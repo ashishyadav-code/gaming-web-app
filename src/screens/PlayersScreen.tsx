@@ -94,7 +94,7 @@ export const PlayersScreen: React.FC<Props> = ({ onSelectPlayer, onOpenAddPlayer
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            Active ({activeCount || 4})
+            Active ({activeCount})
           </button>
 
           <button
@@ -172,19 +172,19 @@ export const PlayersScreen: React.FC<Props> = ({ onSelectPlayer, onOpenAddPlayer
               {/* 4-Metric Row: K/D, Avg DMG, Matches, Survival */}
               <div className="pt-2.5 border-t border-slate-100 grid grid-cols-4 gap-2 text-center">
                 <div>
-                  <div className="text-xs font-black text-slate-900">{p.kd}</div>
+                  <div className="text-xs font-black text-slate-900">{p.kd !== undefined && p.kd !== null ? p.kd : '0.0'}</div>
                   <div className="text-[10px] font-bold text-slate-400 uppercase">K/D</div>
                 </div>
                 <div>
-                  <div className="text-xs font-black text-blue-600">{p.avg_damage}</div>
+                  <div className="text-xs font-black text-blue-600">{p.avg_damage || 0}</div>
                   <div className="text-[10px] font-bold text-slate-400 uppercase">Avg DMG</div>
                 </div>
                 <div>
-                  <div className="text-xs font-black text-slate-900">{p.matches_count}</div>
+                  <div className="text-xs font-black text-slate-900">{p.matches_count || 0}</div>
                   <div className="text-[10px] font-bold text-slate-400 uppercase">Matches</div>
                 </div>
                 <div>
-                  <div className="text-xs font-black text-emerald-600">{p.survival_rate}%</div>
+                  <div className="text-xs font-black text-emerald-600">{p.survival_rate || 0}%</div>
                   <div className="text-[10px] font-bold text-slate-400 uppercase">Survival</div>
                 </div>
               </div>

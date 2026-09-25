@@ -105,71 +105,78 @@ export const PlayerDetailModal: React.FC<Props> = ({ player, onClose, onOpenChan
         {/* Core Performance Grid */}
         <div className="grid grid-cols-4 gap-2 mb-4">
           <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 text-center">
-            <div className="text-base font-black text-slate-900">{player.kd}</div>
+            <div className="text-base font-black text-slate-900">{player.kd !== undefined && player.kd !== null ? player.kd : '0.0'}</div>
             <div className="text-[10px] font-bold text-slate-400 uppercase">K/D</div>
           </div>
           <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 text-center">
-            <div className="text-base font-black text-blue-600">{player.avg_damage}</div>
+            <div className="text-base font-black text-blue-600">{player.avg_damage || 0}</div>
             <div className="text-[10px] font-bold text-slate-400 uppercase">Avg DMG</div>
           </div>
           <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 text-center">
-            <div className="text-base font-black text-slate-900">{player.total_kills}</div>
+            <div className="text-base font-black text-slate-900">{player.total_kills || 0}</div>
             <div className="text-[10px] font-bold text-slate-400 uppercase">Kills</div>
           </div>
           <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 text-center">
-            <div className="text-base font-black text-emerald-600">{player.survival_rate}%</div>
+            <div className="text-base font-black text-emerald-600">{player.survival_rate || 0}%</div>
             <div className="text-[10px] font-bold text-slate-400 uppercase">Survival</div>
           </div>
         </div>
 
         {/* Progress Comparison Card (Section 14 & 21) */}
         {detail && (
-          <div className="p-4 rounded-3xl bg-gradient-to-br from-blue-50/80 to-indigo-50/50 border border-blue-100 mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-black text-blue-900 uppercase tracking-wider flex items-center gap-1.5">
-                <Activity className="w-3.5 h-3.5 text-blue-600" />
-                Performance Progress (7D vs Prev 7D)
-              </span>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                detail.damage_change_pct >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
-              }`}>
-                {detail.damage_change_pct >= 0 ? `+${detail.damage_change_pct}%` : `${detail.damage_change_pct}%`}
-              </span>
+          detail.recent_match_performances && detail.recent_match_performances.length > 0 ? (
+            <div className="p-4 rounded-3xl bg-gradient-to-br from-blue-50/80 to-indigo-50/50 border border-blue-100 mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-black text-blue-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <Activity className="w-3.5 h-3.5 text-blue-600" />
+                  Performance Progress (7D vs Prev 7D)
+                </span>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                  (detail.damage_change_pct || 0) >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
+                }`}>
+                  {(detail.damage_change_pct || 0) >= 0 ? `+${detail.damage_change_pct || 0}%` : `${detail.damage_change_pct || 0}%`}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 text-xs pt-1">
+                <div className="p-2 bg-white/80 rounded-2xl border border-white">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase">Damage Shift</div>
+                  <div className="font-black text-slate-800 text-sm">
+                    {detail.prev_seven_day_avg_damage || 0} &rarr; {detail.seven_day_avg_damage || 0}
+                  </div>
+                  <div className="text-[10px] text-slate-500 font-semibold">
+                    Avg DMG per match
+                  </div>
+                </div>
+
+                <div className="p-2 bg-white/80 rounded-2xl border border-white">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase">Consistency Rating</div>
+                  <div className="font-black text-slate-800 text-sm">
+                    {detail.consistency_score || 0}%
+                  </div>
+                  <div className="text-[10px] text-blue-600 font-bold">
+                    {detail.variance_rating || 'N/A'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Observations bullet list */}
+              {detail.observations && detail.observations.length > 0 && (
+                <div className="mt-3 pt-2.5 border-t border-blue-200/50 space-y-1">
+                  {detail.observations.map((obs, i) => (
+                    <p key={i} className="text-[11px] font-medium text-slate-700 leading-snug">
+                      • {obs}
+                    </p>
+                  ))}
+                </div>
+              )}
             </div>
-
-            <div className="grid grid-cols-2 gap-3 text-xs pt-1">
-              <div className="p-2 bg-white/80 rounded-2xl border border-white">
-                <div className="text-[10px] font-bold text-slate-400 uppercase">Damage Shift</div>
-                <div className="font-black text-slate-800 text-sm">
-                  {detail.prev_seven_day_avg_damage} &rarr; {detail.seven_day_avg_damage}
-                </div>
-                <div className="text-[10px] text-slate-500 font-semibold">
-                  Avg DMG per match
-                </div>
-              </div>
-
-              <div className="p-2 bg-white/80 rounded-2xl border border-white">
-                <div className="text-[10px] font-bold text-slate-400 uppercase">Consistency Rating</div>
-                <div className="font-black text-slate-800 text-sm">
-                  {detail.consistency_score}%
-                </div>
-                <div className="text-[10px] text-blue-600 font-bold">
-                  {detail.variance_rating}
-                </div>
-              </div>
+          ) : (
+            <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100 mb-4 text-center">
+              <p className="text-xs font-bold text-slate-500">No match records logged for this player</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">Combat telemetry will activate once matches are played</p>
             </div>
-
-            {/* Observations bullet list */}
-            {detail.observations.length > 0 && (
-              <div className="mt-3 pt-2.5 border-t border-blue-200/50 space-y-1">
-                {detail.observations.map((obs, i) => (
-                  <p key={i} className="text-[11px] font-medium text-slate-700 leading-snug">
-                    • {obs}
-                  </p>
-                ))}
-              </div>
-            )}
-          </div>
+          )
         )}
 
         {/* Role History Timeline (Section 15) */}

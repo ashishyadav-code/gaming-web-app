@@ -130,7 +130,7 @@ export const HomeScreen: React.FC<Props> = ({
               Matches
             </div>
             <div className="text-[10px] font-extrabold text-slate-400 flex items-center gap-0.5 mt-0.5">
-              <span>▲</span> {summary?.matches_trend ? `+${summary.matches_trend}` : '0'}
+              <span>▲</span> {summary && summary.matches > 0 && summary.matches_trend ? `+${summary.matches_trend}` : '0'}
             </div>
           </div>
         </div>
@@ -148,7 +148,7 @@ export const HomeScreen: React.FC<Props> = ({
               Avg Kills
             </div>
             <div className="text-[10px] font-extrabold text-slate-400 flex items-center gap-0.5 mt-0.5">
-              <span>▲</span> {summary?.avg_kills_trend_pct ? `${summary.avg_kills_trend_pct}%` : '0%'}
+              <span>▲</span> {summary && summary.matches > 0 && summary.avg_kills_trend_pct ? `+${summary.avg_kills_trend_pct}%` : '0%'}
             </div>
           </div>
         </div>
@@ -184,7 +184,7 @@ export const HomeScreen: React.FC<Props> = ({
               Booyah
             </div>
             <div className="text-[10px] font-extrabold text-slate-400 flex items-center gap-0.5 mt-0.5">
-              <span>▲</span> {summary?.booyah_trend ? `+${summary.booyah_trend}` : '0'}
+              <span>▲</span> {summary && summary.matches > 0 && summary.booyah_trend ? `+${summary.booyah_trend}` : '0'}
             </div>
           </div>
         </div>
