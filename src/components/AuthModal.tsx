@@ -10,7 +10,8 @@ interface Props {
 }
 
 export const AuthModal: React.FC<Props> = ({ isOpen, onClose, initialMode = 'login' }) => {
-  const { loginUser } = useAuth();
+  const { loginUser, user } = useAuth();
+  const canClose = !!user; // Only show close button if already logged in
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
   const [userId, setUserId] = useState('');
   const [name, setName] = useState('');
@@ -64,12 +65,14 @@ export const AuthModal: React.FC<Props> = ({ isOpen, onClose, initialMode = 'log
               {mode === 'login' ? 'Player Sign In' : 'Register New Player'}
             </h2>
           </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          {canClose && (
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
         </div>
 
         {/* Mode Toggle Tabs */}

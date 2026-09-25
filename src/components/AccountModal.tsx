@@ -100,7 +100,7 @@ export const AccountModal: React.FC<Props> = ({ isOpen, onClose, onOpenLogin }) 
         <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 font-bold">
           <span>Team Sarkar FF Companion</span>
           <span className="bg-slate-100 px-2 py-0.5 rounded-full text-slate-600 font-extrabold text-[10px]">
-            v1.9
+            v2.0
           </span>
         </div>
       </div>

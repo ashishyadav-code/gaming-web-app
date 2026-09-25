@@ -54,7 +54,7 @@ export const Header: React.FC<Props> = ({ onSearchClick, onNotificationsClick, o
             {isMaster ? (
               <>
                 <Shield className="w-3.5 h-3.5 text-amber-600 fill-amber-500/20" />
-                <span className="font-extrabold text-[11px]">ASHISH800</span>
+                <span className="font-extrabold text-[11px]">{user?.userId || 'ASHISH'}</span>
               </>
             ) : isIGL ? (
               <>
@@ -64,7 +64,7 @@ export const Header: React.FC<Props> = ({ onSearchClick, onNotificationsClick, o
             ) : (
               <>
                 <UserIcon className="w-3.5 h-3.5 text-slate-500" />
-                <span>{user?.userId || 'Player'}</span>
+                <span>{user?.userId || 'Sign In'}</span>
               </>
             )}
           </button>

@@ -6,17 +6,23 @@ import {
 const API_BASE_URL = typeof window !== 'undefined' && window.location.port === '5173' ? '' : 'https://teamsarkar-server.onrender.com';
 
 class ApiClient {
-  private token: string | null = localStorage.getItem('sarkar_token') || 'ASHISH';
-  private role: UserRole = (localStorage.getItem('sarkar_role') as UserRole) || 'IGL';
-  private userId: string = localStorage.getItem('sarkar_user_id') || 'ASHISH';
+  private token: string | null = localStorage.getItem('sarkar_token') || null;
+  private role: UserRole = (localStorage.getItem('sarkar_role') as UserRole) || 'PLAYER';
+  private userId: string = localStorage.getItem('sarkar_user_id') || '';
 
-  setAuth(token: string, role: UserRole, userId: string = 'ASHISH800') {
+  setAuth(token: string, role: UserRole, userId: string = '') {
     this.token = token;
     this.role = role;
     this.userId = userId;
-    localStorage.setItem('sarkar_token', token);
-    localStorage.setItem('sarkar_role', role);
-    localStorage.setItem('sarkar_user_id', userId);
+    if (token) {
+      localStorage.setItem('sarkar_token', token);
+      localStorage.setItem('sarkar_role', role);
+      localStorage.setItem('sarkar_user_id', userId);
+    } else {
+      localStorage.removeItem('sarkar_token');
+      localStorage.removeItem('sarkar_role');
+      localStorage.removeItem('sarkar_user_id');
+    }
   }
 
   getRole(): UserRole {

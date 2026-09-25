@@ -31,23 +31,38 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const savedUserId = localStorage.getItem('sarkar_user_id') || 'ASHISH';
+  const savedUserId = localStorage.getItem('sarkar_user_id');
   const savedRole = (localStorage.getItem('sarkar_role') as UserRole) || 'IGL';
 
-  const isInitialMaster = savedUserId.toUpperCase() === 'ASHISH' || savedUserId.toUpperCase() === 'ASHISH800';
+  const isInitialMaster =
+    savedUserId &&
+    (savedUserId.toUpperCase() === 'ASHISH' || savedUserId.toUpperCase() === 'ASHISH800' || savedUserId.toUpperCase() === 'ASHISH8006');
 
-  const [user, setUser] = useState<AuthUser | null>({
-    userId: savedUserId,
-    name: isInitialMaster ? 'Ashish' : savedUserId,
-    email: `${savedUserId.toLowerCase()}@teamsarkar.com`,
-    role: isInitialMaster ? 'IGL' : savedRole,
-    isMaster: isInitialMaster,
-  });
+  const [user, setUser] = useState<AuthUser | null>(
+    savedUserId
+      ? {
+          userId: savedUserId,
+          name: isInitialMaster ? 'Ashish' : savedUserId,
+          email: `${savedUserId.toLowerCase()}@teamsarkar.com`,
+          role: isInitialMaster ? 'IGL' : savedRole,
+          isMaster: !!isInitialMaster,
+        }
+      : null
+  );
 
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  // Open auth modal on fresh install (no saved user)
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(!savedUserId);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
   const [permissionDeniedModalOpen, setPermissionDeniedModalOpen] = useState(false);
   const [deniedActionName, setDeniedActionName] = useState('This action');
+
+  // Hydrate API client credentials on mount
+  useEffect(() => {
+    const token = localStorage.getItem('sarkar_token');
+    if (savedUserId && token) {
+      api.setAuth(token, savedRole, savedUserId);
+    }
+  }, []);
 
   const isMasterUser = Boolean(
     user?.isMaster ||
@@ -59,9 +74,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isIGLRole = isMasterUser || user?.role === 'IGL';
 
   const loginUser = (newUser: AuthUser, token: string) => {
-    const isMaster = newUser.userId.toUpperCase() === 'ASHISH' || newUser.userId.toUpperCase() === 'ASHISH800';
+    const isMaster =
+      newUser.userId.toUpperCase() === 'ASHISH' ||
+      newUser.userId.toUpperCase() === 'ASHISH800' ||
+      newUser.userId.toUpperCase() === 'ASHISH8006';
     const role: UserRole = isMaster ? 'IGL' : newUser.role || 'PLAYER';
-    
+
     const finalizedUser: AuthUser = {
       ...newUser,
       role,
@@ -70,16 +88,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setUser(finalizedUser);
     api.setAuth(token, role, finalizedUser.userId);
+
+    // Persist login permanently
+    localStorage.setItem('sarkar_user_id', finalizedUser.userId);
+    localStorage.setItem('sarkar_role', role);
+    localStorage.setItem('sarkar_token', token);
   };
 
   const logoutUser = () => {
-    setUser({
-      userId: 'GUEST',
-      name: 'Player',
-      role: 'PLAYER',
-      isMaster: false,
-    });
-    api.setAuth('GUEST', 'PLAYER', 'GUEST');
+    // Clear all saved auth data
+    localStorage.removeItem('sarkar_user_id');
+    localStorage.removeItem('sarkar_role');
+    localStorage.removeItem('sarkar_token');
+    setUser(null);
+    api.setAuth('', 'PLAYER', '');
     setIsAuthModalOpen(true);
   };
 

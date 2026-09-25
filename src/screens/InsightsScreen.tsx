@@ -121,17 +121,23 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
   // Team Position progression (Rank, 1 is best) - Strictly empty/0 if no matches
   const teamPositionChartData: ChartDataPoint[] = [];
 
-  // Load AI Insights
+  // Load AI Insights — only when real data exists
   const generateAiInsights = async () => {
+    const count = viewMode === 'Me' ? meMatchesCount : teamMatchesCount;
+    if (count === 0) {
+      setAiInsight(null);
+      setAiLoading(false);
+      return;
+    }
     setAiLoading(true);
     try {
       const res = await fetchDeterministicInsights({
         viewMode,
         category,
-        totalKills: viewMode === 'Me' ? (meMatchesCount > 0 ? meTotalKills : 47) : (teamMatchesCount > 0 ? teamTotalKills : 159),
-        avgKills: viewMode === 'Me' ? (meMatchesCount > 0 ? meAvgKills : 9.4) : (teamMatchesCount > 0 ? teamAvgKills : 31.8),
-        highestKills: viewMode === 'Me' ? (meMatchesCount > 0 ? meHighestKills : 15) : (teamMatchesCount > 0 ? teamHighestKills : 48),
-        matchesCount: viewMode === 'Me' ? (meMatchesCount > 0 ? meMatchesCount : 5) : (teamMatchesCount > 0 ? teamMatchesCount : 5),
+        totalKills: viewMode === 'Me' ? meTotalKills : teamTotalKills,
+        avgKills: viewMode === 'Me' ? meAvgKills : teamAvgKills,
+        highestKills: viewMode === 'Me' ? meHighestKills : teamHighestKills,
+        matchesCount: count,
         playerName: currentUserName,
         recentKills: viewMode === 'Me' ? meKillsChartData.map((d) => d.value) : teamKillsChartData.map((d) => d.value),
       });
@@ -145,7 +151,7 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
 
   useEffect(() => {
     generateAiInsights();
-  }, [viewMode, category]);
+  }, [viewMode, category, matches]);
 
   // Categories list
   const categories: CategoryFilter[] = [
@@ -431,6 +437,12 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
                   </p>
                 </div>
               </div>
+              ) : displayMatchesCount === 0 ? (
+              <div className="py-6 text-center relative z-10">
+                <div className="text-3xl mb-2">📊</div>
+                <p className="text-xs font-bold text-slate-400">No match data available</p>
+                <p className="text-[10px] text-slate-500 mt-1">Play some matches to unlock AI insights</p>
+              </div>
             ) : null}
           </div>
         </div>
@@ -574,6 +586,13 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
                     {aiInsight.tacticalAdvice}
                   </p>
                 </div>
+              </div>
+            )}
+            {!aiLoading && !aiInsight && displayMatchesCount === 0 && (
+              <div className="py-6 text-center">
+                <div className="text-3xl mb-2">📊</div>
+                <p className="text-xs font-bold text-slate-400">No team match data available</p>
+                <p className="text-[10px] text-slate-500 mt-1">Record matches to unlock team AI insights</p>
               </div>
             )}
           </div>
