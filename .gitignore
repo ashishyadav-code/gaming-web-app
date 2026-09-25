@@ -12,14 +12,6 @@ dist
 dist-ssr
 *.local
 
-# Secrets — never commit
-.env
-.env.local
-.env.*.local
-
-# Netlify local cache
-.netlify/
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

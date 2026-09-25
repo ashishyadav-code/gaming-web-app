@@ -1,56 +1,32 @@
-# SARKAR ⚡ Free Fire Guild Website
+# React + TypeScript + Vite
 
-A premium, private mobile-first guild portal for SARKAR. Built with Vite, React, Tailwind CSS, and Netlify Functions with MongoDB integration.
+This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
-## 🚀 Deployment (Netlify)
+Currently, two official plugins are available:
 
-This project is ready to be deployed on Netlify.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-### 1. MongoDB Setup
-1. Create a free cluster on [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).
-2. Create a database named `sarkar_guild`.
-3. Create a collection named `members`.
-4. Get your Connection String (SRV).
+## React Compiler
 
-### 2. Environment Variables
-Add the following variables to your Netlify site settings (**Site settings > Build & deploy > Environment > Environment variables**):
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-| Variable | Description |
-| :--- | :--- |
-| `MONGODB_URI` | Your MongoDB Connection String |
-| `DB_NAME` | `sarkar_guild` (or your preferred DB name) |
-| `SITE_PASSWORD` | Shared password for guild members to access the site |
-| `ADMIN_EMAIL` | Email for admin login |
-| `ADMIN_PASSWORD` | Password for admin dashboard |
-| `JWT_SECRET` | A random long string for security |
+## Expanding the Oxlint configuration
 
-### 3. Build Settings
-- **Build command:** `npm run build`
-- **Publish directory:** `dist`
-- **Functions directory:** `netlify/functions`
+If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
 
-## 🛠️ Local Development
+```json
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "oxc"],
+  "options": {
+    "typeAware": true
+  },
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+  }
+}
+```
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-2. (Optional) Install Netlify CLI to test functions locally:
-   ```bash
-   npm install -g netlify-cli
-   ```
-
-3. Run locally:
-   ```bash
-   netlify dev
-   ```
-
-## ✨ Features
-
-- **Liquid Glassmorphism UI:** Premium frosted panels with subtle red accents.
-- **Mobile-First:** Thumb-friendly layout with bottom navigation.
-- **Site Gate:** Site-wide password protection for privacy.
-- **Members List:** Dynamic member roster fetched from MongoDB.
-- **Admin Dashboard:** Hidden portal to manage, edit, and remove members.
-- **Zero Logic Exposure:** Backend URLs and DB logic are hidden in serverless functions.
+See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
