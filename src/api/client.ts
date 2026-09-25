@@ -3,7 +3,7 @@ import {
   IGLNote, DashboardSummary, DailyEvaluation, WeeklyEvaluation, PlayerProgressDetail
 } from '../types';
 
-const API_BASE_URL = typeof window !== 'undefined' && window.location.port === '5173' ? '' : 'https://teamsarkar-server.onrender.com';
+const API_BASE_URL = typeof window !== 'undefined' && window.location.port === '5173' ? '' : 'https://teamsarkar-server-1.onrender.com';
 
 class ApiClient {
   private token: string | null = localStorage.getItem('sarkar_token') || null;
