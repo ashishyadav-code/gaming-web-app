@@ -87,7 +87,7 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
   const meAvgKills = meMatchesCount > 0 ? Number((meTotalKills / meMatchesCount).toFixed(1)) : 0.0;
   const meHighestKills = playerStatsList.length > 0 ? Math.max(...playerStatsList.map((p) => p.kills)) : 0;
 
-  // Chart 1 (Me Kills in category)
+  // Chart 1 (Me Kills in category) - Strictly 0 if no matches
   const meKillsChartData: ChartDataPoint[] =
     playerStatsList.length > 0
       ? playerStatsList.map((p) => ({
@@ -95,24 +95,10 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
           value: p.kills,
           subtext: `${p.damage} DMG`,
         }))
-      : [
-          { label: 'Match 1', value: 4 },
-          { label: 'Match 2', value: 7 },
-          { label: 'Match 3', value: 12 },
-          { label: 'Match 4', value: 9 },
-          { label: 'Match 5', value: 15 },
-        ];
+      : [];
 
-  // Recent 7-Day Trend data for Me
-  const meTrendChartData: ChartDataPoint[] = [
-    { label: 'Sep 20', value: 8 },
-    { label: 'Sep 21', value: 12 },
-    { label: 'Sep 22', value: 10 },
-    { label: 'Sep 23', value: 18 },
-    { label: 'Sep 24', value: 15 },
-    { label: 'Sep 25', value: 22 },
-    { label: 'Sep 26', value: 25 },
-  ];
+  // Recent 7-Day Trend data for Me - Strictly empty/0 if no matches
+  const meTrendChartData: ChartDataPoint[] = [];
 
   // Team calculations
   const teamTotalKills = filteredMatches.reduce((acc, curr) => acc + (curr.team_kills || 0), 0);
@@ -127,35 +113,13 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
           label: `Match ${idx + 1}`,
           value: m.team_kills || 0,
         }))
-      : [
-          { label: 'Match 1', value: 18 },
-          { label: 'Match 2', value: 28 },
-          { label: 'Match 3', value: 35 },
-          { label: 'Match 4', value: 30 },
-          { label: 'Match 5', value: 48 },
-        ];
+      : [];
 
-  // Team Points progression (Overall Tournament)
-  const teamPointsChartData: ChartDataPoint[] = [
-    { label: 'Day 1', value: 45 },
-    { label: 'Day 2', value: 78 },
-    { label: 'Day 3', value: 102 },
-    { label: 'Day 4', value: 120 },
-    { label: 'Day 5', value: 145 },
-    { label: 'Day 6', value: 168 },
-    { label: 'Day 7', value: 190 },
-  ];
+  // Team Points progression (Overall Tournament) - Strictly empty/0 if no matches
+  const teamPointsChartData: ChartDataPoint[] = [];
 
-  // Team Position progression (Rank, 1 is best)
-  const teamPositionChartData: ChartDataPoint[] = [
-    { label: 'Day 1', value: 12 },
-    { label: 'Day 2', value: 8 },
-    { label: 'Day 3', value: 6 },
-    { label: 'Day 4', value: 4 },
-    { label: 'Day 5', value: 3 },
-    { label: 'Day 6', value: 2 },
-    { label: 'Day 7', value: 1 },
-  ];
+  // Team Position progression (Rank, 1 is best) - Strictly empty/0 if no matches
+  const teamPositionChartData: ChartDataPoint[] = [];
 
   // Load AI Insights
   const generateAiInsights = async () => {
@@ -191,10 +155,10 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
     'Overall Practice',
   ];
 
-  const displayTotalKills = viewMode === 'Me' ? (meMatchesCount > 0 ? meTotalKills : 47) : (teamMatchesCount > 0 ? teamTotalKills : 159);
-  const displayAvgKills = viewMode === 'Me' ? (meMatchesCount > 0 ? meAvgKills : 9.4) : (teamMatchesCount > 0 ? teamAvgKills : 31.8);
-  const displayHighestKills = viewMode === 'Me' ? (meMatchesCount > 0 ? meHighestKills : 15) : (teamMatchesCount > 0 ? teamHighestKills : 48);
-  const displayMatchesCount = viewMode === 'Me' ? (meMatchesCount > 0 ? meMatchesCount : 5) : (teamMatchesCount > 0 ? teamMatchesCount : 5);
+  const displayTotalKills = viewMode === 'Me' ? meTotalKills : teamTotalKills;
+  const displayAvgKills = viewMode === 'Me' ? meAvgKills : teamAvgKills;
+  const displayHighestKills = viewMode === 'Me' ? meHighestKills : teamHighestKills;
+  const displayMatchesCount = viewMode === 'Me' ? meMatchesCount : teamMatchesCount;
 
   return (
     <div className="min-h-full pb-28 text-left animate-fade-in-smooth">
@@ -353,31 +317,32 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
               <p className="text-[11px] text-slate-400 font-medium">Kill count for each match</p>
             </div>
 
-            {/* Horizontal Scrollable or Grid of Matches */}
-            <div className="grid grid-cols-5 gap-1.5 overflow-x-auto">
-              {(meKillsChartData.length > 0 ? meKillsChartData : [
-                { label: 'Match 1', value: 4, subtext: '453 DMG' },
-                { label: 'Match 2', value: 7, subtext: '892 DMG' },
-                { label: 'Match 3', value: 12, subtext: '1.2K DMG' },
-                { label: 'Match 4', value: 9, subtext: '876 DMG' },
-                { label: 'Match 5', value: 15, subtext: '1.8K DMG' },
-              ]).map((m, idx) => (
-                <div
-                  key={idx}
-                  className="p-2 rounded-2xl bg-slate-50 border border-slate-100 text-center flex flex-col items-center justify-center min-w-[58px]"
-                >
-                  <span className="text-[10px] font-bold text-slate-400 whitespace-nowrap">
-                    {m.label}
-                  </span>
-                  <div className="text-xs font-black text-blue-600 my-0.5 whitespace-nowrap">
-                    {m.value} Kills
+            {/* Match list or 0 state */}
+            {meKillsChartData.length > 0 ? (
+              <div className="grid grid-cols-5 gap-1.5 overflow-x-auto">
+                {meKillsChartData.map((m, idx) => (
+                  <div
+                    key={idx}
+                    className="p-2 rounded-2xl bg-slate-50 border border-slate-100 text-center flex flex-col items-center justify-center min-w-[58px]"
+                  >
+                    <span className="text-[10px] font-bold text-slate-400 whitespace-nowrap">
+                      {m.label}
+                    </span>
+                    <div className="text-xs font-black text-blue-600 my-0.5 whitespace-nowrap">
+                      {m.value} Kills
+                    </div>
+                    <span className="text-[9px] font-semibold text-slate-500 whitespace-nowrap">
+                      {m.subtext || `${m.value * 110 + 200} DMG`}
+                    </span>
                   </div>
-                  <span className="text-[9px] font-semibold text-slate-500 whitespace-nowrap">
-                    {m.subtext || `${m.value * 110 + 200} DMG`}
-                  </span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-center">
+                <p className="text-xs font-bold text-slate-700">0 Matches Recorded</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">Use the (+) button below to log tournament or practice matches.</p>
+              </div>
+            )}
           </div>
 
           {/* Recent Trend Card */}
