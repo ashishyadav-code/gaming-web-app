@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, Award, Swords, Flame, BarChart2, Crown } from 'lucide-react';
-import { WeeklyEvaluation, PracticeSession } from '../types';
+import { X, Award, Swords, BarChart2, Crown } from 'lucide-react';
+import { WeeklyEvaluation } from '../types';
 import { api } from '../api/client';
 
 interface Props {
@@ -10,16 +10,14 @@ interface Props {
 
 export const AnalyticsModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const [weekly, setWeekly] = useState<WeeklyEvaluation | null>(null);
-  const [, setPractices] = useState<PracticeSession[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (isOpen) {
       setLoading(true);
-      Promise.all([api.getWeeklyEvaluation(), api.getPracticeSessions()])
-        .then(([wData, pData]) => {
+      api.getWeeklyEvaluation()
+        .then((wData) => {
           setWeekly(wData);
-          setPractices(pData);
           setLoading(false);
         })
         .catch(() => setLoading(false));
@@ -65,7 +63,7 @@ export const AnalyticsModal: React.FC<Props> = ({ isOpen, onClose }) => {
                 "Are we actually getting better?"
               </h3>
               <p className="text-xs text-zinc-200 mt-1 leading-relaxed">
-                Yes. Team firepower increased by +{Math.round(((weekly.current_avg_damage - weekly.previous_avg_damage) / Math.max(1, weekly.previous_avg_damage)) * 100)}% and placement improved from #{weekly.previous_avg_placement} to #{weekly.current_avg_placement}.
+                Yes. Team combat kills shifted from {weekly.previous_avg_kills} to {weekly.current_avg_kills} avg frags, and placement improved from #{weekly.previous_avg_placement} to #{weekly.current_avg_placement}.
               </p>
             </div>
 
@@ -86,17 +84,6 @@ export const AnalyticsModal: React.FC<Props> = ({ isOpen, onClose }) => {
                   </div>
                   <div className="font-extrabold text-zinc-200">
                     {weekly.previous_avg_kills} &rarr; <span className="text-red-400">{weekly.current_avg_kills}</span>
-                  </div>
-                </div>
-
-                {/* Avg Damage */}
-                <div className="flex items-center justify-between p-2 rounded-lg bg-[#141419] border border-[#282836]">
-                  <div className="flex items-center gap-2 font-bold text-zinc-300">
-                    <Flame className="w-3.5 h-3.5 text-rose-400" />
-                    <span>Average Damage</span>
-                  </div>
-                  <div className="font-extrabold text-zinc-200">
-                    {weekly.previous_avg_damage} &rarr; <span className="text-rose-400">{weekly.current_avg_damage}</span>
                   </div>
                 </div>
 
@@ -124,25 +111,27 @@ export const AnalyticsModal: React.FC<Props> = ({ isOpen, onClose }) => {
               </div>
             </div>
 
-            {/* Deterministic Insights List */}
-            <div>
-              <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400 mb-2 px-1">
-                Deterministic Observations
-              </h3>
-              <div className="space-y-1.5">
-                {weekly.insights.map((ins, i) => (
-                  <div key={i} className="p-2.5 rounded-xl bg-[#1c1c24] border border-[#282836] text-xs">
+            {/* Tactical Observations */}
+            {weekly.insights && weekly.insights.length > 0 && (
+              <div className="space-y-2 pt-1">
+                <div className="text-[11px] font-black uppercase tracking-wider text-zinc-400 px-1">
+                  Tactical Progress Insights
+                </div>
+                {weekly.insights.map((item, idx) => (
+                  <div key={idx} className="p-3 rounded-xl bg-[#1c1c24] border border-[#282836] text-xs">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="font-extrabold text-white">{ins.title}</span>
-                      <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 border border-red-500/30">
-                        {ins.confidence}
-                      </span>
+                      <span className="font-black text-white">{item.title}</span>
+                      {item.metric_delta && (
+                        <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-white/5 text-amber-400 border border-white/5">
+                          {item.metric_delta}
+                        </span>
+                      )}
                     </div>
-                    <p className="text-zinc-400 text-[11px] leading-relaxed">{ins.message}</p>
+                    <p className="text-[11px] text-zinc-300 leading-snug">{item.message}</p>
                   </div>
                 ))}
               </div>
-            </div>
+            )}
           </div>
         ) : null}
       </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Calendar, Trophy, Gamepad2, ChevronRight, Plus, Search,
+  Calendar, Trophy, ChevronRight, Plus, Search,
   Swords, Crown
 } from 'lucide-react';
 import { Match } from '../types';
@@ -8,6 +8,7 @@ import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { DatePickerModal } from '../components/DatePickerModal';
 import { ASSETS, getPlayerAvatar } from '../utils/assets';
+import { calculateMatchPoints } from '../utils/points';
 
 interface Props {
   onSelectMatch: (match: Match) => void;
@@ -16,7 +17,6 @@ interface Props {
 
 export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }) => {
   const { isIGL, showPermissionDenied } = useAuth();
-  const [filterType, setFilterType] = useState<'All' | 'Tournament' | 'Practice'>('All');
   const [selectedDate, setSelectedDate] = useState('All');
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [matches, setMatches] = useState<Match[]>([]);
@@ -24,7 +24,7 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
   const loadMatches = async () => {
     try {
       const data = await api.getMatches({
-        type: filterType,
+        type: 'Tournament',
         date: selectedDate !== 'All' ? selectedDate : undefined,
       });
       setMatches(data);
@@ -35,7 +35,7 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
 
   useEffect(() => {
     loadMatches();
-  }, [filterType, selectedDate]);
+  }, [selectedDate]);
 
   const mapThumbnails: Record<string, string> = {
     BERMUDA: ASSETS.maps.BERMUDA,
@@ -134,10 +134,10 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
       <div className="px-5 mt-2 mb-3 flex items-start justify-between">
         <div>
           <h1 className="text-xl font-black text-white tracking-tight leading-tight">
-            Matches
+            Tournament Matches
           </h1>
           <p className="text-[11px] font-semibold text-zinc-400">
-            Tournament and practice match logs
+            Official tournament and scrim match logs
           </p>
         </div>
 
@@ -151,54 +151,13 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
         </button>
       </div>
 
-      {/* Segmented Filter Control */}
-      <div className="px-5 mb-4">
-        <div className="p-1 rounded-2xl flex items-center justify-between bg-[#141419] border border-[#22222b] shadow-sm">
-          <button
-            onClick={() => setFilterType('All')}
-            className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
-              filterType === 'All'
-                ? 'bg-red-600 text-white shadow-sm'
-                : 'text-zinc-400 hover:text-white'
-            }`}
-          >
-            <Trophy className="w-3.5 h-3.5" />
-            <span>All Matches</span>
-          </button>
-
-          <button
-            onClick={() => setFilterType('Tournament')}
-            className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
-              filterType === 'Tournament'
-                ? 'bg-red-600 text-white shadow-sm'
-                : 'text-zinc-400 hover:text-white'
-            }`}
-          >
-            <Trophy className="w-3.5 h-3.5" />
-            <span>Tournaments</span>
-          </button>
-
-          <button
-            onClick={() => setFilterType('Practice')}
-            className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
-              filterType === 'Practice'
-                ? 'bg-red-600 text-white shadow-sm'
-                : 'text-zinc-400 hover:text-white'
-            }`}
-          >
-            <Gamepad2 className="w-3.5 h-3.5" />
-            <span>Practice</span>
-          </button>
-        </div>
-      </div>
-
       {/* Match List Grouped By Date */}
       <div className="px-5 space-y-4">
         {matches.length === 0 ? (
           <div className="p-8 text-center bg-[#141419] rounded-2xl border border-[#22222b]">
             <Swords className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
-            <div className="text-xs font-bold text-zinc-300">No matches found for this filter.</div>
-            <p className="text-[11px] text-zinc-500 mt-1">Tap the (+) button above to record a new match.</p>
+            <div className="text-xs font-bold text-zinc-300">No tournament matches found for this filter.</div>
+            <p className="text-[11px] text-zinc-500 mt-1">Tap the (+) button above to record a new tournament match.</p>
           </div>
         ) : (
           Object.keys(groupedMatches).map((dateGroup) => (
@@ -208,81 +167,85 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
               </div>
 
               <div className="space-y-2">
-                {groupedMatches[dateGroup].map((m) => (
-                  <div
-                    key={m.id}
-                    onClick={() => onSelectMatch(m)}
-                    className="p-3 rounded-2xl bg-[#141419] border border-[#22222b] shadow-sm hover:border-red-500/35 transition-all active:scale-[0.99] cursor-pointer"
-                  >
-                    {/* Top Row: Map icon, Name, Time, Placement, Team Kills */}
-                    <div className="flex items-center justify-between gap-3">
-                      {/* Map Image Thumbnail */}
-                      <div className="w-12 h-11 rounded-xl overflow-hidden bg-[#1c1c24] flex-shrink-0 border border-white/10">
-                        <img
-                          src={mapThumbnails[m.map] || ASSETS.maps.BERMUDA}
-                          alt={m.map}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-
-                      {/* Placement Badge */}
-                      {getPlacementBadge(m.placement)}
-
-                      {/* Match Details */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <h3 className="text-xs font-black text-white tracking-tight truncate">
-                            {m.map}
-                          </h3>
-                          <span className={`px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase ${
-                            m.type === 'Tournament'
-                              ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                              : 'bg-red-500/20 text-red-400 border border-red-500/30'
-                          }`}>
-                            {m.type}
-                          </span>
+                {groupedMatches[dateGroup].map((m) => {
+                  const pts = calculateMatchPoints(m.placement, m.team_kills);
+                  return (
+                    <div
+                      key={m.id}
+                      onClick={() => onSelectMatch(m)}
+                      className="p-3 rounded-2xl bg-[#141419] border border-[#22222b] shadow-sm hover:border-red-500/35 transition-all active:scale-[0.99] cursor-pointer"
+                    >
+                      {/* Top Row: Map icon, Name, Time, Placement, Points & Team Kills */}
+                      <div className="flex items-center justify-between gap-3">
+                        {/* Map Image Thumbnail */}
+                        <div className="w-12 h-11 rounded-xl overflow-hidden bg-[#1c1c24] flex-shrink-0 border border-white/10">
+                          <img
+                            src={mapThumbnails[m.map] || ASSETS.maps.BERMUDA}
+                            alt={m.map}
+                            className="w-full h-full object-cover"
+                          />
                         </div>
-                        <div className="text-[10px] font-semibold text-zinc-400 mt-0.5">
-                          {m.time} {m.tournament_name ? `• ${m.tournament_name}` : ''}
-                        </div>
-                      </div>
 
-                      {/* Team Kills */}
-                      <div className="flex items-center gap-2 text-right flex-shrink-0">
-                        <div>
-                          <div className="text-sm font-black text-red-500">{m.team_kills}</div>
-                          <div className="text-[9px] font-bold text-zinc-500 uppercase">Kills</div>
-                        </div>
-                        <ChevronRight className="w-4 h-4 text-zinc-600" />
-                      </div>
-                    </div>
+                        {/* Placement Badge */}
+                        {getPlacementBadge(m.placement)}
 
-                    {/* Sub-row: 4 Players Mini-Stats Breakdown */}
-                    {m.player_stats && m.player_stats.length > 0 && (
-                      <div className="mt-2.5 pt-2 border-t border-[#22222b] grid grid-cols-4 gap-1">
-                        {m.player_stats.slice(0, 4).map((p) => (
-                          <div key={p.id || p.player_id} className="flex items-center gap-1.5 text-[10px]">
-                            <div className="w-6 h-6 rounded-full overflow-hidden border border-white/20 shadow-xs bg-[#1c1c24] flex-shrink-0">
-                              <img
-                                src={getPlayerAvatar(p.player_name || p.player_role || p.player_avatar)}
-                                alt={p.player_name || 'Player'}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <div className="min-w-0">
-                              <div className="font-extrabold text-zinc-200 text-[10px] truncate leading-tight">
-                                {p.player_name}
-                              </div>
-                              <div className="text-[9px] font-bold text-red-400 leading-tight">
-                                {p.kills} Kills
-                              </div>
-                            </div>
+                        {/* Match Details */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <h3 className="text-xs font-black text-white tracking-tight truncate">
+                              {m.map}
+                            </h3>
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                              Tournament
+                            </span>
                           </div>
-                        ))}
+                          <div className="text-[10px] font-semibold text-zinc-400 mt-0.5 truncate">
+                            {m.time} {m.tournament_name ? `• ${m.tournament_name}` : ''}
+                          </div>
+                        </div>
+
+                        {/* Match Points & Team Kills */}
+                        <div className="flex items-center gap-2.5 text-right flex-shrink-0">
+                          <div className="px-2 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-center min-w-[42px]">
+                            <div className="text-sm font-black text-amber-400 leading-none">{pts.totalPts}</div>
+                            <div className="text-[8px] font-black text-zinc-400 uppercase">Pts</div>
+                          </div>
+
+                          <div>
+                            <div className="text-sm font-black text-red-500">{m.team_kills}</div>
+                            <div className="text-[9px] font-bold text-zinc-500 uppercase">Kills</div>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-zinc-600" />
+                        </div>
                       </div>
-                    )}
-                  </div>
-                ))}
+
+                      {/* Sub-row: 4 Players Mini-Stats Breakdown (Kills Only) */}
+                      {m.player_stats && m.player_stats.length > 0 && (
+                        <div className="mt-2.5 pt-2 border-t border-[#22222b] grid grid-cols-4 gap-1">
+                          {m.player_stats.slice(0, 4).map((p) => (
+                            <div key={p.id || p.player_id} className="flex items-center gap-1.5 text-[10px]">
+                              <div className="w-6 h-6 rounded-full overflow-hidden border border-white/20 shadow-xs bg-[#1c1c24] flex-shrink-0">
+                                <img
+                                  src={getPlayerAvatar(p.player_name || p.player_role || p.player_avatar)}
+                                  alt={p.player_name || 'Player'}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="min-w-0">
+                                <div className="font-extrabold text-zinc-200 text-[10px] truncate leading-tight">
+                                  {p.player_name}
+                                </div>
+                                <div className="text-[9px] font-bold text-red-400 leading-tight">
+                                  {p.kills} Kills
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           ))

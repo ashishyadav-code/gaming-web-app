@@ -1,4 +1,4 @@
-// Groq AI Integration for Esports Strategic & Deterministic Insights
+// Groq AI Integration for Team Sarkar Esports Strategic & Strict Coaching
 // Fast failover between multiple keys and fast models
 
 const assembleKey = (prefix: string, parts: string[]): string => `${prefix}_${parts.join('')}`;
@@ -47,31 +47,35 @@ export async function fetchDeterministicInsights(params: {
   // If no matches have been played
   if (matchesCount === 0) {
     return {
-      headline: `No Match Data for ${category}`,
+      headline: `No Tournament Data for ${category}`,
       rating: 0.0,
-      strengths: ['Roster primed and ready for scrims/tournaments'],
-      improvements: ['Play and log matches to generate tactical analysis'],
-      tacticalAdvice: 'Enter match results using the (+) button to unlock deterministic AI coaching.',
+      strengths: ['Roster assembled for tournament scrims'],
+      improvements: ['Play and log tournament matches to evaluate combat output'],
+      tacticalAdvice: 'Target is 15-20 match points and 4-5+ individual frags.',
     };
   }
 
-  const prompt = `You are the master esports coach for Team Sarkar (Free Fire Esports).
-Analyze the following stats deterministically:
+  const prompt = `You are Coach Sarkar, the ruthlessly strict and demanding esports coach for Team Sarkar (Free Fire Esports).
+Evaluate the performance strictly against these non-negotiable benchmarks:
+- Squad Target: 15-20 points per match, 40-60 points overall in tournament. Anything below 15 pts/match is failure.
+- Individual Standard: Minimum 4 to 5+ kills per player. NEVER praise 0, 1, or 2 kills. 0, 1, or 2 kills must be reprimanded harshly as unacceptable underperformance.
+- Focus strictly on combat kills, frags, and points targets. DO NOT give generic gameplay advice about zone rotations, gloo walls, or weapons.
+
 Context: ${viewMode === 'Me' ? `Player: ${playerName}` : 'Full Squad Team Performance'}
 Category: ${category}
 Matches: ${matchesCount}
 Total Kills: ${totalKills}
 Average Kills: ${avgKills}
 Peak Kills: ${highestKills}
-Kills Per Match: [${recentKills.join(', ')}]
+Kills Log: [${recentKills.join(', ')}]
 
 Respond strictly in JSON format with these exact keys:
 {
-  "headline": "Short crisp 4-7 word punchy headline summarizing current form",
-  "rating": a decimal number out of 10 representing rating (e.g. 8.6),
-  "strengths": ["Strength 1 (esports gunplay/rotations)", "Strength 2"],
-  "improvements": ["Area of focus 1 (positioning/late game)", "Area of focus 2"],
-  "tacticalAdvice": "Actionable 2-sentence tactical tip for the upcoming Free Fire match"
+  "headline": "Strict 4-7 word punchy verdict on fragging output",
+  "rating": a decimal number out of 10 (give 1.0-4.0 for 0-2 kills, 5.0-6.5 for 3 kills, 8.0-10.0 only for 4-5+ kills),
+  "strengths": ["Combat strength based on frags/kills"],
+  "improvements": ["Critical combat flaw (e.g. low kill output below 4-5+ target)"],
+  "tacticalAdvice": "Strict 1-2 sentence coach mandate emphasizing the 4-5+ kill standard and 15-20 points benchmark."
 }`;
 
   for (const key of GROQ_KEYS) {
@@ -85,12 +89,12 @@ Respond strictly in JSON format with these exact keys:
           },
           body: JSON.stringify({
             model,
-            temperature: 0.3,
+            temperature: 0.2,
             response_format: { type: 'json_object' },
             messages: [
               {
                 role: 'system',
-                content: 'You are an elite Free Fire esports coach. Always return valid JSON.',
+                content: 'You are Coach Sarkar, a ruthlessly strict Free Fire esports coach. You demand 15-20 points per match and 4-5+ kills per player. Never praise low kills. Return valid JSON only.',
               },
               { role: 'user', content: prompt },
             ],
@@ -104,32 +108,66 @@ Respond strictly in JSON format with these exact keys:
         if (content) {
           const parsed = JSON.parse(content);
           return {
-            headline: parsed.headline || 'High Tactical Efficiency',
-            rating: typeof parsed.rating === 'number' ? parsed.rating : 8.5,
-            strengths: Array.isArray(parsed.strengths) ? parsed.strengths : ['Aggressive fragging', 'Good map control'],
-            improvements: Array.isArray(parsed.improvements) ? parsed.improvements : ['Zone entry timing', 'Utility conservation'],
-            tacticalAdvice: parsed.tacticalAdvice || 'Focus on early 3rd-party denial and high-ground zone priority.',
+            headline: parsed.headline || (avgKills >= 4 ? 'Met Combat Fragging Standard' : 'Unacceptable Fragging Deficit'),
+            rating: typeof parsed.rating === 'number' ? parsed.rating : (avgKills >= 4 ? 8.5 : 3.5),
+            strengths: Array.isArray(parsed.strengths) ? parsed.strengths : [avgKills >= 4 ? 'Hit 4+ kill target' : 'Participated in engagements'],
+            improvements: Array.isArray(parsed.improvements) ? parsed.improvements : ['Eliminate low kill games; minimum 4-5+ frags required'],
+            tacticalAdvice: parsed.tacticalAdvice || 'Squad target is 15-20 points per match. Push for decisive entry eliminations.',
           };
         }
-      } catch (err) {
-        // try next
+      } catch {
+        // try next key/model
       }
     }
   }
 
-  // Deterministic local fallback if offline
-  const baseRating = Math.min(9.8, Math.max(5.0, Number((avgKills * 1.5).toFixed(1))));
+  // Deterministic strict local fallback if offline or API limit
+  const isHighFrag = avgKills >= 4.0;
+  const isMidFrag = avgKills >= 2.5 && avgKills < 4.0;
+
+  if (isHighFrag) {
+    return {
+      headline: 'Achha — Reached 4-5+ Fragging Target',
+      rating: Math.min(9.8, 7.5 + (avgKills - 4.0) * 0.8),
+      strengths: [
+        `Achieved ${avgKills} kills/game, satisfying the 4-5+ kill esports standard`,
+        `High combat ceiling with peak of ${highestKills} eliminations`,
+      ],
+      improvements: [
+        'Maintain this 4-5+ kill consistency into late match circles',
+        'Push team score toward the 50-60 overall tournament points target',
+      ],
+      tacticalAdvice: 'Strong fragging form. Keep punishing mistakes and secure double-digit squad kills.',
+    };
+  }
+
+  if (isMidFrag) {
+    return {
+      headline: 'Below Standard — Need 4-5+ Kills',
+      rating: 5.2,
+      strengths: [
+        `Contributed ${totalKills} total frags across ${matchesCount} matches`,
+      ],
+      improvements: [
+        `Current average of ${avgKills} kills is below the 4-5+ kill benchmark`,
+        'Must convert knockdowns into confirmed eliminations',
+      ],
+      tacticalAdvice: 'Match target is 15-20 points. Average fragging is not enough to win tournament finals.',
+    };
+  }
+
+  // Harsh reprimand for 0, 1, 2 kills
   return {
-    headline: avgKills > 6 ? 'Aggressive High-Impact Fragging Form' : 'Consistent Zone Control & Survival',
-    rating: baseRating,
+    headline: 'Kharab — Unacceptable 0-2 Frag Deficit',
+    rating: totalKills === 0 ? 1.5 : 3.0,
     strengths: [
-      `Consistent frag rate (${avgKills} kills/game)`,
-      `High ceiling with peak of ${highestKills} eliminations`,
+      totalKills > 0 ? `Secured ${totalKills} kill(s)` : 'Roster present on map',
     ],
     improvements: [
-      'Prioritize compound control during zone 4 shift',
-      'Optimize Gloo wall resource distribution in final circles',
+      `Fatal lack of combat output (${avgKills} avg kills is far below 4-5+ standard)`,
+      '0 to 2 kills is completely unacceptable in tournament scrims',
+      'Failing to reach the 15-20 match points benchmark',
     ],
-    tacticalAdvice: 'Maintain crossfires during compound defenses and avoid early unforced trades.',
+    tacticalAdvice: 'Zero tolerance for passive play with 0-2 kills. You cannot win tournaments without eliminations.',
   };
 }

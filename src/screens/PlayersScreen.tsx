@@ -170,23 +170,19 @@ export const PlayersScreen: React.FC<Props> = ({ onSelectPlayer, onOpenAddPlayer
                 <ChevronRight className="w-4 h-4 text-zinc-600" />
               </div>
 
-              {/* 4-Metric Row: K/D, Avg DMG, Matches, Survival */}
-              <div className="pt-2 border-t border-[#22222b] grid grid-cols-4 gap-2 text-center">
+              {/* 3-Metric Clean Row (Damage and Survival removed) */}
+              <div className="pt-2 border-t border-[#22222b] grid grid-cols-3 gap-2 text-center">
                 <div>
-                  <div className="text-xs font-black text-zinc-200">{p.kd !== undefined && p.kd !== null ? p.kd : '0.0'}</div>
-                  <div className="text-[9px] font-bold text-zinc-500 uppercase">K/D</div>
-                </div>
-                <div>
-                  <div className="text-xs font-black text-red-400">{p.avg_damage || 0}</div>
-                  <div className="text-[9px] font-bold text-zinc-500 uppercase">Avg DMG</div>
+                  <div className="text-xs font-black text-red-500">{p.total_kills || 0}</div>
+                  <div className="text-[9px] font-bold text-zinc-500 uppercase">Kills</div>
                 </div>
                 <div>
                   <div className="text-xs font-black text-zinc-200">{p.matches_count || 0}</div>
                   <div className="text-[9px] font-bold text-zinc-500 uppercase">Matches</div>
                 </div>
                 <div>
-                  <div className="text-xs font-black text-emerald-400">{p.survival_rate || 0}%</div>
-                  <div className="text-[9px] font-bold text-zinc-500 uppercase">Survival</div>
+                  <div className="text-xs font-black text-amber-400">{p.kd !== undefined && p.kd !== null ? p.kd : '0.0'}</div>
+                  <div className="text-[9px] font-bold text-zinc-500 uppercase">K/D</div>
                 </div>
               </div>
             </div>

@@ -103,23 +103,19 @@ export const PlayerDetailModal: React.FC<Props> = ({ player, onClose, onOpenChan
           </div>
         </div>
 
-        {/* Core Performance Grid */}
-        <div className="grid grid-cols-4 gap-2 mb-3.5">
+        {/* Core Performance Grid (Damage and Survival removed) */}
+        <div className="grid grid-cols-3 gap-2 mb-3.5">
           <div className="p-2 rounded-xl bg-[#1c1c24] border border-[#2b2b38] text-center">
-            <div className="text-sm font-black text-zinc-200">{player.kd !== undefined && player.kd !== null ? player.kd : '0.0'}</div>
+            <div className="text-sm font-black text-red-500">{player.total_kills || 0}</div>
+            <div className="text-[9px] font-bold text-zinc-500 uppercase">Total Kills</div>
+          </div>
+          <div className="p-2 rounded-xl bg-[#1c1c24] border border-[#2b2b38] text-center">
+            <div className="text-sm font-black text-zinc-200">{player.matches_count || 0}</div>
+            <div className="text-[9px] font-bold text-zinc-500 uppercase">Matches</div>
+          </div>
+          <div className="p-2 rounded-xl bg-[#1c1c24] border border-[#2b2b38] text-center">
+            <div className="text-sm font-black text-amber-400">{player.kd !== undefined && player.kd !== null ? player.kd : '0.0'}</div>
             <div className="text-[9px] font-bold text-zinc-500 uppercase">K/D</div>
-          </div>
-          <div className="p-2 rounded-xl bg-[#1c1c24] border border-[#2b2b38] text-center">
-            <div className="text-sm font-black text-red-400">{player.avg_damage || 0}</div>
-            <div className="text-[9px] font-bold text-zinc-500 uppercase">Avg DMG</div>
-          </div>
-          <div className="p-2 rounded-xl bg-[#1c1c24] border border-[#2b2b38] text-center">
-            <div className="text-sm font-black text-zinc-200">{player.total_kills || 0}</div>
-            <div className="text-[9px] font-bold text-zinc-500 uppercase">Kills</div>
-          </div>
-          <div className="p-2 rounded-xl bg-[#1c1c24] border border-[#2b2b38] text-center">
-            <div className="text-sm font-black text-emerald-400">{player.survival_rate || 0}%</div>
-            <div className="text-[9px] font-bold text-zinc-500 uppercase">Survival</div>
           </div>
         </div>
 
@@ -133,20 +129,20 @@ export const PlayerDetailModal: React.FC<Props> = ({ player, onClose, onOpenChan
                   Performance Progress (7D vs Prev 7D)
                 </span>
                 <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold ${
-                  (detail.damage_change_pct || 0) >= 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
+                  (detail.kills_change_pct || 0) >= 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
                 }`}>
-                  {(detail.damage_change_pct || 0) >= 0 ? `+${detail.damage_change_pct || 0}%` : `${detail.damage_change_pct || 0}%`}
+                  {(detail.kills_change_pct || 0) >= 0 ? `+${detail.kills_change_pct || 0}%` : `${detail.kills_change_pct || 0}%`}
                 </span>
               </div>
 
               <div className="grid grid-cols-2 gap-2 text-xs pt-1">
                 <div className="p-2 bg-black/40 rounded-xl border border-white/5">
-                  <div className="text-[9px] font-bold text-zinc-500 uppercase">Damage Shift</div>
+                  <div className="text-[9px] font-bold text-zinc-500 uppercase">Fragging Shift</div>
                   <div className="font-black text-white text-xs">
-                    {detail.prev_seven_day_avg_damage || 0} &rarr; {detail.seven_day_avg_damage || 0}
+                    {detail.prev_seven_day_avg_kills || 0} &rarr; {detail.seven_day_avg_kills || 0}
                   </div>
                   <div className="text-[9px] text-zinc-400 font-semibold">
-                    Avg DMG per match
+                    Avg Kills per match
                   </div>
                 </div>
 
@@ -234,14 +230,10 @@ export const PlayerDetailModal: React.FC<Props> = ({ player, onClose, onOpenChan
                     <span className="font-extrabold text-white">{m.map}</span>
                     <span className="text-[9px] text-zinc-500">({m.type})</span>
                   </div>
-                  <div className="flex items-center gap-3 font-semibold">
-                    <span className="text-zinc-300 flex items-center gap-1">
-                      <Swords className="w-3 h-3 text-red-400" />
-                      {m.kills} K
-                    </span>
-                    <span className="text-red-400 flex items-center gap-1">
-                      <Flame className="w-3 h-3 text-rose-400" />
-                      {m.damage} DMG
+                  <div className="flex items-center gap-2 font-semibold">
+                    <span className="text-red-400 flex items-center gap-1 font-black">
+                      <Swords className="w-3.5 h-3.5 text-red-500" />
+                      {m.kills} Kills
                     </span>
                   </div>
                 </div>

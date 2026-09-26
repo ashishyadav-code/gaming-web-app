@@ -120,7 +120,7 @@ export const AuthModal: React.FC<Props> = ({ isOpen, onClose, initialMode = 'log
               <input
                 type="text"
                 required
-                placeholder="e.g. ASHISH800 or ASH"
+                placeholder="e.g. ASHISH or HASHIRAMA"
                 value={userId}
                 onChange={(e) => setUserId(e.target.value)}
                 className="w-full py-2 pl-9 pr-3 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-xs font-bold text-white focus:outline-none focus:border-red-500"

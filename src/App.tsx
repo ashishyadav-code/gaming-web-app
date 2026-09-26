@@ -6,7 +6,6 @@ import { PermissionModal } from './components/PermissionModal';
 import { AuthModal } from './components/AuthModal';
 import { AddMatchModal } from './components/AddMatchModal';
 import { AddTournamentModal } from './components/AddTournamentModal';
-import { AddPracticeModal } from './components/AddPracticeModal';
 import { AddPlayerModal } from './components/AddPlayerModal';
 import { ChangeRoleModal } from './components/ChangeRoleModal';
 import { AddNoteModal } from './components/AddNoteModal';
@@ -39,7 +38,6 @@ const MainAppContent: React.FC = () => {
   const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
   const [isAddMatchOpen, setIsAddMatchOpen] = useState(false);
   const [isAddTournamentOpen, setIsAddTournamentOpen] = useState(false);
-  const [isAddPracticeOpen, setIsAddPracticeOpen] = useState(false);
   const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false);
   const [isAddNoteOpen, setIsAddNoteOpen] = useState(false);
   const [isChangeRoleOpen, setIsChangeRoleOpen] = useState(false);
@@ -73,11 +71,8 @@ const MainAppContent: React.FC = () => {
     setRefreshKey((k) => k + 1);
   };
 
-  const handleActionSheetSelect = (action: 'practice' | 'tournament' | 'player' | 'note' | 'match') => {
+  const handleActionSheetSelect = (action: 'match' | 'tournament' | 'player' | 'note') => {
     switch (action) {
-      case 'practice':
-        setIsAddPracticeOpen(true);
-        break;
       case 'tournament':
         setIsAddTournamentOpen(true);
         break;
@@ -102,7 +97,7 @@ const MainAppContent: React.FC = () => {
           {activeTab === 'home' && (
             <HomeScreen
               onNavigateTab={setActiveTab}
-              onOpenAddPractice={() => setIsAddPracticeOpen(true)}
+              onOpenAddMatch={() => setIsAddMatchOpen(true)}
               onOpenAddTournament={() => setIsAddTournamentOpen(true)}
               onSelectPlayer={(p) => setSelectedPlayer(p)}
               onSelectMatch={(m) => setSelectedMatch(m)}
@@ -177,14 +172,7 @@ const MainAppContent: React.FC = () => {
         onSuccess={handleRefreshAll}
       />
 
-      {/* 6. Add Practice Modal */}
-      <AddPracticeModal
-        isOpen={isAddPracticeOpen}
-        onClose={() => setIsAddPracticeOpen(false)}
-        onSuccess={handleRefreshAll}
-      />
-
-      {/* 7. Add Player Modal */}
+      {/* 6. Add Player Modal */}
       <AddPlayerModal
         isOpen={isAddPlayerOpen}
         onClose={() => setIsAddPlayerOpen(false)}

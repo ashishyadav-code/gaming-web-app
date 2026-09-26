@@ -1,11 +1,11 @@
 import React from 'react';
-import { Gamepad2, Trophy, Users, FileText, X, ChevronRight, Lock } from 'lucide-react';
+import { Swords, Trophy, Users, FileText, X, ChevronRight, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onSelectAction: (action: 'practice' | 'tournament' | 'player' | 'note' | 'match') => void;
+  onSelectAction: (action: 'match' | 'tournament' | 'player' | 'note') => void;
 }
 
 export const ActionSheetModal: React.FC<Props> = ({ isOpen, onClose, onSelectAction }) => {
@@ -13,7 +13,7 @@ export const ActionSheetModal: React.FC<Props> = ({ isOpen, onClose, onSelectAct
 
   if (!isOpen) return null;
 
-  const handleAction = (action: 'practice' | 'tournament' | 'player' | 'note' | 'match', actionTitle: string) => {
+  const handleAction = (action: 'match' | 'tournament' | 'player' | 'note', actionTitle: string) => {
     if (!isIGL) {
       showPermissionDenied(actionTitle);
       return;
@@ -44,9 +44,9 @@ export const ActionSheetModal: React.FC<Props> = ({ isOpen, onClose, onSelectAct
 
         {/* 2x2 Action Tiles Grid */}
         <div className="grid grid-cols-2 gap-3 mb-5">
-          {/* 1. Add Practice */}
+          {/* 1. Add Match */}
           <div
-            onClick={() => handleAction('practice', 'Add Practice')}
+            onClick={() => handleAction('match', 'Add Match')}
             className={`p-3 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between h-[140px] ${
               isIGL
                 ? 'bg-[#181820] hover:bg-[#20202c] border-[#282836] hover:border-red-500/35 active:scale-95 shadow-sm'
@@ -56,7 +56,7 @@ export const ActionSheetModal: React.FC<Props> = ({ isOpen, onClose, onSelectAct
             <div>
               <div className="flex items-center justify-between mb-2">
                 <div className="w-9 h-9 rounded-xl bg-red-500/15 text-red-400 flex items-center justify-center">
-                  <Gamepad2 className="w-5 h-5" />
+                  <Swords className="w-5 h-5" />
                 </div>
                 {isIGL ? (
                   <ChevronRight className="w-4 h-4 text-red-500" />
@@ -67,10 +67,10 @@ export const ActionSheetModal: React.FC<Props> = ({ isOpen, onClose, onSelectAct
                 )}
               </div>
               <h3 className="font-extrabold text-white text-xs leading-tight mb-0.5">
-                Add Practice
+                Add Match
               </h3>
               <p className="text-[10px] text-zinc-400 line-clamp-2 leading-tight">
-                Record scrim practice with team performance.
+                Record tournament match kills and placement.
               </p>
             </div>
 

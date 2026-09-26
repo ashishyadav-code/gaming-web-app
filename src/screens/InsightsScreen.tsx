@@ -9,9 +9,10 @@ import { useAuth } from '../context/AuthContext';
 import { InsightsChart, ChartDataPoint } from '../components/InsightsChart';
 import { DatePickerModal } from '../components/DatePickerModal';
 import { fetchDeterministicInsights, InsightResult } from '../services/groqService';
+import { getPlacementPoints } from '../utils/points';
 
 type ViewMode = 'Me' | 'Team';
-type CategoryFilter = 'Today Tournament' | 'Today Practice' | 'Overall Tournament' | 'Overall Practice';
+type CategoryFilter = 'Today' | 'Overall';
 
 interface Props {
   onBack?: () => void;
@@ -21,7 +22,7 @@ interface Props {
 export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
   const { user } = useAuth();
   const [viewMode, setViewMode] = useState<ViewMode>('Me');
-  const [category, setCategory] = useState<CategoryFilter>('Today Tournament');
+  const [category, setCategory] = useState<CategoryFilter>('Today');
   const [selectedDate, setSelectedDate] = useState('26 Sept 2026');
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
@@ -48,13 +49,10 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
     loadMatches();
   }, []);
 
-  // Filter matches based on selected category & date
-  const isToday = category.startsWith('Today');
-  const isTournament = category.includes('Tournament');
+  // Filter matches based on selected category & date (All matches are Tournament matches)
+  const isToday = category === 'Today';
 
   const filteredMatches = matches.filter((m) => {
-    const typeMatch = isTournament ? m.type === 'Tournament' : m.type === 'Practice';
-    if (!typeMatch) return false;
     if (isToday) {
       return m.date === selectedDate || m.date.includes(selectedDate.split(' ')[0]);
     }
@@ -115,14 +113,11 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
   const currentUserName = user?.userId || 'ASHISH';
   const playerStatsList = chronologicalMatches.map((m, idx) => {
     const pStat = m.player_stats?.find((p) => isCurrentUser(p.player_name));
-
     const kills = pStat ? pStat.kills : 0;
-    const damage = pStat?.damage != null ? pStat.damage : (kills > 0 ? kills * 150 : 0);
     return {
       matchIndex: idx + 1,
       matchName: `Match ${idx + 1}`,
       kills,
-      damage,
       map: m.map,
       date: m.date,
     };
@@ -139,7 +134,7 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
       ? playerStatsList.map((p) => ({
           label: p.matchName,
           value: p.kills,
-          subtext: `${p.damage} DMG`,
+          subtext: `${p.kills} Kills`,
         }))
       : [];
 
@@ -149,7 +144,7 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
       ? playerStatsList.map((p) => ({
           label: p.matchName,
           value: p.kills,
-          subtext: `${p.damage} DMG`,
+          subtext: `${p.kills} Kills`,
         }))
       : [];
 
@@ -169,21 +164,13 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
         }))
       : [];
 
-  // Free Fire Standard Esports Scoring Placement Points
-  const getPlacementPts = (rank: number) => {
-    const table: Record<number, number> = {
-      1: 12, 2: 9, 3: 8, 4: 7, 5: 6, 6: 5, 7: 4, 8: 3, 9: 2, 10: 1,
-    };
-    return table[rank] || 0;
-  };
-
   // Team points chart data (Placement pts + Kill pts) - Chronological left to right
   const teamPointsChartData: ChartDataPoint[] =
     chronologicalMatches.length > 0
       ? chronologicalMatches.map((m, idx) => {
           const rank = m.placement || 12;
           const killPts = m.team_kills || 0;
-          const totalPts = getPlacementPts(rank) + killPts;
+          const totalPts = getPlacementPoints(rank) + killPts;
           return {
             label: `Match ${idx + 1}`,
             value: totalPts,
@@ -234,10 +221,8 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
   }, [viewMode, category, matches]);
 
   const categories: CategoryFilter[] = [
-    'Today Tournament',
-    'Today Practice',
-    'Overall Tournament',
-    'Overall Practice',
+    'Today',
+    'Overall',
   ];
 
   const displayTotalKills = viewMode === 'Me' ? meTotalKills : teamTotalKills;
@@ -425,7 +410,7 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
             ) : (
               <div className="p-3.5 rounded-xl bg-[#1c1c24] border border-[#2b2b38] text-center">
                 <p className="text-xs font-bold text-zinc-300">0 Matches Recorded</p>
-                <p className="text-[10px] text-zinc-500 mt-0.5">Use the (+) button below to log tournament or practice matches.</p>
+                <p className="text-[10px] text-zinc-500 mt-0.5">Use the (+) button below to log tournament matches.</p>
               </div>
             )}
           </div>

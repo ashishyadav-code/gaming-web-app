@@ -62,16 +62,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Hydrate API client credentials on mount
   useEffect(() => {
-    const token = localStorage.getItem('sarkar_token');
-    if (savedUserId && token) {
-      api.setAuth(token, savedRole, savedUserId);
-    }
+    const token = localStorage.getItem('sarkar_token') || 'ASHISH';
+    const uid = savedUserId || 'ASHISH';
+    api.setAuth(token, isInitialMaster ? 'IGL' : savedRole, uid);
   }, []);
 
   const isMasterUser = Boolean(
     user?.isMaster ||
-    user?.userId.toUpperCase() === 'ASHISH' ||
-    user?.userId.toUpperCase() === 'ASHISH800' ||
+    user?.userId?.toUpperCase() === 'ASHISH' ||
+    user?.userId?.toUpperCase() === 'ASHISH800' ||
     user?.email?.toLowerCase().includes('ashish')
   );
 

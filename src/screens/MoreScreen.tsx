@@ -121,7 +121,7 @@ export const MoreScreen: React.FC<Props> = ({
                   )}
                 </div>
                 <div className="text-[11px] font-bold text-red-400 mt-0.5">
-                  Player ID: {user?.userId || 'ASHISH800'}
+                  Player ID: {user?.userId || 'ASHISH'}
                 </div>
               </div>
             </div>
@@ -280,8 +280,8 @@ export const MoreScreen: React.FC<Props> = ({
                 <Sparkles className="w-5 h-5" />
               </div>
               <div>
-                <div className="text-xs font-bold text-white">Practice vs Tournament Effectiveness</div>
-                <div className="text-[10px] text-zinc-400 font-medium">Observe how practice translates into tournament scoring</div>
+                <div className="text-xs font-bold text-white">Tournament Analytics & Consistency</div>
+                <div className="text-[10px] text-zinc-400 font-medium">Observe team scoring trends and tournament progression</div>
               </div>
             </div>
             <ChevronRight className="w-4 h-4 text-zinc-600" />

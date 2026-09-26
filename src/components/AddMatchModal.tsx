@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { X, Trophy, Gamepad2, Check, ShieldAlert, Swords, Crown } from 'lucide-react';
-import { Player, Tournament, PracticeSession } from '../types';
+import { X, Trophy, Check, ShieldAlert, Swords, Crown, Award } from 'lucide-react';
+import { Player, Tournament } from '../types';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { ASSETS } from '../utils/assets';
+import { calculateMatchPoints } from '../utils/points';
 
 interface Props {
   isOpen: boolean;
@@ -15,27 +16,22 @@ interface Props {
 export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, players }) => {
   const { isIGL, showPermissionDenied } = useAuth();
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
-  const [practices, setPractices] = useState<PracticeSession[]>([]);
 
-  // Form states
-  const [matchType, setMatchType] = useState<'Practice' | 'Tournament'>('Practice');
+  // Form states (Tournament only, no practice)
   const [selectedMap, setSelectedMap] = useState<'BERMUDA' | 'NEXTERRA' | 'KALAHARI' | 'ALPINE' | 'PURGATORY'>('BERMUDA');
   const [placement, setPlacement] = useState<number>(1);
   const [tournamentId, setTournamentId] = useState<number | ''>('');
-  const [practiceId, setPracticeId] = useState<number | ''>('');
   const [date, setDate] = useState<string>('26 Sept 2026');
   const [time, setTime] = useState<string>('08:40 PM');
   const [notes, setNotes] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Player breakdown states (Kills only)
+  // Player breakdown states (Kills only - Assist, Damage, Survival removed)
   const [playerStats, setPlayerStats] = useState<Array<{
     player_id: number;
     player_name: string;
     kills: number;
-    assists: number;
-    deaths: number;
   }>>([]);
 
   useEffect(() => {
@@ -46,15 +42,17 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
         return;
       }
 
-      api.getTournaments().then(setTournaments).catch(() => {});
-      api.getPracticeSessions().then(setPractices).catch(() => {});
+      api.getTournaments().then((tList) => {
+        setTournaments(tList);
+        if (tList.length > 0 && !tournamentId) {
+          setTournamentId(tList[0].id);
+        }
+      }).catch(() => {});
 
       const initial = players.slice(0, 4).map((p) => ({
         player_id: p.id,
         player_name: p.player_name,
-        kills: 2,
-        assists: 1,
-        deaths: 1,
+        kills: 0,
       }));
       setPlayerStats(initial);
     }
@@ -64,10 +62,11 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
 
   // Auto calculate total team kills
   const totalTeamKills = playerStats.reduce((sum, p) => sum + (Number(p.kills) || 0), 0);
+  const points = calculateMatchPoints(placement, totalTeamKills);
 
-  const handleStatChange = (index: number, field: 'kills' | 'assists' | 'deaths', value: number) => {
+  const handleKillsChange = (index: number, value: number) => {
     const updated = [...playerStats];
-    updated[index] = { ...updated[index], [field]: Math.max(0, value) };
+    updated[index] = { ...updated[index], kills: Math.max(0, value) };
     setPlayerStats(updated);
   };
 
@@ -83,22 +82,21 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
 
     try {
       const payload = {
-        type: matchType,
+        type: 'Tournament',
         map: selectedMap,
         placement: Number(placement),
         date: date,
         time: time,
-        tournament_id: matchType === 'Tournament' && tournamentId ? Number(tournamentId) : null,
-        practice_session_id: matchType === 'Practice' && practiceId ? Number(practiceId) : null,
+        tournament_id: tournamentId ? Number(tournamentId) : null,
         team_kills: totalTeamKills,
         notes: notes.trim() || undefined,
         player_stats: playerStats.map((p) => ({
           player_id: p.player_id,
           player_name: p.player_name,
           kills: Number(p.kills) || 0,
-          assists: Number(p.assists) || 0,
-          deaths: Number(p.deaths) || 0,
-          survival_percent: placement === 1 ? 80.0 : Math.max(30.0, 75.0 - placement * 4),
+          assists: 0,
+          deaths: 0,
+          survival_percent: placement === 1 ? 100 : Math.max(0, 100 - placement * 8),
         })),
       };
 
@@ -126,11 +124,12 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-[#22222b]">
           <div>
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">
-              IGL Match Entry
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full flex items-center gap-1 w-fit">
+              <Trophy className="w-3 h-3 text-amber-400" />
+              Tournament Match Entry
             </span>
             <h2 className="text-lg font-black text-white mt-1">
-              Add Match Result
+              Add Tournament Match
             </h2>
           </div>
           <button
@@ -149,35 +148,25 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
         )}
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-3.5">
-          {/* Match Type Tabs */}
+          {/* Linked Tournament */}
           <div>
-            <label className="text-xs font-bold text-zinc-300 block mb-1">Match Type</label>
-            <div className="grid grid-cols-2 gap-2 p-1 bg-[#1c1c24] border border-[#282836] rounded-xl">
-              <button
-                type="button"
-                onClick={() => setMatchType('Practice')}
-                className={`py-1.5 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all ${
-                  matchType === 'Practice' ? 'bg-red-600 text-white shadow-sm' : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                <Gamepad2 className="w-3.5 h-3.5" /> Practice
-              </button>
-              <button
-                type="button"
-                onClick={() => setMatchType('Tournament')}
-                className={`py-1.5 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all ${
-                  matchType === 'Tournament' ? 'bg-amber-600 text-white shadow-sm' : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                <Trophy className="w-3.5 h-3.5" /> Tournament
-              </button>
-            </div>
+            <label className="text-xs font-bold text-zinc-300 block mb-1">Select Tournament</label>
+            <select
+              value={tournamentId}
+              onChange={(e) => setTournamentId(e.target.value ? Number(e.target.value) : '')}
+              className="w-full py-2 px-3 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-xs font-semibold text-white focus:outline-none focus:border-red-500"
+            >
+              <option value="">-- Standalone Tournament Match --</option>
+              {tournaments.map((t) => (
+                <option key={t.id} value={t.id}>{t.name} ({t.date})</option>
+              ))}
+            </select>
           </div>
 
           {/* Map Selection */}
           <div>
             <label className="text-xs font-bold text-zinc-300 block mb-1.5">
-              Select Map (Includes Kalahari)
+              Select Map
             </label>
             <div className="grid grid-cols-5 gap-1.5">
               {mapsList.map((m) => (
@@ -200,39 +189,6 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
             </div>
           </div>
 
-          {/* Linked Tournament or Practice Session */}
-          {matchType === 'Tournament' && (
-            <div>
-              <label className="text-xs font-bold text-zinc-300 block mb-1">Select Tournament</label>
-              <select
-                value={tournamentId}
-                onChange={(e) => setTournamentId(e.target.value ? Number(e.target.value) : '')}
-                className="w-full py-2 px-3 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-xs font-semibold text-white focus:outline-none focus:border-red-500"
-              >
-                <option value="">-- Standalone Tournament Match --</option>
-                {tournaments.map((t) => (
-                  <option key={t.id} value={t.id}>{t.name} ({t.date})</option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {matchType === 'Practice' && (
-            <div>
-              <label className="text-xs font-bold text-zinc-300 block mb-1">Linked Practice Session</label>
-              <select
-                value={practiceId}
-                onChange={(e) => setPracticeId(e.target.value ? Number(e.target.value) : '')}
-                className="w-full py-2 px-3 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-xs font-semibold text-white focus:outline-none focus:border-red-500"
-              >
-                <option value="">-- Standalone Practice Match --</option>
-                {practices.map((p) => (
-                  <option key={p.id} value={p.id}>{p.date} - {p.focus} ({p.duration_minutes}m)</option>
-                ))}
-              </select>
-            </div>
-          )}
-
           {/* Placement, Date, Time Row */}
           <div className="grid grid-cols-3 gap-2">
             <div>
@@ -241,10 +197,10 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
                 <input
                   type="number"
                   min="1"
-                  max="50"
+                  max="12"
                   required
                   value={placement}
-                  onChange={(e) => setPlacement(Math.max(1, parseInt(e.target.value) || 1))}
+                  onChange={(e) => setPlacement(Math.max(1, Math.min(12, parseInt(e.target.value) || 1)))}
                   className="w-full py-2 px-3 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-sm font-extrabold text-white text-center focus:border-red-500 focus:outline-none"
                 />
                 {placement === 1 && (
@@ -276,7 +232,24 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
             </div>
           </div>
 
-          {/* 4-Player Stats Section */}
+          {/* Live Points Preview Card */}
+          <div className="p-3 bg-gradient-to-r from-[#1c1712] to-[#141419] rounded-xl border border-amber-500/25 flex items-center justify-between">
+            <div>
+              <div className="text-[10px] uppercase font-black text-amber-400 flex items-center gap-1">
+                <Award className="w-3.5 h-3.5" />
+                <span>Calculated Points</span>
+              </div>
+              <div className="text-[11px] font-bold text-zinc-300 mt-0.5">
+                #{placement} ({points.placementPts} pts) + {points.killPts} kills ({points.killPts} pts)
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-xl font-black text-amber-400 leading-none">{points.totalPts}</div>
+              <div className="text-[9px] font-extrabold text-zinc-400 uppercase">Match Points</div>
+            </div>
+          </div>
+
+          {/* Squad Kills Breakdown (Kills Only) */}
           <div className="p-3 bg-[#1c1c24] rounded-xl border border-[#282836]">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-black text-white">
@@ -291,32 +264,19 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
             <div className="space-y-1.5">
               {playerStats.map((p, idx) => (
                 <div key={p.player_id} className="p-2 bg-[#141419] rounded-lg border border-[#282836] flex items-center justify-between gap-2">
-                  <span className="font-extrabold text-xs text-white w-20 truncate">
+                  <span className="font-extrabold text-xs text-white truncate flex-1">
                     {p.player_name}
                   </span>
 
-                  <div className="flex items-center gap-3 flex-1 justify-end">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[9px] text-zinc-400 font-bold">KILLS</span>
-                      <input
-                        type="number"
-                        min="0"
-                        value={p.kills}
-                        onChange={(e) => handleStatChange(idx, 'kills', parseInt(e.target.value) || 0)}
-                        className="w-12 py-1 text-center rounded bg-[#1c1c24] text-xs font-black text-red-400 border border-[#2b2b38]"
-                      />
-                    </div>
-
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[9px] text-zinc-400 font-bold">ASSISTS</span>
-                      <input
-                        type="number"
-                        min="0"
-                        value={p.assists}
-                        onChange={(e) => handleStatChange(idx, 'assists', parseInt(e.target.value) || 0)}
-                        className="w-10 py-1 text-center rounded bg-[#1c1c24] text-xs font-bold text-zinc-200 border border-[#2b2b38]"
-                      />
-                    </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] text-zinc-400 font-bold uppercase">Kills</span>
+                    <input
+                      type="number"
+                      min="0"
+                      value={p.kills}
+                      onChange={(e) => handleKillsChange(idx, parseInt(e.target.value) || 0)}
+                      className="w-16 py-1 text-center rounded-lg bg-[#1c1c24] text-xs font-black text-red-400 border border-[#2b2b38] focus:border-red-500 focus:outline-none"
+                    />
                   </div>
                 </div>
               ))}
@@ -344,7 +304,7 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
             className="w-full py-3 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50"
           >
             <Check className="w-4 h-4 stroke-[2.5]" />
-            <span>Save Match Result</span>
+            <span>Save Tournament Match</span>
           </button>
         </form>
       </div>
