@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Activity, History, Swords, Flame } from 'lucide-react';
+import { X, Activity, History, Swords } from 'lucide-react';
 import { Player, PlayerProgressDetail } from '../types';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
