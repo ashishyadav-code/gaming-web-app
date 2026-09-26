@@ -17,30 +17,86 @@ const STORAGE_KEYS = {
 };
 
 // Master Admin User
+// Master Admin User (Ashish - IGL & Sniper)
 const MASTER_USER = {
   userId: 'ASHISH',
   name: 'Ashish',
+  ign: 'HASHIRAMA 777',
   email: 'ashish@teamsarkar.com',
   role: 'IGL' as UserRole,
+  teamRole: 'Sniper',
   password: 'ASHISH',
 };
 
-// Initial Seed Setup
+// Initial Seed Setup with Official 4-Player Roster
 function initializeLocalStorageDB() {
   if (typeof window === 'undefined') return;
 
-  // 1. Users
+  // 1. Users (Only 4 official team members)
   if (!localStorage.getItem(STORAGE_KEYS.USERS)) {
-    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify([MASTER_USER]));
+    const defaultUsers = [
+      MASTER_USER,
+      {
+        userId: 'ITACHI 777',
+        name: 'Shashank',
+        ign: 'SRK•ITACHI 777',
+        role: 'PLAYER' as UserRole,
+        teamRole: 'Primary Rusher',
+        password: 'password123',
+      },
+      {
+        userId: 'TuUFAN   777',
+        name: 'Priyanshu',
+        ign: 'SRK•TUUFAN   777',
+        role: 'PLAYER' as UserRole,
+        teamRole: 'Assaulter',
+        password: 'password123',
+      },
+      {
+        userId: 'PANDIT    777',
+        name: 'Ansh mishra',
+        ign: 'SRK•PANDIT    777',
+        role: 'PLAYER' as UserRole,
+        teamRole: '2nd Rusher',
+        password: 'password123',
+      },
+    ];
+    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(defaultUsers));
   }
 
-  // 2. Players (Default active roster initialized with Ashish if empty)
+  // 2. Official 4 Players Roster
   if (!localStorage.getItem(STORAGE_KEYS.PLAYERS)) {
     const defaultPlayers: Player[] = [
       {
+        id: 4,
+        player_name: 'HASHIRAMA 777',
+        ign: 'HASHIRAMA 777',
+        team_role: 'Sniper',
+        status: 'Active',
+        avatar_url: '',
+        joined_at: '25 Sept 2026',
+        matches_count: 0,
+        kd: 0.0,
+        avg_damage: 0,
+        total_kills: 0,
+        total_damage: 0,
+        total_assists: 0,
+        total_deaths: 0,
+        survival_rate: 0,
+        trend: 'stable',
+        role_history: [
+          {
+            id: 1,
+            role: 'Sniper',
+            started_at: '25 Sept 2026',
+            notes: 'Team Sarkar Official IGL & Sniper',
+          },
+        ],
+      },
+      {
         id: 1,
-        player_name: 'ASHISH',
-        ign: 'SARKAR・ASHISH',
+        player_name: 'ITACHI 777',
+        ign: 'SRK•ITACHI 777',
         team_role: 'Primary Rusher',
         status: 'Active',
         avatar_url: '',
@@ -59,7 +115,59 @@ function initializeLocalStorageDB() {
             id: 1,
             role: 'Primary Rusher',
             started_at: '25 Sept 2026',
-            notes: 'Founding IGL and Rusher',
+            notes: 'Primary Entry Fragger',
+          },
+        ],
+      },
+      {
+        id: 3,
+        player_name: 'TUUFAN   777',
+        ign: 'SRK•TUUFAN   777',
+        team_role: 'Assaulter',
+        status: 'Active',
+        avatar_url: '',
+        joined_at: '25 Sept 2026',
+        matches_count: 0,
+        kd: 0.0,
+        avg_damage: 0,
+        total_kills: 0,
+        total_damage: 0,
+        total_assists: 0,
+        total_deaths: 0,
+        survival_rate: 0,
+        trend: 'stable',
+        role_history: [
+          {
+            id: 1,
+            role: 'Assaulter',
+            started_at: '25 Sept 2026',
+            notes: 'Frontline Assault',
+          },
+        ],
+      },
+      {
+        id: 5,
+        player_name: 'PANDIT    777',
+        ign: 'SRK•PANDIT    777',
+        team_role: '2nd Rusher',
+        status: 'Active',
+        avatar_url: '',
+        joined_at: '25 Sept 2026',
+        matches_count: 0,
+        kd: 0.0,
+        avg_damage: 0,
+        total_kills: 0,
+        total_damage: 0,
+        total_assists: 0,
+        total_deaths: 0,
+        survival_rate: 0,
+        trend: 'stable',
+        role_history: [
+          {
+            id: 1,
+            role: '2nd Rusher',
+            started_at: '25 Sept 2026',
+            notes: 'Secondary Rusher & Support',
           },
         ],
       },
@@ -67,13 +175,99 @@ function initializeLocalStorageDB() {
     localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(defaultPlayers));
   }
 
-  // 3. Strictly 0 matches, tournaments, practice, notes
-  if (!localStorage.getItem(STORAGE_KEYS.MATCHES)) {
-    localStorage.setItem(STORAGE_KEYS.MATCHES, JSON.stringify([]));
-  }
+  // 3. Tournaments Seed
   if (!localStorage.getItem(STORAGE_KEYS.TOURNAMENTS)) {
-    localStorage.setItem(STORAGE_KEYS.TOURNAMENTS, JSON.stringify([]));
+    const defaultTournaments: Tournament[] = [
+      {
+        id: 1,
+        name: 'Daily scrims',
+        date: '26 Sept 2026',
+        status: 'Upcoming',
+        notes: '3 matches',
+        matches_count: 3,
+        avg_placement: 9.0,
+        total_kills: 6,
+        avg_kills: 2.0,
+        total_damage: 0,
+        avg_damage: 0,
+        booyah_count: 0,
+        matches: [],
+      },
+    ];
+    localStorage.setItem(STORAGE_KEYS.TOURNAMENTS, JSON.stringify(defaultTournaments));
   }
+
+  // 4. Matches Seed (3 real matches from MongoDB Atlas)
+  if (!localStorage.getItem(STORAGE_KEYS.MATCHES)) {
+    const defaultMatches: Match[] = [
+      {
+        id: 3,
+        team_id: 1,
+        tournament_id: 1,
+        tournament_name: 'Daily scrims',
+        practice_session_id: null,
+        type: 'Tournament',
+        map: 'KALAHARI',
+        date: '26 Sept 2026',
+        time: '11:00 AM',
+        placement: 4,
+        team_kills: 4,
+        team_damage: 0,
+        notes: '',
+        player_stats: [
+          { id: 1, player_id: 1, player_name: 'ITACHI 777', player_role: 'Primary Rusher', kills: 0, damage: 0, assists: 0, deaths: 1, survival_percent: 59 },
+          { id: 2, player_id: 3, player_name: 'TUUFAN   777', player_role: 'Assaulter', kills: 2, damage: 0, assists: 0, deaths: 1, survival_percent: 59 },
+          { id: 3, player_id: 4, player_name: 'HASHIRAMA 777', player_role: 'Sniper', kills: 2, damage: 0, assists: 0, deaths: 1, survival_percent: 59 },
+          { id: 4, player_id: 5, player_name: 'PANDIT    777', player_role: '2nd Rusher', kills: 0, damage: 0, assists: 0, deaths: 1, survival_percent: 59 },
+        ],
+      },
+      {
+        id: 2,
+        team_id: 1,
+        tournament_id: 1,
+        tournament_name: 'Daily scrims',
+        practice_session_id: null,
+        type: 'Tournament',
+        map: 'PURGATORY',
+        date: '26 Sept 2026',
+        time: '11:00 AM',
+        placement: 12,
+        team_kills: 0,
+        team_damage: 0,
+        notes: '',
+        player_stats: [
+          { id: 1, player_id: 1, player_name: 'ITACHI 777', player_role: 'Primary Rusher', kills: 0, damage: 0, assists: 1, deaths: 1, survival_percent: 30 },
+          { id: 2, player_id: 3, player_name: 'TUUFAN   777', player_role: 'Assaulter', kills: 0, damage: 0, assists: 1, deaths: 1, survival_percent: 30 },
+          { id: 3, player_id: 4, player_name: 'HASHIRAMA 777', player_role: 'Sniper', kills: 0, damage: 0, assists: 1, deaths: 1, survival_percent: 30 },
+          { id: 4, player_id: 5, player_name: 'PANDIT    777', player_role: '2nd Rusher', kills: 0, damage: 0, assists: 1, deaths: 1, survival_percent: 30 },
+        ],
+      },
+      {
+        id: 1,
+        team_id: 1,
+        tournament_id: 1,
+        tournament_name: 'Daily scrims',
+        practice_session_id: null,
+        type: 'Tournament',
+        map: 'BERMUDA',
+        date: '26 Sept 2026',
+        time: '11:00 AM',
+        placement: 11,
+        team_kills: 2,
+        team_damage: 0,
+        notes: '',
+        player_stats: [
+          { id: 1, player_id: 1, player_name: 'ITACHI 777', player_role: 'Primary Rusher', kills: 1, damage: 0, assists: 1, deaths: 1, survival_percent: 31 },
+          { id: 2, player_id: 3, player_name: 'TUUFAN   777', player_role: 'Assaulter', kills: 1, damage: 0, assists: 1, deaths: 1, survival_percent: 31 },
+          { id: 3, player_id: 4, player_name: 'HASHIRAMA 777', player_role: 'Sniper', kills: 0, damage: 0, assists: 1, deaths: 1, survival_percent: 31 },
+          { id: 4, player_id: 5, player_name: 'PANDIT    777', player_role: '2nd Rusher', kills: 0, damage: 0, assists: 1, deaths: 1, survival_percent: 31 },
+        ],
+      },
+    ];
+    localStorage.setItem(STORAGE_KEYS.MATCHES, JSON.stringify(defaultMatches));
+  }
+
+  // 5. Practice & Notes
   if (!localStorage.getItem(STORAGE_KEYS.PRACTICE)) {
     localStorage.setItem(STORAGE_KEYS.PRACTICE, JSON.stringify([]));
   }
@@ -178,11 +372,13 @@ class ApiClient {
 
     if (isMaster && cleanPass.toUpperCase() === 'ASHISH') {
       const user = {
-        id: 1,
+        id: 4,
         userId: 'ASHISH',
         name: 'Ashish',
+        ign: 'HASHIRAMA 777',
         email: 'ashish@teamsarkar.com',
         role: 'IGL' as UserRole,
+        teamRole: 'Sniper',
         isMaster: true,
       };
       const token = `sarkar_jwt_${Date.now()}`;

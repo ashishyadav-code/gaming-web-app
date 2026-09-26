@@ -5,6 +5,8 @@ import { api } from '../api/client';
 export interface AuthUser {
   userId: string;
   name: string;
+  ign?: string;
+  teamRole?: string;
   email?: string;
   role: UserRole;
   isMaster?: boolean;
@@ -43,6 +45,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ? {
           userId: savedUserId,
           name: isInitialMaster ? 'Ashish' : savedUserId,
+          ign: isInitialMaster ? 'HASHIRAMA 777' : savedUserId,
+          teamRole: isInitialMaster ? 'Sniper' : 'Rusher',
           email: `${savedUserId.toLowerCase()}@teamsarkar.com`,
           role: isInitialMaster ? 'IGL' : savedRole,
           isMaster: !!isInitialMaster,
@@ -82,6 +86,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const finalizedUser: AuthUser = {
       ...newUser,
+      name: isMaster ? 'Ashish' : (newUser.name || newUser.userId),
+      ign: isMaster ? 'HASHIRAMA 777' : (newUser.ign || newUser.userId),
+      teamRole: isMaster ? 'Sniper' : (newUser.teamRole || 'Rusher'),
       role,
       isMaster,
     };
