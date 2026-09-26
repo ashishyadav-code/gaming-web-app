@@ -94,9 +94,9 @@ const MainAppContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#E5ECF6] flex justify-center text-slate-800 antialiased font-sans selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen bg-[#070709] flex justify-center text-slate-100 antialiased font-sans selection:bg-red-600 selection:text-white">
       {/* Real Edge-to-Edge Mobile-First Container (No fake phone bezel) */}
-      <div className="w-full max-w-md min-h-screen bg-[#EFF5FC] shadow-xl flex flex-col relative overflow-x-hidden">
+      <div className="w-full max-w-md min-h-screen bg-[#0c0c10] shadow-2xl flex flex-col relative overflow-x-hidden border-x border-[#1a1a24]">
         {/* Main Screen Content */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden relative" key={refreshKey}>
           {activeTab === 'home' && (
@@ -241,6 +241,7 @@ const MainAppContent: React.FC = () => {
       <TeamHistoryModal
         isOpen={isTeamHistoryOpen}
         onClose={() => setIsTeamHistoryOpen(false)}
+        players={players}
       />
 
       {/* 14. Account Profile & Switch User Modal */}

@@ -20,62 +20,62 @@ export const InsightsChart: React.FC<Props> = ({
   title,
   subtitle,
   data,
-  colorTheme = 'blue',
+  colorTheme = 'red',
   yAxisLabel = 'Kills',
   defaultChartType = 'line',
   invertRank = false,
 }) => {
   const [chartType, setChartType] = useState<'line' | 'bar'>(defaultChartType);
 
-  // Themes
+  // Themes tuned for matte black dark background
   const themes = {
-    blue: {
-      line: '#3B82F6',
-      dot: '#2563EB',
-      gradientFrom: '#3B82F6',
-      gradientTo: '#93C5FD',
-      bar: 'fill-blue-500',
-      activePill: 'bg-blue-600 text-white',
-      badge: 'text-blue-600',
-    },
     red: {
       line: '#EF4444',
-      dot: '#DC2626',
+      dot: '#F87171',
       gradientFrom: '#EF4444',
-      gradientTo: '#FCA5A5',
-      bar: 'fill-rose-500',
-      activePill: 'bg-blue-600 text-white',
-      badge: 'text-rose-600',
+      gradientTo: '#991B1B',
+      bar: 'fill-red-500',
+      activePill: 'bg-red-600 text-white',
+      badge: 'text-red-400',
+    },
+    blue: {
+      line: '#EF4444',
+      dot: '#F87171',
+      gradientFrom: '#EF4444',
+      gradientTo: '#991B1B',
+      bar: 'fill-red-500',
+      activePill: 'bg-red-600 text-white',
+      badge: 'text-red-400',
     },
     green: {
       line: '#10B981',
-      dot: '#059669',
+      dot: '#34D399',
       gradientFrom: '#10B981',
-      gradientTo: '#A7F3D0',
+      gradientTo: '#064E3B',
       bar: 'fill-emerald-500',
-      activePill: 'bg-blue-600 text-white',
-      badge: 'text-emerald-600',
+      activePill: 'bg-emerald-600 text-white',
+      badge: 'text-emerald-400',
     },
     amber: {
       line: '#F59E0B',
-      dot: '#D97706',
+      dot: '#FBBF24',
       gradientFrom: '#F59E0B',
-      gradientTo: '#FDE68A',
+      gradientTo: '#78350F',
       bar: 'fill-amber-500',
-      activePill: 'bg-blue-600 text-white',
-      badge: 'text-amber-600',
+      activePill: 'bg-amber-600 text-white',
+      badge: 'text-amber-400',
     },
   };
 
-  const theme = themes[colorTheme] || themes.blue;
+  const theme = themes[colorTheme] || themes.red;
 
   // Chart dimensions
   const width = 340;
-  const height = 140;
+  const height = 135;
   const paddingLeft = 32;
   const paddingRight = 18;
-  const paddingTop = 26;
-  const paddingBottom = 26;
+  const paddingTop = 24;
+  const paddingBottom = 24;
 
   const chartWidth = width - paddingLeft - paddingRight;
   const chartHeight = height - paddingTop - paddingBottom;
@@ -84,16 +84,16 @@ export const InsightsChart: React.FC<Props> = ({
 
   if (pointsCount === 0) {
     return (
-      <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-soft-card">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-[#141419] rounded-2xl p-4 border border-[#22222b] shadow-sm mb-3.5">
+        <div className="flex items-center justify-between mb-3">
           <div>
-            <h3 className="text-base font-black text-slate-900 tracking-tight">{title}</h3>
-            <p className="text-xs text-slate-400 font-medium">{subtitle}</p>
+            <h3 className="text-sm font-black text-white tracking-tight">{title}</h3>
+            <p className="text-[11px] text-zinc-400 font-medium">{subtitle}</p>
           </div>
         </div>
-        <div className="h-32 flex flex-col items-center justify-center text-slate-400 text-xs">
-          <p className="font-bold">No match data recorded yet</p>
-          <span className="text-[11px] text-slate-400">Play matches to see performance curve</span>
+        <div className="h-28 flex flex-col items-center justify-center text-zinc-400 text-xs">
+          <p className="font-bold text-zinc-300">No match data recorded yet</p>
+          <span className="text-[11px] text-zinc-500 mt-0.5">Play matches to see performance curve</span>
         </div>
       </div>
     );
@@ -142,25 +142,25 @@ export const InsightsChart: React.FC<Props> = ({
   const gradId = `grad-${colorTheme}-${Math.random().toString(36).substr(2, 6)}`;
 
   return (
-    <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-soft-card mb-4 text-left transition-all">
+    <div className="bg-[#141419] rounded-2xl p-3.5 border border-[#22222b] shadow-sm mb-3 text-left transition-all">
       {/* Card Header */}
       <div className="flex items-start justify-between gap-2 mb-2">
         <div>
-          <h3 className="text-[15px] font-black text-slate-900 tracking-tight leading-tight">
+          <h3 className="text-sm font-black text-white tracking-tight leading-tight">
             {title}
           </h3>
-          <p className="text-[11px] text-slate-400 font-medium leading-tight mt-0.5">
+          <p className="text-[10px] text-zinc-400 font-medium leading-tight mt-0.5">
             {subtitle}
           </p>
         </div>
 
         {/* Line / Bar Pill Switcher */}
-        <div className="flex items-center bg-slate-100 rounded-full p-0.5 flex-shrink-0">
+        <div className="flex items-center bg-[#1c1c24] rounded-full p-0.5 border border-white/10 flex-shrink-0">
           <button
             type="button"
             onClick={() => setChartType('line')}
             className={`px-2.5 py-0.5 text-[10px] font-extrabold rounded-full transition-all ${
-              chartType === 'line' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-500 hover:text-slate-700'
+              chartType === 'line' ? 'bg-red-600 text-white shadow-xs' : 'text-zinc-400 hover:text-white'
             }`}
           >
             Line
@@ -169,7 +169,7 @@ export const InsightsChart: React.FC<Props> = ({
             type="button"
             onClick={() => setChartType('bar')}
             className={`px-2.5 py-0.5 text-[10px] font-extrabold rounded-full transition-all ${
-              chartType === 'bar' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-500 hover:text-slate-700'
+              chartType === 'bar' ? 'bg-red-600 text-white shadow-xs' : 'text-zinc-400 hover:text-white'
             }`}
           >
             Bar
@@ -180,14 +180,14 @@ export const InsightsChart: React.FC<Props> = ({
       {/* SVG Canvas Area */}
       <div className="relative w-full overflow-hidden">
         {/* Y Axis Label */}
-        <div className="absolute top-1 left-0 text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">
+        <div className="absolute top-0 left-0 text-[8.5px] font-extrabold text-zinc-500 uppercase tracking-wider">
           {yAxisLabel}
         </div>
 
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto overflow-visible select-none">
           <defs>
             <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={theme.gradientFrom} stopOpacity="0.45" />
+              <stop offset="0%" stopColor={theme.gradientFrom} stopOpacity="0.4" />
               <stop offset="100%" stopColor={theme.gradientTo} stopOpacity="0.0" />
             </linearGradient>
           </defs>
@@ -202,7 +202,7 @@ export const InsightsChart: React.FC<Props> = ({
                   y1={yPos}
                   x2={width - paddingRight}
                   y2={yPos}
-                  stroke="#F1F5F9"
+                  stroke="#22222b"
                   strokeWidth="1"
                   strokeDasharray="2,3"
                 />
@@ -210,8 +210,8 @@ export const InsightsChart: React.FC<Props> = ({
                   x={paddingLeft - 6}
                   y={yPos + 3}
                   textAnchor="end"
-                  fill="#94A3B8"
-                  fontSize="9"
+                  fill="#71717a"
+                  fontSize="8.5"
                   fontWeight="700"
                 >
                   {tickVal}
@@ -243,17 +243,17 @@ export const InsightsChart: React.FC<Props> = ({
                 return (
                   <g key={i}>
                     {/* Glowing outer circle */}
-                    <circle cx={cx} cy={cy} r="5" fill="#FFFFFF" stroke={theme.dot} strokeWidth="2.5" />
+                    <circle cx={cx} cy={cy} r="5" fill="#141419" stroke={theme.dot} strokeWidth="2.5" />
                     {/* Inner core */}
                     <circle cx={cx} cy={cy} r="2" fill={theme.dot} />
 
                     {/* Numeric Value Label directly above node */}
                     <text
                       x={cx}
-                      y={cy - 8}
+                      y={cy - 7}
                       textAnchor="middle"
-                      fill="#1E293B"
-                      fontSize="10"
+                      fill="#FFFFFF"
+                      fontSize="9.5"
                       fontWeight="900"
                     >
                       {invertRank ? `#${d.value}` : d.value}
@@ -268,7 +268,7 @@ export const InsightsChart: React.FC<Props> = ({
               {data.map((d, i) => {
                 const cx = getX(i);
                 const cy = getY(d.value);
-                const barWidth = Math.min(24, Math.max(12, (chartWidth / pointsCount) * 0.55));
+                const barWidth = Math.min(22, Math.max(12, (chartWidth / pointsCount) * 0.55));
                 const barHeight = Math.max(4, height - paddingBottom - cy);
 
                 return (
@@ -280,14 +280,14 @@ export const InsightsChart: React.FC<Props> = ({
                       height={barHeight}
                       rx="4"
                       fill={theme.line}
-                      opacity="0.85"
+                      opacity="0.9"
                     />
                     <text
                       x={cx}
                       y={cy - 6}
                       textAnchor="middle"
-                      fill="#1E293B"
-                      fontSize="10"
+                      fill="#FFFFFF"
+                      fontSize="9.5"
                       fontWeight="900"
                     >
                       {invertRank ? `#${d.value}` : d.value}
@@ -305,9 +305,9 @@ export const InsightsChart: React.FC<Props> = ({
               <text
                 key={i}
                 x={cx}
-                y={height - 8}
+                y={height - 7}
                 textAnchor="middle"
-                fill="#64748B"
+                fill="#a1a1aa"
                 fontSize="9"
                 fontWeight="700"
               >

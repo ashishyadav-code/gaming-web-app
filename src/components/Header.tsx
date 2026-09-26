@@ -17,7 +17,7 @@ export const Header: React.FC<Props> = ({ onSearchClick, onNotificationsClick, o
     <header className="px-5 pt-4 pb-2 flex items-center justify-between relative z-20">
       {/* Brand Logo & Name */}
       <div className="flex items-center gap-2.5">
-        <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center p-0.5">
+        <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center p-0.5 bg-[#14141a] border border-white/10">
           <img
             src={ASSETS.logo}
             alt="Team Sarkar Logo"
@@ -25,13 +25,13 @@ export const Header: React.FC<Props> = ({ onSearchClick, onNotificationsClick, o
           />
         </div>
         <div>
-          <div className="text-[10px] tracking-[0.2em] font-black text-slate-500 uppercase leading-none">
+          <div className="text-[10px] tracking-[0.2em] font-black text-zinc-400 uppercase leading-none">
             Team
           </div>
-          <div className="text-base font-black tracking-tight text-slate-900 leading-tight">
+          <div className="text-base font-black tracking-tight text-white leading-tight">
             SARKAR
           </div>
-          <div className="text-[9px] tracking-widest font-bold text-blue-600 uppercase leading-none">
+          <div className="text-[9px] tracking-widest font-bold text-red-500 uppercase leading-none">
             FF ESPORTS
           </div>
         </div>
@@ -45,25 +45,25 @@ export const Header: React.FC<Props> = ({ onSearchClick, onNotificationsClick, o
             title="Click to view profile, switch player or sign out"
             className={`px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm ${
               isMaster
-                ? 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100'
+                ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25'
                 : isIGL
-                ? 'bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100'
-                : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
+                ? 'bg-red-500/15 text-red-400 border border-red-500/30 hover:bg-red-500/25'
+                : 'bg-[#181822] text-zinc-300 border border-[#2b2b3a] hover:bg-[#222230]'
             }`}
           >
             {isMaster ? (
               <>
-                <Shield className="w-3.5 h-3.5 text-amber-600 fill-amber-500/20" />
+                <Shield className="w-3.5 h-3.5 text-amber-400 fill-amber-500/20" />
                 <span className="font-extrabold text-[11px]">{user?.userId === 'ASHISH800' ? 'ASHISH' : (user?.userId || 'ASHISH')}</span>
               </>
             ) : isIGL ? (
               <>
-                <Shield className="w-3.5 h-3.5 text-blue-600 fill-blue-600/20" />
+                <Shield className="w-3.5 h-3.5 text-red-400 fill-red-500/20" />
                 <span>IGL</span>
               </>
             ) : (
               <>
-                <UserIcon className="w-3.5 h-3.5 text-slate-500" />
+                <UserIcon className="w-3.5 h-3.5 text-zinc-400" />
                 <span>{user?.userId || 'Sign In'}</span>
               </>
             )}
@@ -72,17 +72,17 @@ export const Header: React.FC<Props> = ({ onSearchClick, onNotificationsClick, o
 
         <button
           onClick={onSearchClick}
-          className="w-9 h-9 rounded-full bg-white/90 backdrop-blur-md border border-white/80 shadow-sm flex items-center justify-center text-slate-600 hover:bg-white active:scale-95 transition-transform"
+          className="w-9 h-9 rounded-full bg-[#15151c] border border-white/10 shadow-sm flex items-center justify-center text-zinc-300 hover:bg-[#202029] active:scale-95 transition-transform"
         >
           <Search className="w-4 h-4" />
         </button>
 
         <button
           onClick={onNotificationsClick}
-          className="w-9 h-9 rounded-full bg-white/90 backdrop-blur-md border border-white/80 shadow-sm flex items-center justify-center text-slate-600 relative hover:bg-white active:scale-95 transition-transform"
+          className="w-9 h-9 rounded-full bg-[#15151c] border border-white/10 shadow-sm flex items-center justify-center text-zinc-300 relative hover:bg-[#202029] active:scale-95 transition-transform"
         >
           <Bell className="w-4 h-4" />
-          <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white animate-pulse" />
+          <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500 ring-2 ring-[#15151c] animate-pulse" />
         </button>
       </div>
     </header>

@@ -14,35 +14,35 @@ export const PermissionModal: React.FC<Props> = ({ isOpen, onClose, actionName =
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in-smooth">
-      <div className="bg-white rounded-[32px] p-6 max-w-sm w-full shadow-2xl border border-slate-100 text-center relative overflow-hidden animate-slide-up-smooth">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center shadow-inner">
-          <Lock className="w-8 h-8" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in-smooth">
+      <div className="bg-[#141419] rounded-2xl p-5 max-w-sm w-full shadow-2xl border border-[#22222b] text-center relative overflow-hidden animate-slide-up-smooth">
+        <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center border border-amber-500/30">
+          <Lock className="w-6 h-6" />
         </div>
 
-        <h3 className="text-xl font-bold text-slate-800 mb-2">
+        <h3 className="text-lg font-black text-white mb-1.5">
           IGL Permission Required
         </h3>
 
-        <p className="text-sm text-slate-500 mb-6 leading-relaxed">
-          <span className="font-semibold text-slate-700">{actionName}</span> is restricted to the team IGL or Master Admin (<span className="font-bold text-slate-800">ASHISH800</span>). Players have read-only access to match stats and analytics.
+        <p className="text-xs text-zinc-400 mb-4 leading-relaxed">
+          <span className="font-bold text-white">{actionName}</span> is restricted to the team IGL or Master Admin (<span className="font-bold text-red-400">ASHISH</span> / <span className="font-bold text-red-400">HASHIRAMA 777</span>). Players have read-only access to match stats and telemetry.
         </p>
 
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           <button
             onClick={() => {
               onClose();
               openLoginModal();
             }}
-            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-sm shadow-btn-glow hover:opacity-95 transition-all flex items-center justify-center gap-2"
+            className="w-full py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all flex items-center justify-center gap-2 active:scale-95"
           >
             <LogIn className="w-4 h-4" />
-            Sign in as IGL / ASHISH800
+            Sign in as IGL / ASHISH
           </button>
 
           <button
             onClick={onClose}
-            className="w-full py-2.5 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium text-sm transition-colors"
+            className="w-full py-2 px-4 rounded-xl bg-[#1c1c24] hover:bg-[#282836] text-zinc-400 hover:text-white font-bold text-xs transition-colors"
           >
             Dismiss
           </button>

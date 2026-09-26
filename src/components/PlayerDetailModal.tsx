@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { X, TrendingUp, TrendingDown, Minus, ShieldCheck, History, Activity, Calendar, ShieldAlert } from 'lucide-react';
+import { X, Activity, History, Swords, Flame } from 'lucide-react';
 import { Player, PlayerProgressDetail } from '../types';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
-import { ASSETS } from '../utils/assets';
+import { getPlayerAvatar } from '../utils/assets';
 
 interface Props {
   player: Player | null;
@@ -12,9 +12,9 @@ interface Props {
 }
 
 export const PlayerDetailModal: React.FC<Props> = ({ player, onClose, onOpenChangeRole }) => {
-  const { isIGL, showPermissionDenied } = useAuth();
+  const { isIGL } = useAuth();
   const [detail, setDetail] = useState<PlayerProgressDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     if (player) {
@@ -33,138 +33,138 @@ export const PlayerDetailModal: React.FC<Props> = ({ player, onClose, onOpenChan
   if (!player) return null;
 
   const roleColors: Record<string, string> = {
-    'Rusher': 'bg-rose-50 text-rose-600 border-rose-200',
-    'Primary Rusher': 'bg-rose-50 text-rose-600 border-rose-200',
-    '2nd Rusher': 'bg-blue-50 text-blue-600 border-blue-200',
-    'Secondary Rusher': 'bg-blue-50 text-blue-600 border-blue-200',
-    'Naider': 'bg-purple-50 text-purple-600 border-purple-200',
-    'Assaulter': 'bg-amber-50 text-amber-600 border-amber-200',
+    'Rusher': 'bg-red-500/15 text-red-400 border-red-500/30',
+    'Primary Rusher': 'bg-red-500/15 text-red-400 border-red-500/30',
+    '2nd Rusher': 'bg-rose-500/15 text-rose-400 border-rose-500/30',
+    'Secondary Rusher': 'bg-rose-500/15 text-rose-400 border-rose-500/30',
+    'Naider': 'bg-purple-500/15 text-purple-400 border-purple-500/30',
+    'Assaulter': 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+    'Sniper': 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
-      <div className="bg-white rounded-[32px] p-5 max-w-md w-full shadow-2xl border border-slate-100 text-left relative my-6 max-h-[92vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/80 backdrop-blur-md animate-fade-in-smooth overflow-y-auto">
+      <div className="bg-[#141419] rounded-2xl p-5 max-w-md w-full shadow-2xl border border-[#22222b] text-left relative my-6 max-h-[92vh] overflow-y-auto animate-slide-up-smooth">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500"
+          className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-[#1c1c24] hover:bg-[#282836] border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
         {/* Profile Header */}
-        <div className="flex items-center gap-4 mb-4 pt-1">
+        <div className="flex items-center gap-3.5 mb-4 pt-1">
           <div className="relative">
-            <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-md bg-slate-100">
+            <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white/20 shadow-md bg-[#1c1c24]">
               <img
-                src={player.avatar_url || ASSETS.avatars.ash}
+                src={getPlayerAvatar(player.player_name || player.team_role || player.avatar_url)}
                 alt={player.player_name}
                 className="w-full h-full object-cover"
               />
             </div>
-            <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-500 ring-2 ring-white" />
+            <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 ring-2 ring-[#141419]" />
           </div>
 
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-black text-slate-900 tracking-tight">
+              <h2 className="text-lg font-black text-white tracking-tight">
                 {player.player_name}
               </h2>
               {player.ign && (
-                <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
+                <span className="text-[10px] font-bold text-zinc-400 bg-[#1c1c24] border border-[#2b2b38] px-1.5 py-0.5 rounded">
                   {player.ign}
                 </span>
               )}
             </div>
 
             <div className="flex items-center gap-2 mt-1">
-              <span className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold border ${roleColors[player.team_role] || 'bg-slate-100 text-slate-600'}`}>
+              <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold border ${roleColors[player.team_role] || 'bg-[#1c1c24] text-zinc-400'}`}>
                 {player.team_role}
               </span>
 
               {isIGL ? (
                 <button
                   onClick={() => onOpenChangeRole(player)}
-                  className="text-[11px] font-bold text-blue-600 hover:text-blue-700 underline"
+                  className="text-[10px] font-bold text-red-400 hover:text-red-300 underline"
                 >
                   Change Role &rarr;
                 </button>
               ) : (
-                <span className="text-[10px] text-slate-400 font-semibold">
+                <span className="text-[10px] text-zinc-500 font-semibold">
                   (IGL Assigned)
                 </span>
               )}
             </div>
 
-            <div className="text-[11px] text-slate-400 font-medium mt-1">
+            <div className="text-[10px] text-zinc-500 font-medium mt-1">
               Joined {player.joined_at} • {player.matches_count} Matches
             </div>
           </div>
         </div>
 
         {/* Core Performance Grid */}
-        <div className="grid grid-cols-4 gap-2 mb-4">
-          <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 text-center">
-            <div className="text-base font-black text-slate-900">{player.kd !== undefined && player.kd !== null ? player.kd : '0.0'}</div>
-            <div className="text-[10px] font-bold text-slate-400 uppercase">K/D</div>
+        <div className="grid grid-cols-4 gap-2 mb-3.5">
+          <div className="p-2 rounded-xl bg-[#1c1c24] border border-[#2b2b38] text-center">
+            <div className="text-sm font-black text-zinc-200">{player.kd !== undefined && player.kd !== null ? player.kd : '0.0'}</div>
+            <div className="text-[9px] font-bold text-zinc-500 uppercase">K/D</div>
           </div>
-          <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 text-center">
-            <div className="text-base font-black text-blue-600">{player.avg_damage || 0}</div>
-            <div className="text-[10px] font-bold text-slate-400 uppercase">Avg DMG</div>
+          <div className="p-2 rounded-xl bg-[#1c1c24] border border-[#2b2b38] text-center">
+            <div className="text-sm font-black text-red-400">{player.avg_damage || 0}</div>
+            <div className="text-[9px] font-bold text-zinc-500 uppercase">Avg DMG</div>
           </div>
-          <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 text-center">
-            <div className="text-base font-black text-slate-900">{player.total_kills || 0}</div>
-            <div className="text-[10px] font-bold text-slate-400 uppercase">Kills</div>
+          <div className="p-2 rounded-xl bg-[#1c1c24] border border-[#2b2b38] text-center">
+            <div className="text-sm font-black text-zinc-200">{player.total_kills || 0}</div>
+            <div className="text-[9px] font-bold text-zinc-500 uppercase">Kills</div>
           </div>
-          <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 text-center">
-            <div className="text-base font-black text-emerald-600">{player.survival_rate || 0}%</div>
-            <div className="text-[10px] font-bold text-slate-400 uppercase">Survival</div>
+          <div className="p-2 rounded-xl bg-[#1c1c24] border border-[#2b2b38] text-center">
+            <div className="text-sm font-black text-emerald-400">{player.survival_rate || 0}%</div>
+            <div className="text-[9px] font-bold text-zinc-500 uppercase">Survival</div>
           </div>
         </div>
 
-        {/* Progress Comparison Card (Section 14 & 21) */}
+        {/* Progress Comparison Card */}
         {detail && (
           detail.recent_match_performances && detail.recent_match_performances.length > 0 ? (
-            <div className="p-4 rounded-3xl bg-gradient-to-br from-blue-50/80 to-indigo-50/50 border border-blue-100 mb-4">
+            <div className="p-3.5 rounded-xl bg-[#1a1215] border border-red-500/20 mb-3.5">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-black text-blue-900 uppercase tracking-wider flex items-center gap-1.5">
-                  <Activity className="w-3.5 h-3.5 text-blue-600" />
+                <span className="text-[11px] font-black text-red-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <Activity className="w-3.5 h-3.5 text-red-400" />
                   Performance Progress (7D vs Prev 7D)
                 </span>
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                  (detail.damage_change_pct || 0) >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
+                <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold ${
+                  (detail.damage_change_pct || 0) >= 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
                 }`}>
                   {(detail.damage_change_pct || 0) >= 0 ? `+${detail.damage_change_pct || 0}%` : `${detail.damage_change_pct || 0}%`}
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 text-xs pt-1">
-                <div className="p-2 bg-white/80 rounded-2xl border border-white">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase">Damage Shift</div>
-                  <div className="font-black text-slate-800 text-sm">
+              <div className="grid grid-cols-2 gap-2 text-xs pt-1">
+                <div className="p-2 bg-black/40 rounded-xl border border-white/5">
+                  <div className="text-[9px] font-bold text-zinc-500 uppercase">Damage Shift</div>
+                  <div className="font-black text-white text-xs">
                     {detail.prev_seven_day_avg_damage || 0} &rarr; {detail.seven_day_avg_damage || 0}
                   </div>
-                  <div className="text-[10px] text-slate-500 font-semibold">
+                  <div className="text-[9px] text-zinc-400 font-semibold">
                     Avg DMG per match
                   </div>
                 </div>
 
-                <div className="p-2 bg-white/80 rounded-2xl border border-white">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase">Consistency Rating</div>
-                  <div className="font-black text-slate-800 text-sm">
+                <div className="p-2 bg-black/40 rounded-xl border border-white/5">
+                  <div className="text-[9px] font-bold text-zinc-500 uppercase">Consistency Rating</div>
+                  <div className="font-black text-white text-xs">
                     {detail.consistency_score || 0}%
                   </div>
-                  <div className="text-[10px] text-blue-600 font-bold">
+                  <div className="text-[9px] text-red-400 font-bold">
                     {detail.variance_rating || 'N/A'}
                   </div>
                 </div>
               </div>
 
-              {/* Observations bullet list */}
               {detail.observations && detail.observations.length > 0 && (
-                <div className="mt-3 pt-2.5 border-t border-blue-200/50 space-y-1">
+                <div className="mt-2.5 pt-2 border-t border-white/10 space-y-1">
                   {detail.observations.map((obs, i) => (
-                    <p key={i} className="text-[11px] font-medium text-slate-700 leading-snug">
+                    <p key={i} className="text-[10px] font-medium text-zinc-300 leading-snug">
                       • {obs}
                     </p>
                   ))}
@@ -172,36 +172,36 @@ export const PlayerDetailModal: React.FC<Props> = ({ player, onClose, onOpenChan
               )}
             </div>
           ) : (
-            <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100 mb-4 text-center">
-              <p className="text-xs font-bold text-slate-500">No match records logged for this player</p>
-              <p className="text-[10px] text-slate-400 mt-0.5">Combat telemetry will activate once matches are played</p>
+            <div className="p-3.5 rounded-xl bg-[#1c1c24] border border-[#2b2b38] mb-3.5 text-center">
+              <p className="text-xs font-bold text-zinc-400">No match records logged for this player</p>
+              <p className="text-[10px] text-zinc-500 mt-0.5">Combat telemetry will activate once matches are played</p>
             </div>
           )
         )}
 
-        {/* Role History Timeline (Section 15) */}
-        <div className="mb-4">
+        {/* Role History Timeline */}
+        <div className="mb-3.5">
           <div className="flex items-center gap-1.5 mb-2 px-1">
-            <History className="w-3.5 h-3.5 text-slate-500" />
-            <h3 className="text-xs font-black uppercase tracking-wider text-slate-600">
+            <History className="w-3.5 h-3.5 text-zinc-400" />
+            <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400">
               Role Evolution & History
             </h3>
           </div>
 
-          <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 space-y-2.5">
+          <div className="p-3 bg-[#1c1c24] rounded-xl border border-[#2b2b38] space-y-2">
             {player.role_history && player.role_history.length > 0 ? (
               player.role_history.map((rh, idx) => (
                 <div key={rh.id || idx} className="flex items-start gap-2.5 text-xs">
-                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />
+                  <div className="w-2 h-2 rounded-full bg-red-500 mt-1 flex-shrink-0" />
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-slate-900">{rh.role}</span>
-                      <span className="text-[10px] text-slate-400 font-semibold">
+                      <span className="font-bold text-white">{rh.role}</span>
+                      <span className="text-[9px] text-zinc-500 font-semibold">
                         {rh.started_at} {rh.ended_at ? `– ${rh.ended_at}` : '– Present'}
                       </span>
                     </div>
                     {rh.notes && (
-                      <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                      <p className="text-[10px] text-zinc-400 font-medium mt-0.5">
                         {rh.notes}
                       </p>
                     )}
@@ -209,7 +209,7 @@ export const PlayerDetailModal: React.FC<Props> = ({ player, onClose, onOpenChan
                 </div>
               ))
             ) : (
-              <div className="text-xs text-slate-400 text-center py-1">
+              <div className="text-xs text-zinc-500 text-center py-1">
                 {player.team_role} since {player.joined_at}
               </div>
             )}
@@ -219,24 +219,30 @@ export const PlayerDetailModal: React.FC<Props> = ({ player, onClose, onOpenChan
         {/* Recent Matches Table */}
         {detail && detail.recent_match_performances.length > 0 && (
           <div>
-            <h3 className="text-xs font-black uppercase tracking-wider text-slate-600 mb-2 px-1">
+            <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400 mb-2 px-1">
               Recent Matches
             </h3>
             <div className="space-y-1.5">
               {detail.recent_match_performances.slice(0, 4).map((m, i) => (
-                <div key={i} className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-xs">
+                <div key={i} className="p-2 rounded-xl bg-[#1c1c24] border border-[#2b2b38] flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
-                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                      m.placement === 1 ? 'bg-amber-100 text-amber-700' : 'bg-slate-200 text-slate-700'
+                    <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                      m.placement === 1 ? 'bg-amber-500/20 text-amber-400' : 'bg-[#252532] text-zinc-300'
                     }`}>
                       #{m.placement}
                     </span>
-                    <span className="font-extrabold text-slate-800">{m.map}</span>
-                    <span className="text-[10px] text-slate-400">({m.type})</span>
+                    <span className="font-extrabold text-white">{m.map}</span>
+                    <span className="text-[9px] text-zinc-500">({m.type})</span>
                   </div>
-                  <div className="flex items-center gap-3 font-semibold text-slate-700">
-                    <span>⚔ {m.kills} K</span>
-                    <span className="text-blue-600">🔥 {m.damage} DMG</span>
+                  <div className="flex items-center gap-3 font-semibold">
+                    <span className="text-zinc-300 flex items-center gap-1">
+                      <Swords className="w-3 h-3 text-red-400" />
+                      {m.kills} K
+                    </span>
+                    <span className="text-red-400 flex items-center gap-1">
+                      <Flame className="w-3 h-3 text-rose-400" />
+                      {m.damage} DMG
+                    </span>
                   </div>
                 </div>
               ))}

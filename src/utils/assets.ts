@@ -10,6 +10,10 @@ import avatarAsh from '../assets/avatar_ash.png';
 import avatarKai from '../assets/avatar_kai.png';
 import avatarVex from '../assets/avatar_vex.png';
 import avatarZoro from '../assets/avatar_zoro.png';
+import avatarHashirama from '../assets/hashirama.jpeg';
+import avatarItachi from '../assets/itachi.jpeg';
+import avatarTufan from '../assets/tufan.jpeg';
+import avatarPandit from '../assets/pandit.jpeg';
 
 export const ASSETS = {
   logo: logoImg,
@@ -23,12 +27,16 @@ export const ASSETS = {
     PURGATORY: mapPurgatory,
   },
   avatars: {
-    ash: avatarAsh,
-    kai: avatarKai,
-    vex: avatarVex,
-    zoro: avatarZoro,
-    default: avatarAsh,
-  }
+    hashirama: avatarHashirama,
+    itachi: avatarItachi,
+    tufan: avatarTufan,
+    pandit: avatarPandit,
+    ash: avatarHashirama,
+    kai: avatarItachi,
+    vex: avatarTufan,
+    zoro: avatarPandit,
+    default: avatarHashirama,
+  },
 };
 
 export const getMapImage = (mapName: string = ''): string => {
@@ -37,6 +45,42 @@ export const getMapImage = (mapName: string = ''): string => {
 };
 
 export const getAvatarImage = (key: string = ''): string => {
-  const k = key.toLowerCase() as keyof typeof ASSETS.avatars;
-  return ASSETS.avatars[k] || ASSETS.avatars.default;
+  return getPlayerAvatar(key);
+};
+
+export const getPlayerAvatar = (nameOrRoleOrUrl?: string): string => {
+  if (!nameOrRoleOrUrl) return avatarHashirama;
+  const s = String(nameOrRoleOrUrl).toUpperCase();
+
+  // 1. HASHIRAMA 777 (Ashish / Sniper / IGL)
+  if (s.includes('HASHIRAMA') || s.includes('ASHISH') || s.includes('SNIPER') || s.includes('IGL')) {
+    return avatarHashirama;
+  }
+  // 2. ITACHI 777 (Shashank / Primary Rusher)
+  if (s.includes('ITACHI') || s.includes('SHASHANK') || s.includes('PRIMARY')) {
+    return avatarItachi;
+  }
+  // 3. TUUFAN 777 (Priyanshu / Assaulter)
+  if (s.includes('TUUFAN') || s.includes('TUFAN') || s.includes('PRIYANSHU') || s.includes('ASSAULTER')) {
+    return avatarTufan;
+  }
+  // 4. PANDIT 777 (Ansh mishra / 2nd Rusher)
+  if (s.includes('PANDIT') || s.includes('ANSH') || s.includes('2ND') || s.includes('SECONDARY')) {
+    return avatarPandit;
+  }
+
+  if (s.includes('HASHIRAMA.JPEG') || s.includes('HASHIRAMA')) return avatarHashirama;
+  if (s.includes('ITACHI.JPEG') || s.includes('ITACHI')) return avatarItachi;
+  if (s.includes('TUFAN.JPEG') || s.includes('TUFAN')) return avatarTufan;
+  if (s.includes('PANDIT.JPEG') || s.includes('PANDIT')) return avatarPandit;
+
+  if (s.startsWith('HTTP') || s.startsWith('DATA:') || s.startsWith('/ASSETS/')) {
+    if (s.includes('AVATAR_ASH')) return avatarHashirama;
+    if (s.includes('AVATAR_KAI')) return avatarItachi;
+    if (s.includes('AVATAR_VEX')) return avatarTufan;
+    if (s.includes('AVATAR_ZORO')) return avatarPandit;
+    return nameOrRoleOrUrl;
+  }
+
+  return avatarHashirama;
 };

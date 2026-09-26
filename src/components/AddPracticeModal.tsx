@@ -11,7 +11,7 @@ interface Props {
 
 export const AddPracticeModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) => {
   const { isIGL, showPermissionDenied } = useAuth();
-  const [date, setDate] = useState('25 Sept 2026');
+  const [date, setDate] = useState('26 Sept 2026');
   const [duration, setDuration] = useState(90);
   const [focus, setFocus] = useState('Rush, Rotation, Grenades, Communication');
   const [notes, setNotes] = useState('');
@@ -59,114 +59,122 @@ export const AddPracticeModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
-      <div className="bg-white rounded-[32px] p-6 max-w-sm w-full shadow-2xl border border-slate-100 text-left relative my-6">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/80 backdrop-blur-md animate-fade-in overflow-y-auto">
+      <div className="bg-[#141419] rounded-2xl p-5 max-w-sm w-full shadow-2xl border border-[#22222b] text-left relative my-6 max-h-[92vh] overflow-y-auto animate-slide-up-smooth">
+        <div className="flex items-center justify-between pb-3 border-b border-[#22222b]">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
-              <Gamepad2 className="w-5 h-5" />
+            <div className="w-8 h-8 rounded-xl bg-red-500/15 text-red-400 flex items-center justify-center">
+              <Gamepad2 className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-600">
-                IGL Training System
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-red-400">
+                Scrim Logistics
               </span>
-              <h2 className="text-lg font-black text-slate-900 leading-tight">
-                Add Practice Session
+              <h2 className="text-base font-black text-white leading-tight">
+                Log Practice Session
               </h2>
             </div>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500">
-            <X className="w-5 h-5" />
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-[#1c1c24] hover:bg-[#282836] border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white">
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {errorMsg && (
-          <div className="mt-3 p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-1.5">
+          <div className="mt-3 p-2.5 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 text-xs font-medium flex items-center gap-1.5">
             <ShieldAlert className="w-4 h-4" />
             <span>{errorMsg}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-4 space-y-3.5">
+        <form onSubmit={handleSubmit} className="mt-3.5 space-y-3">
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Session Date</label>
+              <label className="text-xs font-bold text-zinc-300 block mb-1">Session Date</label>
               <input
                 type="text"
                 required
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full py-2 px-3 rounded-2xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none text-center"
+                className="w-full py-2 px-3 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-xs font-semibold text-white focus:border-red-500 focus:outline-none"
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Duration (Mins)</label>
+              <label className="text-xs font-bold text-zinc-300 block mb-1">Duration (Min)</label>
               <input
                 type="number"
                 min="10"
-                step="5"
                 required
                 value={duration}
-                onChange={(e) => setDuration(parseInt(e.target.value) || 60)}
-                className="w-full py-2 px-3 rounded-2xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none text-center"
+                onChange={(e) => setDuration(parseInt(e.target.value) || 0)}
+                className="w-full py-2 px-3 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-xs font-semibold text-white focus:border-red-500 focus:outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-700 block mb-1">Practice Focus</label>
+            <label className="text-xs font-bold text-zinc-300 block mb-1">Tactical Focus</label>
             <input
               type="text"
               required
               value={focus}
               onChange={(e) => setFocus(e.target.value)}
-              placeholder="e.g. Rush, Rotation, Grenades, Communication"
-              className="w-full py-2.5 px-3 rounded-2xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full py-2 px-3 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-xs font-semibold text-white focus:border-red-500 focus:outline-none"
             />
-            {/* Quick preset chips */}
             <div className="flex flex-wrap gap-1 mt-1.5">
               {focusPresets.map((preset) => (
                 <button
                   type="button"
                   key={preset}
                   onClick={() => setFocus(preset)}
-                  className="px-2 py-0.5 rounded-full bg-slate-100 hover:bg-blue-50 text-[10px] font-bold text-slate-600 hover:text-blue-600 transition-colors"
+                  className="px-2 py-0.5 rounded-lg bg-[#1c1c24] hover:bg-[#252532] border border-[#2b2b38] text-[9.5px] font-bold text-zinc-400 hover:text-white"
                 >
-                  +{preset}
+                  + {preset}
                 </button>
               ))}
             </div>
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-700 block mb-1">Mistakes to Fix</label>
+            <label className="text-xs font-bold text-zinc-300 block mb-1">IGL Session Notes</label>
             <textarea
               rows={2}
-              value={mistakes}
-              onChange={(e) => setMistakes(e.target.value)}
-              placeholder="e.g. Lost man early on bridge cross; bad gloo wall timing."
-              className="w-full p-2 rounded-2xl border border-slate-200 bg-slate-50 text-xs font-medium text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="e.g. Focus on aggressive double-rush and zone control."
+              className="w-full p-2.5 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-xs font-medium text-white placeholder:text-zinc-600 focus:border-red-500 focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-700 block mb-1">Positive Observations</label>
+            <label className="text-xs font-bold text-zinc-300 block mb-1">Common Mistakes Observed</label>
+            <textarea
+              rows={2}
+              value={mistakes}
+              onChange={(e) => setMistakes(e.target.value)}
+              placeholder="e.g. Overextending without gloo walls."
+              className="w-full p-2.5 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-xs font-medium text-white placeholder:text-zinc-600 focus:border-red-500 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-bold text-zinc-300 block mb-1">Positive Highlights</label>
             <textarea
               rows={2}
               value={positiveObservations}
               onChange={(e) => setPositiveObservations(e.target.value)}
-              placeholder="e.g. Trade kills under 1.5 seconds; clean compound breaches."
-              className="w-full p-2 rounded-2xl border border-slate-200 bg-slate-50 text-xs font-medium text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              placeholder="e.g. Great comms on clutch situations."
+              className="w-full p-2.5 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-xs font-medium text-white placeholder:text-zinc-600 focus:border-red-500 focus:outline-none"
             />
           </div>
 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-extrabold text-sm shadow-btn-glow hover:opacity-95 transition-all flex items-center justify-center gap-2"
+            className="w-full mt-2 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs shadow-[0_0_15px_rgba(239,68,68,0.4)] flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50"
           >
-            <Check className="w-4 h-4 stroke-[2.5]" />
-            <span>Save Practice Session</span>
+            <Check className="w-4 h-4 stroke-[3]" />
+            <span>{isSubmitting ? 'Saving...' : 'Save Practice Session'}</span>
           </button>
         </form>
       </div>

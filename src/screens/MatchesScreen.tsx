@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
   Calendar, Trophy, Gamepad2, ChevronRight, Plus, Search,
-  Swords
+  Swords, Crown
 } from 'lucide-react';
 import { Match } from '../types';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { DatePickerModal } from '../components/DatePickerModal';
-import { ASSETS } from '../utils/assets';
+import { ASSETS, getPlayerAvatar } from '../utils/assets';
 
 interface Props {
   onSelectMatch: (match: Match) => void;
@@ -48,7 +48,7 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
   // Group matches by date
   const groupedMatches: Record<string, Match[]> = {};
   matches.forEach((m) => {
-    const key = m.date.includes('25 Sept') ? 'Today • 25 Sept 2026' : m.date;
+    const key = m.date.includes('26 Sept') ? 'Today • 26 Sept 2026' : m.date;
     if (!groupedMatches[key]) {
       groupedMatches[key] = [];
     }
@@ -58,39 +58,39 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
   const getPlacementBadge = (placement: number) => {
     if (placement === 1) {
       return (
-        <div className="w-11 h-11 rounded-2xl bg-amber-100 text-amber-700 border border-amber-200/80 shadow-sm flex flex-col items-center justify-center">
+        <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/40 shadow-sm flex flex-col items-center justify-center">
           <span className="text-xs font-black leading-none">#1</span>
-          <span className="text-[10px] leading-none mt-0.5">👑</span>
+          <Crown className="w-3 h-3 text-amber-400 mt-0.5" />
         </div>
       );
     }
     if (placement === 2) {
       return (
-        <div className="w-11 h-11 rounded-2xl bg-slate-100 text-slate-700 border border-slate-200/80 shadow-sm flex items-center justify-center font-black text-xs">
+        <div className="w-10 h-10 rounded-xl bg-slate-500/20 text-slate-300 border border-slate-500/40 shadow-sm flex items-center justify-center font-black text-xs">
           #2
         </div>
       );
     }
     if (placement === 3) {
       return (
-        <div className="w-11 h-11 rounded-2xl bg-orange-100 text-orange-700 border border-orange-200/80 shadow-sm flex items-center justify-center font-black text-xs">
+        <div className="w-10 h-10 rounded-xl bg-orange-500/20 text-orange-400 border border-orange-500/40 shadow-sm flex items-center justify-center font-black text-xs">
           #3
         </div>
       );
     }
     return (
-      <div className="w-11 h-11 rounded-2xl bg-slate-50 text-slate-600 border border-slate-200/80 shadow-sm flex items-center justify-center font-black text-xs">
+      <div className="w-10 h-10 rounded-xl bg-[#1c1c24] text-zinc-400 border border-[#2b2b38] shadow-sm flex items-center justify-center font-black text-xs">
         #{placement}
       </div>
     );
   };
 
   return (
-    <div className="min-h-full pb-28 text-left animate-fade-in-smooth">
+    <div className="min-h-full pb-28 text-left animate-fade-in-smooth bg-[#0c0c10]">
       {/* Top Header */}
       <header className="px-5 pt-4 pb-2 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center p-0.5">
+          <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center p-0.5 bg-[#14141a] border border-white/10">
             <img
               src={ASSETS.logo}
               alt="Team Sarkar Logo"
@@ -98,20 +98,20 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
             />
           </div>
           <div>
-            <div className="text-[10px] tracking-[0.2em] font-black text-slate-500 uppercase leading-none">
+            <div className="text-[10px] tracking-[0.2em] font-black text-zinc-400 uppercase leading-none">
               Team
             </div>
-            <div className="text-base font-black tracking-tight text-slate-900 leading-tight">
+            <div className="text-base font-black tracking-tight text-white leading-tight">
               SARKAR
             </div>
-            <div className="text-[9px] tracking-widest font-bold text-blue-600 uppercase leading-none">
+            <div className="text-[9px] tracking-widest font-bold text-red-500 uppercase leading-none">
               FF ESPORTS
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="w-9 h-9 rounded-full bg-white/90 backdrop-blur-md border border-white/80 shadow-sm flex items-center justify-center text-slate-600 hover:bg-white active:scale-95 transition-transform">
+          <button className="w-9 h-9 rounded-full bg-[#15151c] border border-white/10 shadow-sm flex items-center justify-center text-zinc-300 hover:bg-[#202029] active:scale-95 transition-transform">
             <Search className="w-4 h-4" />
           </button>
           <button
@@ -122,7 +122,7 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
               }
               onOpenAddMatch();
             }}
-            className="w-9 h-9 rounded-full bg-blue-600 text-white shadow-btn-glow flex items-center justify-center hover:bg-blue-700 active:scale-95 transition-all"
+            className="w-9 h-9 rounded-full bg-red-600 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)] flex items-center justify-center hover:bg-red-700 active:scale-95 transition-all"
             title="Add Match"
           >
             <Plus className="w-5 h-5 stroke-[2.5]" />
@@ -133,33 +133,33 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
       {/* Screen Title & Date Filter Capsule */}
       <div className="px-5 mt-2 mb-3 flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-tight">
+          <h1 className="text-xl font-black text-white tracking-tight leading-tight">
             Matches
           </h1>
-          <p className="text-xs font-semibold text-slate-500">
-            Tournament and practice logs (Kalahari supported)
+          <p className="text-[11px] font-semibold text-zinc-400">
+            Tournament and practice match logs
           </p>
         </div>
 
         <button
           onClick={() => setIsDatePickerOpen(true)}
-          className="glass-pill px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-bold text-slate-700 shadow-sm border border-white active:scale-95 transition-all"
+          className="px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-bold text-zinc-300 shadow-sm bg-[#141419] border border-[#22222b] hover:border-red-500/30 active:scale-95 transition-all"
         >
-          <Calendar className="w-3.5 h-3.5 text-blue-600" />
-          <span>{selectedDate === 'All' ? 'All Dates' : selectedDate}</span>
-          <span className="text-[10px] text-slate-400">▼</span>
+          <Calendar className="w-3.5 h-3.5 text-red-400" />
+          <span className="text-[11px]">{selectedDate === 'All' ? 'All Dates' : selectedDate}</span>
+          <span className="text-[10px] text-zinc-500">▼</span>
         </button>
       </div>
 
       {/* Segmented Filter Control */}
       <div className="px-5 mb-4">
-        <div className="glass-pill p-1 rounded-2xl flex items-center justify-between border border-white/80 shadow-sm">
+        <div className="p-1 rounded-2xl flex items-center justify-between bg-[#141419] border border-[#22222b] shadow-sm">
           <button
             onClick={() => setFilterType('All')}
-            className={`flex-1 py-2 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
+            className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
               filterType === 'All'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-500 hover:text-slate-800'
+                ? 'bg-red-600 text-white shadow-sm'
+                : 'text-zinc-400 hover:text-white'
             }`}
           >
             <Trophy className="w-3.5 h-3.5" />
@@ -168,10 +168,10 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
 
           <button
             onClick={() => setFilterType('Tournament')}
-            className={`flex-1 py-2 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
+            className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
               filterType === 'Tournament'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-500 hover:text-slate-800'
+                ? 'bg-red-600 text-white shadow-sm'
+                : 'text-zinc-400 hover:text-white'
             }`}
           >
             <Trophy className="w-3.5 h-3.5" />
@@ -180,10 +180,10 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
 
           <button
             onClick={() => setFilterType('Practice')}
-            className={`flex-1 py-2 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
+            className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
               filterType === 'Practice'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-500 hover:text-slate-800'
+                ? 'bg-red-600 text-white shadow-sm'
+                : 'text-zinc-400 hover:text-white'
             }`}
           >
             <Gamepad2 className="w-3.5 h-3.5" />
@@ -192,39 +192,32 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
         </div>
       </div>
 
-      {/* Date Grouped Matches Feed */}
-      <div className="px-5 space-y-6">
-        {Object.keys(groupedMatches).length === 0 ? (
-          <div className="p-8 text-center bg-white/70 rounded-3xl border border-slate-200">
-            <Gamepad2 className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-            <div className="text-sm font-bold text-slate-700">No matches found for this filter.</div>
-            <div className="text-xs text-slate-400 mt-1">
-              {isIGL ? 'Tap + to record a match.' : 'Waiting for IGL to record matches.'}
-            </div>
+      {/* Match List Grouped By Date */}
+      <div className="px-5 space-y-4">
+        {matches.length === 0 ? (
+          <div className="p-8 text-center bg-[#141419] rounded-2xl border border-[#22222b]">
+            <Swords className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
+            <div className="text-xs font-bold text-zinc-300">No matches found for this filter.</div>
+            <p className="text-[11px] text-zinc-500 mt-1">Tap the (+) button above to record a new match.</p>
           </div>
         ) : (
-          Object.entries(groupedMatches).map(([dateLabel, dateMatches]) => (
-            <div key={dateLabel} className="space-y-3">
-              {/* Group Header */}
-              <div className="flex items-center justify-between text-xs font-black text-slate-800 px-1">
-                <span>{dateLabel}</span>
-                <span className="text-[11px] font-bold text-slate-400">
-                  {dateMatches.length} Matches
-                </span>
+          Object.keys(groupedMatches).map((dateGroup) => (
+            <div key={dateGroup} className="space-y-2">
+              <div className="text-[11px] font-black text-zinc-400 uppercase tracking-wider px-1">
+                {dateGroup}
               </div>
 
-              {/* Match Cards */}
-              <div className="space-y-3">
-                {dateMatches.map((m) => (
+              <div className="space-y-2">
+                {groupedMatches[dateGroup].map((m) => (
                   <div
                     key={m.id}
                     onClick={() => onSelectMatch(m)}
-                    className="p-3.5 rounded-3xl bg-white/95 backdrop-blur-md border border-white/80 shadow-soft-card cursor-pointer hover:shadow-md transition-all active:scale-[0.99]"
+                    className="p-3 rounded-2xl bg-[#141419] border border-[#22222b] shadow-sm hover:border-red-500/35 transition-all active:scale-[0.99] cursor-pointer"
                   >
-                    {/* Top Row: Map Thumbnail, Map Name, Tag, Placement, Kills */}
+                    {/* Top Row: Map icon, Name, Time, Placement, Team Kills */}
                     <div className="flex items-center justify-between gap-3">
                       {/* Map Image Thumbnail */}
-                      <div className="w-16 h-12 rounded-2xl overflow-hidden bg-slate-100 flex-shrink-0 border border-slate-100">
+                      <div className="w-12 h-11 rounded-xl overflow-hidden bg-[#1c1c24] flex-shrink-0 border border-white/10">
                         <img
                           src={mapThumbnails[m.map] || ASSETS.maps.BERMUDA}
                           alt={m.map}
@@ -232,55 +225,55 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
                         />
                       </div>
 
-                      {/* Map & Type Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs font-black text-slate-900 tracking-tight truncate">
-                          {m.map}
-                        </div>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className={`px-2 py-0.2 rounded-full text-[9px] font-extrabold uppercase ${
-                            m.type === 'Tournament'
-                              ? 'bg-rose-50 text-rose-600 border border-rose-100'
-                              : 'bg-blue-50 text-blue-600 border border-blue-100'
-                          }`}>
-                            {m.type}
-                          </span>
-                          <span className="text-[10px] font-semibold text-slate-400">
-                            {m.time}
-                          </span>
-                        </div>
-                      </div>
-
                       {/* Placement Badge */}
                       {getPlacementBadge(m.placement)}
 
-                      {/* Kills Only */}
-                      <div className="text-right flex items-center gap-3">
-                        <div>
-                          <div className="text-sm font-black text-blue-600">{m.team_kills}</div>
-                          <div className="text-[9px] font-bold text-slate-400 uppercase">Kills</div>
+                      {/* Match Details */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <h3 className="text-xs font-black text-white tracking-tight truncate">
+                            {m.map}
+                          </h3>
+                          <span className={`px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase ${
+                            m.type === 'Tournament'
+                              ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                              : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                          }`}>
+                            {m.type}
+                          </span>
                         </div>
-                        <ChevronRight className="w-4 h-4 text-slate-300" />
+                        <div className="text-[10px] font-semibold text-zinc-400 mt-0.5">
+                          {m.time} {m.tournament_name ? `• ${m.tournament_name}` : ''}
+                        </div>
+                      </div>
+
+                      {/* Team Kills */}
+                      <div className="flex items-center gap-2 text-right flex-shrink-0">
+                        <div>
+                          <div className="text-sm font-black text-red-500">{m.team_kills}</div>
+                          <div className="text-[9px] font-bold text-zinc-500 uppercase">Kills</div>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-zinc-600" />
                       </div>
                     </div>
 
-                    {/* Sub-row: 4 Players Mini-Stats Breakdown (KILLS ONLY) */}
+                    {/* Sub-row: 4 Players Mini-Stats Breakdown */}
                     {m.player_stats && m.player_stats.length > 0 && (
-                      <div className="mt-2.5 pt-2 border-t border-slate-100 grid grid-cols-4 gap-1">
+                      <div className="mt-2.5 pt-2 border-t border-[#22222b] grid grid-cols-4 gap-1">
                         {m.player_stats.slice(0, 4).map((p) => (
                           <div key={p.id || p.player_id} className="flex items-center gap-1.5 text-[10px]">
-                            <div className="w-6 h-6 rounded-full overflow-hidden border border-white shadow-xs bg-slate-100 flex-shrink-0">
+                            <div className="w-6 h-6 rounded-full overflow-hidden border border-white/20 shadow-xs bg-[#1c1c24] flex-shrink-0">
                               <img
-                                src={p.player_avatar || ASSETS.avatars.ash}
+                                src={getPlayerAvatar(p.player_name || p.player_role || p.player_avatar)}
                                 alt={p.player_name || 'Player'}
                                 className="w-full h-full object-cover"
                               />
                             </div>
                             <div className="min-w-0">
-                              <div className="font-extrabold text-slate-800 text-[10px] truncate leading-tight">
+                              <div className="font-extrabold text-zinc-200 text-[10px] truncate leading-tight">
                                 {p.player_name}
                               </div>
-                              <div className="text-[9px] font-bold text-blue-600 leading-tight">
+                              <div className="text-[9px] font-bold text-red-400 leading-tight">
                                 {p.kills} Kills
                               </div>
                             </div>
@@ -301,7 +294,7 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
         isOpen={isDatePickerOpen}
         onClose={() => setIsDatePickerOpen(false)}
         selectedDate={selectedDate}
-        onSelectDate={setSelectedDate}
+        onSelectDate={(d) => setSelectedDate(d)}
       />
     </div>
   );

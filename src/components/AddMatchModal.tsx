@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Trophy, Gamepad2, Check, ShieldAlert, Swords } from 'lucide-react';
+import { X, Trophy, Gamepad2, Check, ShieldAlert, Swords, Crown } from 'lucide-react';
 import { Player, Tournament, PracticeSession } from '../types';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
@@ -23,13 +23,13 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
   const [placement, setPlacement] = useState<number>(1);
   const [tournamentId, setTournamentId] = useState<number | ''>('');
   const [practiceId, setPracticeId] = useState<number | ''>('');
-  const [date, setDate] = useState<string>('25 Sept 2026');
+  const [date, setDate] = useState<string>('26 Sept 2026');
   const [time, setTime] = useState<string>('08:40 PM');
   const [notes, setNotes] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Player breakdown states (KILLS & ASSISTS ONLY - NO DAMAGE AS REQUESTED)
+  // Player breakdown states (Kills only)
   const [playerStats, setPlayerStats] = useState<Array<{
     player_id: number;
     player_name: string;
@@ -112,7 +112,6 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
     }
   };
 
-  // Maps list with KALAHARI added as requested!
   const mapsList: Array<{ name: 'BERMUDA' | 'NEXTERRA' | 'KALAHARI' | 'ALPINE' | 'PURGATORY'; img: string }> = [
     { name: 'BERMUDA', img: ASSETS.maps.BERMUDA },
     { name: 'NEXTERRA', img: ASSETS.maps.NEXTERRA },
@@ -122,62 +121,62 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/60 backdrop-blur-sm animate-fade-in-smooth overflow-y-auto">
-      <div className="bg-white rounded-[32px] p-5 max-w-md w-full shadow-2xl border border-slate-100 relative my-6 text-left max-h-[92vh] overflow-y-auto animate-slide-up-smooth">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/80 backdrop-blur-md animate-fade-in-smooth overflow-y-auto">
+      <div className="bg-[#141419] rounded-2xl p-5 max-w-md w-full shadow-2xl border border-[#22222b] relative my-6 text-left max-h-[92vh] overflow-y-auto animate-slide-up-smooth">
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="flex items-center justify-between pb-3 border-b border-[#22222b]">
           <div>
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">
               IGL Match Entry
             </span>
-            <h2 className="text-xl font-black text-slate-900 mt-1">
+            <h2 className="text-lg font-black text-white mt-1">
               Add Match Result
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors"
+            className="w-8 h-8 rounded-full bg-[#1c1c24] hover:bg-[#282836] border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {errorMsg && (
-          <div className="mt-3 p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2">
+          <div className="mt-3 p-3 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 text-xs font-medium flex items-center gap-2">
             <ShieldAlert className="w-4 h-4 flex-shrink-0" />
             <span>{errorMsg}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+        <form onSubmit={handleSubmit} className="mt-4 space-y-3.5">
           {/* Match Type Tabs */}
           <div>
-            <label className="text-xs font-bold text-slate-700 block mb-1.5">Match Type</label>
-            <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-2xl">
+            <label className="text-xs font-bold text-zinc-300 block mb-1">Match Type</label>
+            <div className="grid grid-cols-2 gap-2 p-1 bg-[#1c1c24] border border-[#282836] rounded-xl">
               <button
                 type="button"
                 onClick={() => setMatchType('Practice')}
-                className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${
-                  matchType === 'Practice' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                className={`py-1.5 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all ${
+                  matchType === 'Practice' ? 'bg-red-600 text-white shadow-sm' : 'text-zinc-400 hover:text-white'
                 }`}
               >
-                <Gamepad2 className="w-4 h-4" /> Practice
+                <Gamepad2 className="w-3.5 h-3.5" /> Practice
               </button>
               <button
                 type="button"
                 onClick={() => setMatchType('Tournament')}
-                className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${
-                  matchType === 'Tournament' ? 'bg-white text-amber-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                className={`py-1.5 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all ${
+                  matchType === 'Tournament' ? 'bg-amber-600 text-white shadow-sm' : 'text-zinc-400 hover:text-white'
                 }`}
               >
-                <Trophy className="w-4 h-4" /> Tournament
+                <Trophy className="w-3.5 h-3.5" /> Tournament
               </button>
             </div>
           </div>
 
-          {/* Map Selection - Featuring KALAHARI */}
+          {/* Map Selection */}
           <div>
-            <label className="text-xs font-bold text-slate-700 block mb-1.5">
+            <label className="text-xs font-bold text-zinc-300 block mb-1.5">
               Select Map (Includes Kalahari)
             </label>
             <div className="grid grid-cols-5 gap-1.5">
@@ -186,14 +185,14 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
                   type="button"
                   key={m.name}
                   onClick={() => setSelectedMap(m.name)}
-                  className={`p-1 rounded-2xl border text-center transition-all flex flex-col items-center gap-1 ${
+                  className={`p-1 rounded-xl border text-center transition-all flex flex-col items-center gap-1 ${
                     selectedMap === m.name
-                      ? 'border-blue-600 bg-blue-50/80 ring-2 ring-blue-500/20 shadow-sm'
-                      : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
+                      ? 'border-red-500 bg-red-500/15 ring-2 ring-red-500/20 shadow-sm'
+                      : 'border-[#282836] hover:border-zinc-500 bg-[#1c1c24]'
                   }`}
                 >
                   <img src={m.img} alt={m.name} className="w-9 h-7 rounded-lg object-cover" />
-                  <span className="text-[9px] font-black text-slate-800 tracking-tight leading-none truncate max-w-full">
+                  <span className="text-[8.5px] font-black text-white tracking-tight leading-none truncate max-w-full">
                     {m.name}
                   </span>
                 </button>
@@ -204,11 +203,11 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
           {/* Linked Tournament or Practice Session */}
           {matchType === 'Tournament' && (
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Select Tournament</label>
+              <label className="text-xs font-bold text-zinc-300 block mb-1">Select Tournament</label>
               <select
                 value={tournamentId}
                 onChange={(e) => setTournamentId(e.target.value ? Number(e.target.value) : '')}
-                className="w-full py-2.5 px-3 rounded-2xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full py-2 px-3 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-xs font-semibold text-white focus:outline-none focus:border-red-500"
               >
                 <option value="">-- Standalone Tournament Match --</option>
                 {tournaments.map((t) => (
@@ -220,11 +219,11 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
 
           {matchType === 'Practice' && (
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Linked Practice Session</label>
+              <label className="text-xs font-bold text-zinc-300 block mb-1">Linked Practice Session</label>
               <select
                 value={practiceId}
                 onChange={(e) => setPracticeId(e.target.value ? Number(e.target.value) : '')}
-                className="w-full py-2.5 px-3 rounded-2xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full py-2 px-3 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-xs font-semibold text-white focus:outline-none focus:border-red-500"
               >
                 <option value="">-- Standalone Practice Match --</option>
                 {practices.map((p) => (
@@ -237,7 +236,7 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
           {/* Placement, Date, Time Row */}
           <div className="grid grid-cols-3 gap-2">
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Placement #</label>
+              <label className="text-xs font-bold text-zinc-300 block mb-1">Placement #</label>
               <div className="relative">
                 <input
                   type="number"
@@ -246,76 +245,76 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
                   required
                   value={placement}
                   onChange={(e) => setPlacement(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-full py-2 px-3 rounded-2xl border border-slate-200 bg-slate-50 text-sm font-extrabold text-slate-900 text-center focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="w-full py-2 px-3 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-sm font-extrabold text-white text-center focus:border-red-500 focus:outline-none"
                 />
                 {placement === 1 && (
-                  <span className="absolute -top-2 right-1 text-xs">👑</span>
+                  <Crown className="w-3.5 h-3.5 text-amber-400 absolute -top-1.5 right-1" />
                 )}
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Date</label>
+              <label className="text-xs font-bold text-zinc-300 block mb-1">Date</label>
               <input
                 type="text"
                 required
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full py-2 px-2.5 rounded-2xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-800 text-center focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full py-2 px-2.5 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-xs font-semibold text-white text-center focus:border-red-500 focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Time</label>
+              <label className="text-xs font-bold text-zinc-300 block mb-1">Time</label>
               <input
                 type="text"
                 required
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
-                className="w-full py-2 px-2.5 rounded-2xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-800 text-center focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full py-2 px-2.5 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-xs font-semibold text-white text-center focus:border-red-500 focus:outline-none"
               />
             </div>
           </div>
 
-          {/* 4-Player Stats Section (KILLS & ASSISTS ONLY - NO DAMAGE) */}
-          <div className="p-3 bg-slate-50/80 rounded-2xl border border-slate-200/80">
+          {/* 4-Player Stats Section */}
+          <div className="p-3 bg-[#1c1c24] rounded-xl border border-[#282836]">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-black text-slate-800">
+              <span className="text-xs font-black text-white">
                 Squad Eliminations (Kills Only)
               </span>
-              <div className="flex items-center gap-2 text-xs font-extrabold text-blue-600">
+              <div className="flex items-center gap-1.5 text-xs font-extrabold text-red-400">
                 <Swords className="w-3.5 h-3.5" />
                 <span>{totalTeamKills} Total Kills</span>
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {playerStats.map((p, idx) => (
-                <div key={p.player_id} className="p-2 bg-white rounded-xl border border-slate-200 shadow-sm flex items-center justify-between gap-2">
-                  <span className="font-extrabold text-xs text-slate-800 w-20 truncate">
+                <div key={p.player_id} className="p-2 bg-[#141419] rounded-lg border border-[#282836] flex items-center justify-between gap-2">
+                  <span className="font-extrabold text-xs text-white w-20 truncate">
                     {p.player_name}
                   </span>
 
                   <div className="flex items-center gap-3 flex-1 justify-end">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] text-slate-500 font-bold">KILLS</span>
+                      <span className="text-[9px] text-zinc-400 font-bold">KILLS</span>
                       <input
                         type="number"
                         min="0"
                         value={p.kills}
                         onChange={(e) => handleStatChange(idx, 'kills', parseInt(e.target.value) || 0)}
-                        className="w-12 py-1 text-center rounded-lg bg-slate-100 text-xs font-black text-blue-600 border border-slate-200"
+                        className="w-12 py-1 text-center rounded bg-[#1c1c24] text-xs font-black text-red-400 border border-[#2b2b38]"
                       />
                     </div>
 
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] text-slate-500 font-bold">ASSISTS</span>
+                      <span className="text-[9px] text-zinc-400 font-bold">ASSISTS</span>
                       <input
                         type="number"
                         min="0"
                         value={p.assists}
                         onChange={(e) => handleStatChange(idx, 'assists', parseInt(e.target.value) || 0)}
-                        className="w-10 py-1 text-center rounded-lg bg-slate-100 text-xs font-bold border border-slate-200"
+                        className="w-10 py-1 text-center rounded bg-[#1c1c24] text-xs font-bold text-zinc-200 border border-[#2b2b38]"
                       />
                     </div>
                   </div>
@@ -326,7 +325,7 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
 
           {/* Notes */}
           <div>
-            <label className="text-xs font-bold text-slate-700 block mb-1">
+            <label className="text-xs font-bold text-zinc-300 block mb-1">
               Match Notes & Observations (Optional)
             </label>
             <textarea
@@ -334,7 +333,7 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="e.g. Good early fight on Kalahari command post."
-              className="w-full p-2.5 rounded-2xl border border-slate-200 bg-slate-50 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full p-2.5 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-xs font-medium text-white placeholder:text-zinc-600 focus:border-red-500 focus:outline-none"
             />
           </div>
 
@@ -342,9 +341,9 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-95 text-white font-extrabold text-sm shadow-btn-glow transition-all flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50"
+            className="w-full py-3 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50"
           >
-            <Check className="w-5 h-5 stroke-[2.5]" />
+            <Check className="w-4 h-4 stroke-[2.5]" />
             <span>Save Match Result</span>
           </button>
         </form>

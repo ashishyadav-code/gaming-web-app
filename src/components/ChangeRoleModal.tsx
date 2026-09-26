@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, ShieldCheck, Check, History, ShieldAlert } from 'lucide-react';
+import { X, ShieldCheck, Check, ShieldAlert } from 'lucide-react';
 import { Player } from '../types';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
@@ -27,7 +27,8 @@ export const ChangeRoleModal: React.FC<Props> = ({ isOpen, onClose, player, onSu
     '2nd Rusher',
     'Naider',
     'Assaulter',
-    'Sniper / Support',
+    'Sniper',
+    'Support',
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,57 +58,49 @@ export const ChangeRoleModal: React.FC<Props> = ({ isOpen, onClose, player, onSu
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white rounded-[32px] p-6 max-w-sm w-full shadow-2xl border border-slate-100 text-left relative">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/80 backdrop-blur-md animate-fade-in">
+      <div className="bg-[#141419] rounded-2xl p-5 max-w-sm w-full shadow-2xl border border-[#22222b] text-left relative">
+        <div className="flex items-center justify-between pb-3 border-b border-[#22222b]">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5" />
+            <div className="w-8 h-8 rounded-xl bg-red-500/15 text-red-400 flex items-center justify-center">
+              <ShieldCheck className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-600">
-                IGL Role Reassignment
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-red-400">
+                IGL Authority
               </span>
-              <h2 className="text-lg font-black text-slate-900 leading-tight">
-                Change Role: {player.player_name}
+              <h2 className="text-base font-black text-white leading-tight">
+                Update Player Role
               </h2>
             </div>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500">
-            <X className="w-5 h-5" />
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-[#1c1c24] hover:bg-[#282836] border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white">
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {errorMsg && (
-          <div className="mt-3 p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-1.5">
+          <div className="mt-3 p-2.5 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 text-xs font-medium flex items-center gap-1.5">
             <ShieldAlert className="w-4 h-4" />
             <span>{errorMsg}</span>
           </div>
         )}
 
-        <div className="mt-3 p-3 bg-blue-50/60 rounded-2xl border border-blue-100 text-xs text-blue-900 flex items-start gap-2">
-          <History className="w-4 h-4 flex-shrink-0 text-blue-600 mt-0.5" />
-          <div>
-            <span className="font-bold">Historical Audit Preserved: </span>
-            The current role ({player.team_role}) will be archived with effective dates so historical match records remain consistent.
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit} className="mt-4 space-y-3.5">
-          <div>
-            <label className="text-xs font-bold text-slate-700 block mb-1">Current Active Role</label>
-            <div className="py-2 px-3 rounded-2xl bg-slate-100 text-xs font-bold text-slate-600 border border-slate-200">
-              {player.team_role}
+        <form onSubmit={handleSubmit} className="mt-3.5 space-y-3">
+          <div className="p-3 bg-[#1c1c24] rounded-xl border border-[#2b2b38] text-xs">
+            <div className="text-[10px] text-zinc-500 font-bold uppercase">Target Player</div>
+            <div className="font-extrabold text-white text-sm mt-0.5">{player.player_name}</div>
+            <div className="text-[11px] text-zinc-400 mt-0.5">
+              Current Role: <span className="font-bold text-red-400">{player.team_role}</span>
             </div>
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-700 block mb-1">New Assigned Role</label>
+            <label className="text-xs font-bold text-zinc-300 block mb-1">New Assigned Role</label>
             <select
               value={newRole}
               onChange={(e) => setNewRole(e.target.value)}
-              required
-              className="w-full py-2.5 px-3 rounded-2xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full py-2 px-3 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-xs font-semibold text-white focus:border-red-500 focus:outline-none"
             >
               <option value="">-- Choose New Role --</option>
               {roles.map((r) => (
@@ -119,23 +112,23 @@ export const ChangeRoleModal: React.FC<Props> = ({ isOpen, onClose, player, onSu
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-700 block mb-1">Reason / Tactical Adjustment Note</label>
+            <label className="text-xs font-bold text-zinc-300 block mb-1">Reason for Role Change</label>
             <textarea
               rows={2}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="e.g. Swapped to Primary Rusher for compound assault pacing."
-              className="w-full p-2.5 rounded-2xl border border-slate-200 bg-slate-50 text-xs font-medium text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              placeholder="e.g. Swapped to sniper for Kalahari high ground strat."
+              className="w-full p-2.5 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-xs font-medium text-white placeholder:text-zinc-600 focus:border-red-500 focus:outline-none"
             />
           </div>
 
           <button
             type="submit"
-            disabled={isSubmitting || !newRole}
-            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-extrabold text-sm shadow-btn-glow hover:opacity-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            disabled={isSubmitting}
+            className="w-full mt-2 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs shadow-[0_0_15px_rgba(239,68,68,0.4)] flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50"
           >
-            <Check className="w-4 h-4 stroke-[2.5]" />
-            <span>Update Role & Log History</span>
+            <Check className="w-4 h-4 stroke-[3]" />
+            <span>{isSubmitting ? 'Updating...' : 'Confirm Role Evolution'}</span>
           </button>
         </form>
       </div>
