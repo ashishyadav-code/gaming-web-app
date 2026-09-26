@@ -19,12 +19,9 @@ export const DatePickerModal: React.FC<Props> = ({
   if (!isOpen) return null;
 
   const quickDates = [
-    { label: 'Today • 25 Sept 2026', value: '25 Sept 2026', badge: '3 Matches' },
-    { label: 'Yesterday • 24 Sept 2026', value: '24 Sept 2026', badge: '4 Matches' },
-    { label: '23 Sept 2026', value: '23 Sept 2026', badge: '1 Match' },
-    { label: '22 Sept 2026', value: '22 Sept 2026', badge: '1 Match' },
-    { label: '21 Sept 2026', value: '21 Sept 2026', badge: '3 Matches' },
-    { label: 'Show All Dates (Full History)', value: 'All', badge: '12 Matches' },
+    { label: 'Today • 26 Sept 2026', value: '26 Sept 2026', badge: '3 Matches' },
+    { label: 'Yesterday • 25 Sept 2026', value: '25 Sept 2026', badge: '0 Matches' },
+    { label: 'Show All Dates (Full History)', value: 'All', badge: '3 Matches' },
   ];
 
   const handleApplyCustom = (e: React.FormEvent) => {

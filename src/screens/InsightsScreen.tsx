@@ -22,7 +22,7 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
   const { user } = useAuth();
   const [viewMode, setViewMode] = useState<ViewMode>('Me');
   const [category, setCategory] = useState<CategoryFilter>('Today Tournament');
-  const [selectedDate, setSelectedDate] = useState('25 Sept 2026');
+  const [selectedDate, setSelectedDate] = useState('26 Sept 2026');
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
   const [matches, setMatches] = useState<Match[]>([]);

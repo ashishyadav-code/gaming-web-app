@@ -7,7 +7,7 @@ interface Props {
   onDateClick?: () => void;
 }
 
-export const HeroBanner: React.FC<Props> = ({ selectedDate = '25 Sept 2026', onDateClick }) => {
+export const HeroBanner: React.FC<Props> = ({ selectedDate = '26 Sept 2026', onDateClick }) => {
   return (
     <div className="px-5 my-2">
       <div className="relative w-full rounded-3xl overflow-hidden shadow-soft-card border border-white/60 bg-slate-900 group">
