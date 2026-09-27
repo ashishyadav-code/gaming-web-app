@@ -5,6 +5,7 @@ import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { ASSETS } from '../utils/assets';
 import { calculateMatchPoints } from '../utils/points';
+import { getTodayDateString } from '../utils/dateUtils';
 
 interface Props {
   isOpen: boolean;
@@ -16,16 +17,40 @@ interface Props {
 export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, players }) => {
   const { isIGL, showPermissionDenied } = useAuth();
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [shouldRender, setShouldRender] = useState(isOpen);
+  const [isClosing, setIsClosing] = useState(false);
 
   // Form states (Tournament only, no practice)
   const [selectedMap, setSelectedMap] = useState<'BERMUDA' | 'NEXTERRA' | 'KALAHARI' | 'ALPINE' | 'PURGATORY'>('BERMUDA');
   const [placement, setPlacement] = useState<number>(1);
   const [tournamentId, setTournamentId] = useState<number | ''>('');
-  const [date, setDate] = useState<string>('26 Sept 2026');
+  const [date, setDate] = useState<string>(() => getTodayDateString());
   const [time, setTime] = useState<string>('08:40 PM');
   const [notes, setNotes] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setShouldRender(true);
+      setIsClosing(false);
+      setDate(getTodayDateString());
+    } else if (shouldRender) {
+      setIsClosing(true);
+      const timer = setTimeout(() => {
+        setShouldRender(false);
+        setIsClosing(false);
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
+  const triggerClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      onClose();
+    }, 200);
+  };
 
   // Player breakdown states (Kills only - Assist, Damage, Survival removed)
   const [playerStats, setPlayerStats] = useState<Array<{
@@ -58,7 +83,7 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
     }
   }, [isOpen, players, isIGL]);
 
-  if (!isOpen) return null;
+  if (!isOpen && !shouldRender) return null;
 
   // Auto calculate total team kills
   const totalTeamKills = playerStats.reduce((sum, p) => sum + (Number(p.kills) || 0), 0);
@@ -103,7 +128,7 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
       await api.createMatch(payload);
       setIsSubmitting(false);
       onSuccess();
-      onClose();
+      triggerClose();
     } catch (err: any) {
       setIsSubmitting(false);
       setErrorMsg(err.message || 'Failed to save match.');
@@ -119,10 +144,10 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/80 backdrop-blur-md animate-fade-in-smooth overflow-y-auto">
-      <div className="bg-[#141419] rounded-2xl p-5 max-w-md w-full shadow-2xl border border-[#22222b] relative my-6 text-left max-h-[92vh] overflow-y-auto animate-slide-up-smooth">
+    <div className={`fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/80 backdrop-blur-md overflow-y-auto ${isClosing ? 'animate-backdrop-out' : 'animate-backdrop-in'}`}>
+      <div className={`glass-sheet rounded-3xl p-5 max-w-md w-full shadow-2xl border border-white/10 relative my-6 text-left max-h-[92vh] overflow-y-auto transition-all ${isClosing ? 'animate-fade-out-smooth' : 'animate-slide-up-smooth'}`}>
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-[#22222b]">
+        <div className="flex items-center justify-between pb-3 border-b border-white/10">
           <div>
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full flex items-center gap-1 w-fit">
               <Trophy className="w-3 h-3 text-amber-400" />
@@ -133,8 +158,8 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
             </h2>
           </div>
           <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-[#1c1c24] hover:bg-[#282836] border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+            onClick={triggerClose}
+            className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
           >
             <X className="w-4 h-4" />
           </button>

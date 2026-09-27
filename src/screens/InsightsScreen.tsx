@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   ChevronLeft, Calendar, Skull, Target, Flame, Gamepad2,
-  Users, Sparkles, RefreshCw, Trophy, BarChart2, CheckCircle2
+  Sparkles, RefreshCw, Trophy, BarChart2, CheckCircle2,
+  AlertCircle, ArrowRight
 } from 'lucide-react';
 import { Match } from '../types';
 import { api } from '../api/client';
@@ -10,6 +11,8 @@ import { InsightsChart, ChartDataPoint } from '../components/InsightsChart';
 import { DatePickerModal } from '../components/DatePickerModal';
 import { fetchDeterministicInsights, InsightResult } from '../services/groqService';
 import { getPlacementPoints } from '../utils/points';
+import { getTodayDateString, getYesterdayDateString, isSameDay } from '../utils/dateUtils';
+import { getPlayerAvatar } from '../utils/assets';
 
 type ViewMode = 'Me' | 'Team';
 type CategoryFilter = 'Today' | 'Overall';
@@ -19,21 +22,47 @@ interface Props {
   matches?: Match[];
 }
 
+const SQUAD_PLAYERS = [
+  { name: 'HASHIRAMA', ign: 'SRK•HASHIRAMA⚡', role: 'Sniper' },
+  { name: 'TUUFAN', ign: 'SRK•TUUFAN⚔', role: 'Assaulter' },
+  { name: 'ITACHI', ign: 'SRK•ITACHI🗡', role: 'Primary Rusher' },
+  { name: 'PANDIT', ign: 'SRK•PANDIT💣', role: '2nd Rusher' },
+];
+
 export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
   const { user } = useAuth();
+  const todayStr = getTodayDateString();
+  const yesterdayStr = getYesterdayDateString();
+
   const [viewMode, setViewMode] = useState<ViewMode>('Me');
   const [category, setCategory] = useState<CategoryFilter>('Today');
-  const [selectedDate, setSelectedDate] = useState('26 Sept 2026');
+  const [selectedDate, setSelectedDate] = useState<string>(todayStr);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [, setLoading] = useState(true);
+  // Active player selection for "Me" view (defaults to logged in user)
+  const defaultPlayerName = useMemo(() => {
+    const u = (user?.userId || user?.name || user?.ign || '').toUpperCase();
+    if (u.includes('TUUFAN') || u.includes('TUFAN') || u.includes('PRIYANSHU')) return 'TUUFAN';
+    if (u.includes('ITACHI') || u.includes('SHASHANK')) return 'ITACHI';
+    if (u.includes('PANDIT') || u.includes('ANSH')) return 'PANDIT';
+    return 'HASHIRAMA'; // Default to Hashirama (Ashish)
+  }, [user]);
+
+  const [activePlayer, setActivePlayer] = useState<string>(defaultPlayerName);
+
+  useEffect(() => {
+    setActivePlayer(defaultPlayerName);
+  }, [defaultPlayerName]);
+
+  // Instant SWR cache load
+  const [matches, setMatches] = useState<Match[]>(() => api.getCachedMatches());
+  const [, setLoading] = useState(false);
 
   // AI Coaching state
   const [aiInsight, setAiInsight] = useState<InsightResult | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
 
-  // Load matches
+  // Load matches from API
   const loadMatches = async () => {
     try {
       setLoading(true);
@@ -49,79 +78,58 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
     loadMatches();
   }, []);
 
-  // Filter matches based on selected category & date (All matches are Tournament matches)
-  const isToday = category === 'Today';
+  // Filter matches based on selected category & date
+  const isTodayCategory = category === 'Today';
 
-  const filteredMatches = matches.filter((m) => {
-    if (isToday) {
-      return m.date === selectedDate || m.date.includes(selectedDate.split(' ')[0]);
+  const filteredMatches = useMemo(() => {
+    if (isTodayCategory) {
+      return matches.filter((m) => isSameDay(m.date, selectedDate));
     }
-    return true; // Overall
-  });
+    return matches; // Overall
+  }, [matches, isTodayCategory, selectedDate]);
 
   // Sort matches CHRONOLOGICALLY (oldest first: Match 1 -> Match 2 -> Match 3)
-  const chronologicalMatches = [...filteredMatches].sort((a, b) => a.id - b.id);
+  const chronologicalMatches = useMemo(() => {
+    return [...filteredMatches].sort((a, b) => a.id - b.id);
+  }, [filteredMatches]);
 
-  // Check if player corresponds to current user (Ashish is HASHIRAMA 777)
-  const isCurrentUser = (pName?: string) => {
+  // Check if player corresponds to active player
+  const matchesActivePlayer = (pName?: string) => {
     if (!pName) return false;
     const clean = (s: string) => s.toUpperCase().replace(/[^A-Z0-9]/g, '');
     const pClean = clean(pName);
-    const uIdClean = clean(user?.userId || '');
-    const uIgnClean = clean(user?.ign || '');
-    const uNameClean = clean(user?.name || '');
+    const actClean = clean(activePlayer);
 
-    // Default to Hashirama (Ashish) if not logged in or logged in as Ashish
-    const isAshish =
-      !user ||
-      uIdClean.includes('ASHISH') ||
-      uNameClean.includes('ASHISH') ||
-      uIgnClean.includes('HASHIRAMA');
-    if (isAshish) {
+    if (actClean.includes('HASHIRAMA')) {
       return pClean.includes('HASHIRAMA') || pClean.includes('ASHISH');
     }
-
-    // Itachi (Shashank)
-    if (uIdClean.includes('SHASHANK') || uNameClean.includes('SHASHANK') || uIgnClean.includes('ITACHI')) {
-      return pClean.includes('ITACHI') || pClean.includes('SHASHANK');
-    }
-
-    // Tuufan (Priyanshu)
-    if (
-      uIdClean.includes('PRIYANSHU') ||
-      uNameClean.includes('PRIYANSHU') ||
-      uIgnClean.includes('TUUFAN') ||
-      uIgnClean.includes('TUFAN')
-    ) {
+    if (actClean.includes('TUUFAN') || actClean.includes('TUFAN')) {
       return pClean.includes('TUUFAN') || pClean.includes('TUFAN') || pClean.includes('PRIYANSHU');
     }
-
-    // Pandit (Ansh)
-    if (uIdClean.includes('ANSH') || uNameClean.includes('ANSH') || uIgnClean.includes('PANDIT')) {
+    if (actClean.includes('ITACHI')) {
+      return pClean.includes('ITACHI') || pClean.includes('SHASHANK');
+    }
+    if (actClean.includes('PANDIT')) {
       return pClean.includes('PANDIT') || pClean.includes('ANSH');
     }
 
-    // General matching fallback
-    if (uIgnClean && (pClean.includes(uIgnClean) || uIgnClean.includes(pClean))) return true;
-    if (uIdClean && (pClean.includes(uIdClean) || uIdClean.includes(pClean))) return true;
-    if (uNameClean && (pClean.includes(uNameClean) || uNameClean.includes(pClean))) return true;
-
-    return false;
+    return pClean.includes(actClean) || actClean.includes(pClean);
   };
 
   // Calculate stats for "Me"
-  const currentUserName = user?.userId || 'ASHISH';
-  const playerStatsList = chronologicalMatches.map((m, idx) => {
-    const pStat = m.player_stats?.find((p) => isCurrentUser(p.player_name));
-    const kills = pStat ? pStat.kills : 0;
-    return {
-      matchIndex: idx + 1,
-      matchName: `Match ${idx + 1}`,
-      kills,
-      map: m.map,
-      date: m.date,
-    };
-  });
+  const playerStatsList = useMemo(() => {
+    return chronologicalMatches.map((m, idx) => {
+      const pStat = m.player_stats?.find((p) => matchesActivePlayer(p.player_name));
+      const kills = pStat ? pStat.kills : 0;
+      return {
+        matchIndex: idx + 1,
+        matchName: `Match ${idx + 1}`,
+        kills,
+        map: m.map,
+        date: m.date,
+      };
+    });
+  }, [chronologicalMatches, activePlayer]);
 
   const meTotalKills = playerStatsList.reduce((acc, curr) => acc + curr.kills, 0);
   const meMatchesCount = playerStatsList.length;
@@ -129,24 +137,22 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
   const meHighestKills = playerStatsList.length > 0 ? Math.max(...playerStatsList.map((p) => p.kills)) : 0;
 
   // Chart 1 (Me Kills in category) - Chronological left to right
-  const meKillsChartData: ChartDataPoint[] =
-    playerStatsList.length > 0
-      ? playerStatsList.map((p) => ({
-          label: p.matchName,
-          value: p.kills,
-          subtext: `${p.kills} Kills`,
-        }))
-      : [];
+  const meKillsChartData: ChartDataPoint[] = useMemo(() => {
+    return playerStatsList.map((p) => ({
+      label: p.matchName,
+      value: p.kills,
+      subtext: `${p.kills} Kills`,
+    }));
+  }, [playerStatsList]);
 
-  // Recent Trend data for Me - Chronological left to right
-  const meTrendChartData: ChartDataPoint[] =
-    playerStatsList.length > 0
-      ? playerStatsList.map((p) => ({
-          label: p.matchName,
-          value: p.kills,
-          subtext: `${p.kills} Kills`,
-        }))
-      : [];
+  // Recent Trend data for Me
+  const meTrendChartData: ChartDataPoint[] = useMemo(() => {
+    return playerStatsList.map((p) => ({
+      label: p.matchName,
+      value: p.kills,
+      subtext: `${p.kills} Kills`,
+    }));
+  }, [playerStatsList]);
 
   // Team calculations
   const teamTotalKills = chronologicalMatches.reduce((acc, curr) => acc + (curr.team_kills || 0), 0);
@@ -155,38 +161,35 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
   const teamHighestKills =
     chronologicalMatches.length > 0 ? Math.max(...chronologicalMatches.map((m) => m.team_kills || 0)) : 0;
 
-  // Team kills chart data - Chronological left to right (Match 1 -> Match 2 -> Match 3)
-  const teamKillsChartData: ChartDataPoint[] =
-    chronologicalMatches.length > 0
-      ? chronologicalMatches.map((m, idx) => ({
-          label: `Match ${idx + 1}`,
-          value: m.team_kills || 0,
-        }))
-      : [];
+  // Team kills chart data
+  const teamKillsChartData: ChartDataPoint[] = useMemo(() => {
+    return chronologicalMatches.map((m, idx) => ({
+      label: `Match ${idx + 1}`,
+      value: m.team_kills || 0,
+    }));
+  }, [chronologicalMatches]);
 
-  // Team points chart data (Placement pts + Kill pts) - Chronological left to right
-  const teamPointsChartData: ChartDataPoint[] =
-    chronologicalMatches.length > 0
-      ? chronologicalMatches.map((m, idx) => {
-          const rank = m.placement || 12;
-          const killPts = m.team_kills || 0;
-          const totalPts = getPlacementPoints(rank) + killPts;
-          return {
-            label: `Match ${idx + 1}`,
-            value: totalPts,
-            subtext: `#${rank} (${killPts} Kills)`,
-          };
-        })
-      : [];
+  // Team points chart data
+  const teamPointsChartData: ChartDataPoint[] = useMemo(() => {
+    return chronologicalMatches.map((m, idx) => {
+      const rank = m.placement || 12;
+      const killPts = m.team_kills || 0;
+      const totalPts = getPlacementPoints(rank) + killPts;
+      return {
+        label: `Match ${idx + 1}`,
+        value: totalPts,
+        subtext: `#${rank} (${killPts} Kills)`,
+      };
+    });
+  }, [chronologicalMatches]);
 
-  // Team position chart data (Rank in each match) - Chronological left to right
-  const teamPositionChartData: ChartDataPoint[] =
-    chronologicalMatches.length > 0
-      ? chronologicalMatches.map((m, idx) => ({
-          label: `Match ${idx + 1}`,
-          value: m.placement || 12,
-        }))
-      : [];
+  // Team position chart data
+  const teamPositionChartData: ChartDataPoint[] = useMemo(() => {
+    return chronologicalMatches.map((m, idx) => ({
+      label: `Match ${idx + 1}`,
+      value: m.placement || 12,
+    }));
+  }, [chronologicalMatches]);
 
   // Load AI Insights
   const generateAiInsights = async () => {
@@ -205,12 +208,12 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
         avgKills: viewMode === 'Me' ? meAvgKills : teamAvgKills,
         highestKills: viewMode === 'Me' ? meHighestKills : teamHighestKills,
         matchesCount: count,
-        playerName: currentUserName,
+        playerName: viewMode === 'Me' ? activePlayer : 'Team Sarkar',
         recentKills: viewMode === 'Me' ? meKillsChartData.map((d) => d.value) : teamKillsChartData.map((d) => d.value),
       });
       setAiInsight(res);
     } catch {
-      // handled in service
+      // handled
     } finally {
       setAiLoading(false);
     }
@@ -218,12 +221,9 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
 
   useEffect(() => {
     generateAiInsights();
-  }, [viewMode, category, matches]);
+  }, [viewMode, category, selectedDate, activePlayer, chronologicalMatches.length]);
 
-  const categories: CategoryFilter[] = [
-    'Today',
-    'Overall',
-  ];
+  const categories: CategoryFilter[] = ['Today', 'Overall'];
 
   const displayTotalKills = viewMode === 'Me' ? meTotalKills : teamTotalKills;
   const displayAvgKills = viewMode === 'Me' ? meAvgKills : teamAvgKills;
@@ -238,7 +238,7 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
           {onBack && (
             <button
               onClick={onBack}
-              className="w-8 h-8 rounded-full bg-[#141419] shadow-xs border border-[#22222b] flex items-center justify-center text-zinc-300 hover:text-white active:scale-95"
+              className="w-8 h-8 rounded-full glass-card border border-white/10 flex items-center justify-center text-zinc-300 hover:text-white active:scale-95 transition-all"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -249,7 +249,7 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
             </h1>
             <p className="text-[11px] text-zinc-400 font-semibold mt-1">
               {viewMode === 'Me'
-                ? 'Track your performance and improvement'
+                ? `Individual Telemetry • ${activePlayer}`
                 : 'Track team performance and growth'}
             </p>
           </div>
@@ -258,7 +258,7 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
         {/* Date Selector Pill */}
         <button
           onClick={() => setIsDatePickerOpen(true)}
-          className="px-3 py-1.5 rounded-full bg-[#141419] border border-[#22222b] shadow-xs flex items-center gap-1.5 text-zinc-300 text-xs font-bold hover:text-white hover:border-red-500/30 active:scale-95 transition-all"
+          className="px-3 py-1.5 rounded-full glass-card border border-white/10 shadow-xs flex items-center gap-1.5 text-zinc-300 text-xs font-bold hover:text-white hover:border-red-500/30 active:scale-95 transition-all"
         >
           <Calendar className="w-3.5 h-3.5 text-red-400" />
           <span className="text-[11px] font-extrabold">{selectedDate}</span>
@@ -268,7 +268,7 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
 
       {/* Main View Toggle: [ Me | Team ] */}
       <div className="px-5 mb-3">
-        <div className="p-1 bg-[#141419] border border-[#22222b] rounded-full flex items-center shadow-xs">
+        <div className="p-1 glass-pill border border-white/10 rounded-full flex items-center shadow-xs">
           <button
             type="button"
             onClick={() => setViewMode('Me')}
@@ -278,7 +278,7 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
-            Me
+            Me ({activePlayer})
           </button>
           <button
             type="button"
@@ -294,23 +294,92 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
         </div>
       </div>
 
-      {/* Sub-Filters */}
-      <div className="px-5 mb-3 overflow-x-auto scrollbar-none flex items-center gap-1.5 py-1">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            type="button"
-            onClick={() => setCategory(cat)}
-            className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold whitespace-nowrap transition-all shadow-xs ${
-              category === cat
-                ? 'bg-red-600 text-white shadow-sm'
-                : 'bg-[#141419] text-zinc-400 border border-[#22222b] hover:text-white hover:border-red-500/20'
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
+      {/* Player Identity Selector for "Me" view mode */}
+      {viewMode === 'Me' && (
+        <div className="px-5 mb-3">
+          <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+            <span>Viewing Player Profile:</span>
+            <span className="text-red-400 font-extrabold">{activePlayer}</span>
+          </div>
+          <div className="grid grid-cols-4 gap-1.5 p-1 rounded-2xl glass-card border border-white/10">
+            {SQUAD_PLAYERS.map((sp) => {
+              const isSelected = activePlayer === sp.name;
+              return (
+                <button
+                  key={sp.name}
+                  onClick={() => setActivePlayer(sp.name)}
+                  className={`p-1.5 rounded-xl flex flex-col items-center text-center transition-all ${
+                    isSelected
+                      ? 'bg-red-600 text-white shadow-sm scale-100 ring-1 ring-red-400'
+                      : 'hover:bg-white/5 text-zinc-400 hover:text-zinc-200'
+                  }`}
+                >
+                  <div className="w-7 h-7 rounded-full overflow-hidden border border-white/20 mb-1 bg-[#1a1a24]">
+                    <img
+                      src={getPlayerAvatar(sp.name)}
+                      alt={sp.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <span className="text-[9.5px] font-black tracking-tight leading-tight truncate w-full">
+                    {sp.name}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Sub-Filters: Today vs Overall */}
+      <div className="px-5 mb-3 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => setCategory(cat)}
+              className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold whitespace-nowrap transition-all shadow-xs ${
+                category === cat
+                  ? 'bg-red-600 text-white shadow-sm'
+                  : 'glass-card text-zinc-400 border border-white/10 hover:text-white hover:border-red-500/20'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Dynamic today status badge */}
+        <span className="text-[10px] font-bold text-zinc-400">
+          {category === 'Today' && isSameDay(selectedDate, todayStr) ? (
+            <span className="text-red-400">● Live Today ({todayStr})</span>
+          ) : (
+            <span>Filtered: {selectedDate}</span>
+          )}
+        </span>
       </div>
+
+      {/* Zero matches banner if viewing today and matches are empty */}
+      {isTodayCategory && isSameDay(selectedDate, todayStr) && chronologicalMatches.length === 0 && (
+        <div className="px-5 mb-3">
+          <div className="p-3.5 rounded-2xl glass-card border border-amber-500/30 flex items-center justify-between gap-3 shadow-md">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+              <div className="text-[11px] text-zinc-300 leading-tight">
+                No matches logged yet for <strong>Today ({todayStr})</strong>.
+              </div>
+            </div>
+            <button
+              onClick={() => setSelectedDate(yesterdayStr)}
+              className="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-[10.5px] font-extrabold flex items-center gap-1 active:scale-95 transition-all whitespace-nowrap"
+            >
+              <span>View Yesterday</span>
+              <ArrowRight className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Content for ME View */}
       {viewMode === 'Me' && (
@@ -319,7 +388,7 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
           <div>
             <InsightsChart
               title={`Kills - ${category}`}
-              subtitle="Your kills in each match today"
+              subtitle={`${activePlayer}'s kills in each match ${category.toLowerCase()}`}
               data={meKillsChartData}
               colorTheme="red"
               yAxisLabel="Kills"
@@ -328,87 +397,87 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
 
             {/* 4 Compact Stats Pill Row */}
             <div className="grid grid-cols-4 gap-2 -mt-1 mb-3">
-              <div className="p-2 rounded-2xl bg-[#141419] border border-[#22222b] shadow-sm flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center flex-shrink-0">
+              <div className="p-2 rounded-2xl glass-card border border-white/10 shadow-sm flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-red-500/15 text-red-400 flex items-center justify-center flex-shrink-0 border border-red-500/20">
                   <Skull className="w-3.5 h-3.5" />
                 </div>
                 <div className="min-w-0">
                   <div className="text-xs font-black text-white leading-tight">
                     {displayTotalKills}
                   </div>
-                  <div className="text-[9px] font-bold text-zinc-500 truncate">Total Kills</div>
+                  <div className="text-[9px] font-bold text-zinc-400 truncate">Total Kills</div>
                 </div>
               </div>
 
-              <div className="p-2 rounded-2xl bg-[#141419] border border-[#22222b] shadow-sm flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center flex-shrink-0">
+              <div className="p-2 rounded-2xl glass-card border border-white/10 shadow-sm flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-rose-500/15 text-rose-400 flex items-center justify-center flex-shrink-0 border border-rose-500/20">
                   <Target className="w-3.5 h-3.5" />
                 </div>
                 <div className="min-w-0">
                   <div className="text-xs font-black text-white leading-tight">
                     {displayAvgKills}
                   </div>
-                  <div className="text-[9px] font-bold text-zinc-500 truncate">Avg Kills</div>
+                  <div className="text-[9px] font-bold text-zinc-400 truncate">Avg Kills</div>
                 </div>
               </div>
 
-              <div className="p-2 rounded-2xl bg-[#141419] border border-[#22222b] shadow-sm flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center flex-shrink-0">
+              <div className="p-2 rounded-2xl glass-card border border-white/10 shadow-sm flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-red-500/15 text-red-400 flex items-center justify-center flex-shrink-0 border border-red-500/20">
                   <Flame className="w-3.5 h-3.5" />
                 </div>
                 <div className="min-w-0">
                   <div className="text-xs font-black text-white leading-tight">
                     {displayHighestKills}
                   </div>
-                  <div className="text-[9px] font-bold text-zinc-500 truncate">Highest Kills</div>
+                  <div className="text-[9px] font-bold text-zinc-400 truncate">Highest Kills</div>
                 </div>
               </div>
 
-              <div className="p-2 rounded-2xl bg-[#141419] border border-[#22222b] shadow-sm flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center flex-shrink-0">
+              <div className="p-2 rounded-2xl glass-card border border-white/10 shadow-sm flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center flex-shrink-0 border border-amber-500/20">
                   <Gamepad2 className="w-3.5 h-3.5" />
                 </div>
                 <div className="min-w-0">
                   <div className="text-xs font-black text-white leading-tight">
                     {displayMatchesCount}
                   </div>
-                  <div className="text-[9px] font-bold text-zinc-500 truncate">Matches</div>
+                  <div className="text-[9px] font-bold text-zinc-400 truncate">Matches</div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Match Details Card */}
-          <div className="bg-[#141419] rounded-2xl p-3.5 border border-[#22222b] shadow-sm">
+          <div className="glass-card rounded-2xl p-3.5 border border-white/10 shadow-sm">
             <div className="mb-2.5">
               <h3 className="text-sm font-black text-white tracking-tight leading-tight">
-                Match Details
+                Match Details • {activePlayer}
               </h3>
-              <p className="text-[10px] text-zinc-400 font-medium">Kill count for each match</p>
+              <p className="text-[10px] text-zinc-400 font-medium">Individual frags across recorded scrims</p>
             </div>
 
             {/* Match list or 0 state */}
             {meKillsChartData.length > 0 ? (
-              <div className="grid grid-cols-5 gap-1.5 overflow-x-auto">
+              <div className="grid grid-cols-6 gap-1.5 overflow-x-auto">
                 {meKillsChartData.map((m, idx) => (
                   <div
                     key={idx}
-                    className="p-2 rounded-xl bg-[#1c1c24] border border-[#2b2b38] text-center flex flex-col items-center justify-center min-w-[58px]"
+                    className="p-2 rounded-xl bg-black/40 border border-white/5 text-center flex flex-col items-center justify-center min-w-[54px]"
                   >
-                    <span className="text-[9.5px] font-bold text-zinc-400 whitespace-nowrap">
+                    <span className="text-[9px] font-bold text-zinc-400 whitespace-nowrap">
                       {m.label}
                     </span>
-                    <div className="text-xs font-black text-red-500 my-0.5 whitespace-nowrap">
+                    <div className="text-xs font-black text-red-400 my-0.5 whitespace-nowrap">
                       {m.value} Kills
                     </div>
-                    <span className="text-[8.5px] font-semibold text-zinc-500 whitespace-nowrap">
-                      {m.subtext || `${m.value * 150} DMG`}
+                    <span className="text-[8px] font-semibold text-zinc-500 whitespace-nowrap">
+                      {m.subtext}
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="p-3.5 rounded-xl bg-[#1c1c24] border border-[#2b2b38] text-center">
+              <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 text-center">
                 <p className="text-xs font-bold text-zinc-300">0 Matches Recorded</p>
                 <p className="text-[10px] text-zinc-500 mt-0.5">Use the (+) button below to log tournament matches.</p>
               </div>
@@ -419,7 +488,7 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
           <div>
             <InsightsChart
               title={`Recent Trend - ${category}`}
-              subtitle="Your kills in each match"
+              subtitle={`${activePlayer}'s kills progression`}
               data={meTrendChartData}
               colorTheme="red"
               yAxisLabel="Kills"
@@ -427,8 +496,8 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
             />
           </div>
 
-          {/* Deterministic AI Coaching Card */}
-          <div className="bg-gradient-to-br from-[#16161d] via-[#1a1215] to-[#121217] rounded-2xl p-4 text-white border border-[#2d2226] shadow-xl relative overflow-hidden">
+          {/* Deterministic AI Coaching Card (Personalized Strict Coach) */}
+          <div className="glass-card rounded-2xl p-4 text-white border border-red-500/25 shadow-xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/10 rounded-full blur-2xl pointer-events-none" />
 
             <div className="flex items-center justify-between pb-2.5 border-b border-white/10 mb-2.5 relative z-10">
@@ -438,9 +507,9 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
                 </div>
                 <div>
                   <div className="text-[8.5px] font-extrabold uppercase tracking-widest text-red-400">
-                    Sarkar AI Engine
+                    Sarkar AI Engine • {activePlayer}
                   </div>
-                  <h3 className="text-xs font-black text-white">Deterministic Coach Insights</h3>
+                  <h3 className="text-xs font-black text-white">Coach Performance Verdict</h3>
                 </div>
               </div>
 
@@ -457,12 +526,12 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
 
             {aiLoading ? (
               <div className="py-5 text-center text-xs font-bold text-zinc-400 animate-pulse">
-                Analyzing combat telemetry via Groq AI...
+                Analyzing combat telemetry for {activePlayer}...
               </div>
             ) : aiInsight ? (
               <div className="space-y-2.5 relative z-10">
-                {/* Headline & Form Score */}
-                <div className="flex items-center justify-between bg-white/5 p-2.5 rounded-xl border border-white/10">
+                {/* Headline & Rating */}
+                <div className="flex items-center justify-between bg-black/40 p-2.5 rounded-xl border border-white/10">
                   <div>
                     <span className="text-[9.5px] text-zinc-400 font-bold block uppercase">
                       Current Form
@@ -478,9 +547,9 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
                 </div>
 
                 {/* Strengths */}
-                <div className="bg-white/5 p-2.5 rounded-xl border border-white/10">
+                <div className="bg-black/40 p-2.5 rounded-xl border border-white/10">
                   <span className="text-[9.5px] font-extrabold text-red-400 uppercase tracking-wide block mb-1">
-                    Key Strengths
+                    Key Strengths / Observations
                   </span>
                   <ul className="space-y-1">
                     {aiInsight.strengths.map((s, i) => (
@@ -492,7 +561,7 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
                   </ul>
                 </div>
 
-                {/* Tactical Advice */}
+                {/* Tactical Advice / Roast */}
                 <div className="bg-red-500/10 p-2.5 rounded-xl border border-red-500/20">
                   <span className="text-[9.5px] font-extrabold text-red-300 uppercase tracking-wide block mb-0.5">
                     Coach Tactical Directive
@@ -520,60 +589,60 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
           <div>
             <InsightsChart
               title={`Team Kills - ${category}`}
-              subtitle="Total team kills in each match today"
+              subtitle="Squad kills per match"
               data={teamKillsChartData}
-              colorTheme="red"
+              colorTheme="purple"
               yAxisLabel="Kills"
               defaultChartType="line"
             />
 
             {/* 4 Compact Stats Pill Row */}
             <div className="grid grid-cols-4 gap-2 -mt-1 mb-3">
-              <div className="p-2 rounded-2xl bg-[#141419] border border-[#22222b] shadow-sm flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center flex-shrink-0">
-                  <Users className="w-3.5 h-3.5" />
+              <div className="p-2 rounded-2xl glass-card border border-white/10 shadow-sm flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-red-500/15 text-red-400 flex items-center justify-center flex-shrink-0 border border-red-500/20">
+                  <Skull className="w-3.5 h-3.5" />
                 </div>
                 <div className="min-w-0">
                   <div className="text-xs font-black text-white leading-tight">
                     {displayTotalKills}
                   </div>
-                  <div className="text-[9px] font-bold text-zinc-500 truncate">Total Kills</div>
+                  <div className="text-[9px] font-bold text-zinc-400 truncate">Total Kills</div>
                 </div>
               </div>
 
-              <div className="p-2 rounded-2xl bg-[#141419] border border-[#22222b] shadow-sm flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center flex-shrink-0">
+              <div className="p-2 rounded-2xl glass-card border border-white/10 shadow-sm flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-rose-500/15 text-rose-400 flex items-center justify-center flex-shrink-0 border border-rose-500/20">
                   <Target className="w-3.5 h-3.5" />
                 </div>
                 <div className="min-w-0">
                   <div className="text-xs font-black text-white leading-tight">
                     {displayAvgKills}
                   </div>
-                  <div className="text-[9px] font-bold text-zinc-500 truncate">Avg Kills</div>
+                  <div className="text-[9px] font-bold text-zinc-400 truncate">Avg Kills</div>
                 </div>
               </div>
 
-              <div className="p-2 rounded-2xl bg-[#141419] border border-[#22222b] shadow-sm flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center flex-shrink-0">
+              <div className="p-2 rounded-2xl glass-card border border-white/10 shadow-sm flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-red-500/15 text-red-400 flex items-center justify-center flex-shrink-0 border border-red-500/20">
                   <Flame className="w-3.5 h-3.5" />
                 </div>
                 <div className="min-w-0">
                   <div className="text-xs font-black text-white leading-tight">
                     {displayHighestKills}
                   </div>
-                  <div className="text-[9px] font-bold text-zinc-500 truncate">Highest Kills</div>
+                  <div className="text-[9px] font-bold text-zinc-400 truncate">Highest Kills</div>
                 </div>
               </div>
 
-              <div className="p-2 rounded-2xl bg-[#141419] border border-[#22222b] shadow-sm flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center flex-shrink-0">
+              <div className="p-2 rounded-2xl glass-card border border-white/10 shadow-sm flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center flex-shrink-0 border border-amber-500/20">
                   <Gamepad2 className="w-3.5 h-3.5" />
                 </div>
                 <div className="min-w-0">
                   <div className="text-xs font-black text-white leading-tight">
                     {displayMatchesCount}
                   </div>
-                  <div className="text-[9px] font-bold text-zinc-500 truncate">Matches</div>
+                  <div className="text-[9px] font-bold text-zinc-400 truncate">Matches</div>
                 </div>
               </div>
             </div>
@@ -605,7 +674,7 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
           </div>
 
           {/* AI Squad Synergy Card */}
-          <div className="bg-gradient-to-br from-[#16161d] via-[#1a1215] to-[#121217] rounded-2xl p-4 text-white border border-[#2d2226] shadow-xl relative overflow-hidden">
+          <div className="glass-card rounded-2xl p-4 text-white border border-red-500/25 shadow-xl relative overflow-hidden">
             <div className="flex items-center justify-between pb-2.5 border-b border-white/10 mb-2.5">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-lg bg-red-500/20 text-red-400 flex items-center justify-center border border-red-400/30">
@@ -630,7 +699,7 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
 
             {aiInsight && (
               <div className="space-y-2.5">
-                <div className="bg-white/5 p-2.5 rounded-xl border border-white/10">
+                <div className="bg-black/40 p-2.5 rounded-xl border border-white/10">
                   <span className="text-[9.5px] font-extrabold text-red-400 uppercase tracking-wide block mb-1">
                     Squad Strengths
                   </span>

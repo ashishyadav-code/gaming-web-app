@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Calendar, Trophy, ChevronRight, Plus, Search,
+  Calendar, ChevronRight, Plus, Search,
   Swords, Crown
 } from 'lucide-react';
 import { Match } from '../types';
@@ -9,6 +9,7 @@ import { useAuth } from '../context/AuthContext';
 import { DatePickerModal } from '../components/DatePickerModal';
 import { ASSETS, getPlayerAvatar } from '../utils/assets';
 import { calculateMatchPoints } from '../utils/points';
+import { getTodayDateString, getYesterdayDateString, isSameDay } from '../utils/dateUtils';
 
 interface Props {
   onSelectMatch: (match: Match) => void;
@@ -17,9 +18,13 @@ interface Props {
 
 export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }) => {
   const { isIGL, showPermissionDenied } = useAuth();
+  const todayStr = getTodayDateString();
+  const yesterdayStr = getYesterdayDateString();
+
   const [selectedDate, setSelectedDate] = useState('All');
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-  const [matches, setMatches] = useState<Match[]>([]);
+  // Instant load from cache
+  const [matches, setMatches] = useState<Match[]>(() => api.getCachedMatches());
 
   const loadMatches = async () => {
     try {
@@ -45,10 +50,14 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
     PURGATORY: ASSETS.maps.PURGATORY,
   };
 
-  // Group matches by date
+  // Group matches by date dynamically
   const groupedMatches: Record<string, Match[]> = {};
   matches.forEach((m) => {
-    const key = m.date.includes('26 Sept') ? 'Today • 26 Sept 2026' : m.date;
+    const key = isSameDay(m.date, todayStr)
+      ? `Today • ${todayStr}`
+      : isSameDay(m.date, yesterdayStr)
+      ? `Yesterday • ${yesterdayStr}`
+      : m.date;
     if (!groupedMatches[key]) {
       groupedMatches[key] = [];
     }
@@ -79,7 +88,7 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
       );
     }
     return (
-      <div className="w-10 h-10 rounded-xl bg-[#1c1c24] text-zinc-400 border border-[#2b2b38] shadow-sm flex items-center justify-center font-black text-xs">
+      <div className="w-10 h-10 rounded-xl bg-[#1c1c24] text-zinc-400 border border-white/5 shadow-sm flex items-center justify-center font-black text-xs">
         #{placement}
       </div>
     );
@@ -90,7 +99,7 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
       {/* Top Header */}
       <header className="px-5 pt-4 pb-2 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center p-0.5 bg-[#14141a] border border-white/10">
+          <div className="w-11 h-11 rounded-2xl overflow-hidden flex items-center justify-center p-1 bg-white/[0.05] backdrop-blur-xl border border-white/15 shadow-md shadow-red-950/30">
             <img
               src={ASSETS.logo}
               alt="Team Sarkar Logo"
@@ -111,7 +120,7 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="w-9 h-9 rounded-full bg-[#15151c] border border-white/10 shadow-sm flex items-center justify-center text-zinc-300 hover:bg-[#202029] active:scale-95 transition-transform">
+          <button className="w-9 h-9 rounded-full glass-card border border-white/10 shadow-sm flex items-center justify-center text-zinc-300 hover:bg-white/10 active:scale-95 transition-transform">
             <Search className="w-4 h-4" />
           </button>
           <button
@@ -143,7 +152,7 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
 
         <button
           onClick={() => setIsDatePickerOpen(true)}
-          className="px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-bold text-zinc-300 shadow-sm bg-[#141419] border border-[#22222b] hover:border-red-500/30 active:scale-95 transition-all"
+          className="px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-bold text-zinc-300 shadow-sm glass-card border border-white/10 hover:border-red-500/30 active:scale-95 transition-all"
         >
           <Calendar className="w-3.5 h-3.5 text-red-400" />
           <span className="text-[11px]">{selectedDate === 'All' ? 'All Dates' : selectedDate}</span>
@@ -154,7 +163,7 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
       {/* Match List Grouped By Date */}
       <div className="px-5 space-y-4">
         {matches.length === 0 ? (
-          <div className="p-8 text-center bg-[#141419] rounded-2xl border border-[#22222b]">
+          <div className="p-8 text-center glass-card rounded-2xl border border-white/10">
             <Swords className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
             <div className="text-xs font-bold text-zinc-300">No tournament matches found for this filter.</div>
             <p className="text-[11px] text-zinc-500 mt-1">Tap the (+) button above to record a new tournament match.</p>
@@ -173,7 +182,7 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
                     <div
                       key={m.id}
                       onClick={() => onSelectMatch(m)}
-                      className="p-3 rounded-2xl bg-[#141419] border border-[#22222b] shadow-sm hover:border-red-500/35 transition-all active:scale-[0.99] cursor-pointer"
+                      className="p-3 rounded-2xl glass-card border border-white/10 shadow-sm hover:border-red-500/35 transition-all active:scale-[0.99] cursor-pointer"
                     >
                       {/* Top Row: Map icon, Name, Time, Placement, Points & Team Kills */}
                       <div className="flex items-center justify-between gap-3">
@@ -195,50 +204,50 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
                             <h3 className="text-xs font-black text-white tracking-tight truncate">
                               {m.map}
                             </h3>
-                            <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase bg-red-500/20 text-red-400 border border-red-500/30">
                               Tournament
                             </span>
                           </div>
-                          <div className="text-[10px] font-semibold text-zinc-400 mt-0.5 truncate">
-                            {m.time} {m.tournament_name ? `• ${m.tournament_name}` : ''}
+                          <div className="text-[10px] font-medium text-zinc-400 mt-0.5">
+                            {m.date} • {m.time}
                           </div>
                         </div>
 
-                        {/* Match Points & Team Kills */}
-                        <div className="flex items-center gap-2.5 text-right flex-shrink-0">
-                          <div className="px-2 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-center min-w-[42px]">
-                            <div className="text-sm font-black text-amber-400 leading-none">{pts.totalPts}</div>
-                            <div className="text-[8px] font-black text-zinc-400 uppercase">Pts</div>
+                        {/* Points & Kills */}
+                        <div className="flex items-center gap-2.5 text-right">
+                          <div className="px-2 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-center">
+                            <div className="text-xs font-black text-amber-400 leading-none">{pts.totalPts}</div>
+                            <div className="text-[8px] font-extrabold text-zinc-400 uppercase">Pts</div>
                           </div>
-
                           <div>
-                            <div className="text-sm font-black text-red-500">{m.team_kills}</div>
-                            <div className="text-[9px] font-bold text-zinc-500 uppercase">Kills</div>
+                            <div className="text-xs font-black text-red-500">{m.team_kills}</div>
+                            <div className="text-[9px] font-bold text-zinc-400 uppercase">Kills</div>
                           </div>
-                          <ChevronRight className="w-4 h-4 text-zinc-600" />
+                          <ChevronRight className="w-4 h-4 text-zinc-500" />
                         </div>
                       </div>
 
-                      {/* Sub-row: 4 Players Mini-Stats Breakdown (Kills Only) */}
+                      {/* Bottom Row: Compact Player Frags Horizontal Pills */}
                       {m.player_stats && m.player_stats.length > 0 && (
-                        <div className="mt-2.5 pt-2 border-t border-[#22222b] grid grid-cols-4 gap-1">
-                          {m.player_stats.slice(0, 4).map((p) => (
-                            <div key={p.id || p.player_id} className="flex items-center gap-1.5 text-[10px]">
-                              <div className="w-6 h-6 rounded-full overflow-hidden border border-white/20 shadow-xs bg-[#1c1c24] flex-shrink-0">
+                        <div className="mt-2.5 pt-2 border-t border-white/5 flex items-center justify-between gap-1 overflow-x-auto">
+                          {m.player_stats.map((ps) => (
+                            <div
+                              key={ps.id || ps.player_id}
+                              className="px-2 py-1 rounded-lg bg-black/40 border border-white/5 flex items-center gap-1.5 flex-1 min-w-[70px]"
+                            >
+                              <div className="w-4 h-4 rounded-full overflow-hidden flex-shrink-0 bg-[#222]">
                                 <img
-                                  src={getPlayerAvatar(p.player_name || p.player_role || p.player_avatar)}
-                                  alt={p.player_name || 'Player'}
+                                  src={getPlayerAvatar(ps.player_name)}
+                                  alt={ps.player_name}
                                   className="w-full h-full object-cover"
                                 />
                               </div>
-                              <div className="min-w-0">
-                                <div className="font-extrabold text-zinc-200 text-[10px] truncate leading-tight">
-                                  {p.player_name}
-                                </div>
-                                <div className="text-[9px] font-bold text-red-400 leading-tight">
-                                  {p.kills} Kills
-                                </div>
-                              </div>
+                              <span className="text-[10px] font-bold text-zinc-300 truncate">
+                                {ps.player_name?.replace(' 777', '')}
+                              </span>
+                              <span className="text-[10px] font-black text-red-400 ml-auto">
+                                {ps.kills}k
+                              </span>
                             </div>
                           ))}
                         </div>
@@ -257,7 +266,9 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
         isOpen={isDatePickerOpen}
         onClose={() => setIsDatePickerOpen(false)}
         selectedDate={selectedDate}
-        onSelectDate={(d) => setSelectedDate(d)}
+        onSelectDate={(newDate) => {
+          setSelectedDate(newDate);
+        }}
       />
     </div>
   );

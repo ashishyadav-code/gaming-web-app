@@ -1,4 +1,6 @@
-import logoImg from '../assets/logo.png';
+import logoImg from '../assets/team_sarkar.png';
+import teamSarkarLogo from '../assets/team_sarkar.png';
+import legacyLogoImg from '../assets/logo.png';
 import heroBannerImg from '../assets/hero_banner.png';
 import heroHeaderImg from '../assets/hero_header.png';
 import mapBermuda from '../assets/map_bermuda.png';
@@ -17,6 +19,8 @@ import avatarPandit from '../assets/pandit.jpeg';
 
 export const ASSETS = {
   logo: logoImg,
+  teamSarkarLogo: teamSarkarLogo,
+  legacyLogo: legacyLogoImg,
   heroBanner: heroBannerImg,
   heroHeader: heroHeaderImg,
   maps: {

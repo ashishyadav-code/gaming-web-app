@@ -2,6 +2,7 @@ import {
   User, UserRole, Player, Tournament, Match, PracticeSession,
   IGLNote, DashboardSummary, DailyEvaluation, WeeklyEvaluation, PlayerProgressDetail
 } from '../types';
+import { getTodayDateString } from '../utils/dateUtils';
 
 const API_BASE_URL = 'https://teamsarkar-server-1.onrender.com';
 
@@ -31,7 +32,7 @@ function runStorageMigration() {
   });
 }
 
-function getCache<T>(key: string): T | null {
+export function getCache<T>(key: string): T | null {
   try {
     const raw = localStorage.getItem(key);
     return raw ? JSON.parse(raw) : null;
@@ -40,7 +41,7 @@ function getCache<T>(key: string): T | null {
   }
 }
 
-function setCache<T>(key: string, data: T) {
+export function setCache<T>(key: string, data: T) {
   try {
     localStorage.setItem(key, JSON.stringify(data));
   } catch {}
@@ -83,6 +84,23 @@ class ApiClient {
 
   getToken(): string | null {
     return this.token;
+  }
+
+  // Instant Synchronous Cache Accessors for Zero-Wait Rendering
+  getCachedMatches(): Match[] {
+    return getCache<Match[]>(CACHE_KEYS.MATCHES) || [];
+  }
+
+  getCachedPlayers(): Player[] {
+    return getCache<Player[]>(CACHE_KEYS.PLAYERS) || [];
+  }
+
+  getCachedTournaments(): Tournament[] {
+    return getCache<Tournament[]>(CACHE_KEYS.TOURNAMENTS) || [];
+  }
+
+  getCachedDashboard(): DashboardSummary | null {
+    return getCache<DashboardSummary>(CACHE_KEYS.DASHBOARD);
   }
 
   saveLocal<T>(dataType: string, data: T) {
@@ -163,47 +181,92 @@ class ApiClient {
     if (params?.limit) searchParams.append('limit', params.limit.toString());
     const q = searchParams.toString() ? `?${searchParams.toString()}` : '';
 
-    try {
-      const data = await this.request<Match[]>(`/api/matches${q}`);
-      setCache(CACHE_KEYS.MATCHES, data);
-      return data;
-    } catch (err) {
-      const cached = getCache<Match[]>(CACHE_KEYS.MATCHES);
-      if (cached) return cached;
-      throw err;
+    const cached = this.getCachedMatches();
+
+    const fetchPromise = this.request<Match[]>(`/api/matches${q}`)
+      .then((data) => {
+        setCache(CACHE_KEYS.MATCHES, data);
+        return data;
+      })
+      .catch((err) => {
+        if (cached.length > 0) return cached;
+        throw err;
+      });
+
+    // If cache exists and no deep filter, return immediately for instant UI
+    if (cached.length > 0 && !params?.map && !params?.type) {
+      // Trigger background update silently
+      fetchPromise.catch(() => {});
+      return cached;
     }
+
+    return fetchPromise;
   }
 
   async createMatch(data: any): Promise<Match> {
-    const res = await this.request<Match>('/api/matches', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-    // Invalidate matches cache
-    try { localStorage.removeItem(CACHE_KEYS.MATCHES); } catch {}
-    return res;
+    // Optimistic instant match creation
+    const optimisticMatch: Match = {
+      id: Date.now(),
+      team_id: data.team_id || 1,
+      tournament_id: data.tournament_id,
+      practice_session_id: data.practice_session_id,
+      map: data.map,
+      type: data.type || 'Tournament',
+      date: data.date,
+      time: data.time || '10:00 PM',
+      placement: data.placement,
+      team_kills: data.team_kills,
+      team_damage: data.team_damage || (data.team_kills * 300),
+      notes: data.notes || '',
+      player_stats: data.player_stats || [],
+    };
+
+    const currentMatches = this.getCachedMatches();
+    setCache(CACHE_KEYS.MATCHES, [optimisticMatch, ...currentMatches]);
+
+    try {
+      const res = await this.request<Match>('/api/matches', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      // Replace optimistic entry with server response
+      const updated = this.getCachedMatches().map(m => m.id === optimisticMatch.id ? res : m);
+      setCache(CACHE_KEYS.MATCHES, updated);
+      return res;
+    } catch {
+      return optimisticMatch;
+    }
   }
 
   async deleteMatch(id: number): Promise<{ message: string }> {
-    const res = await this.request<{ message: string }>(`/api/matches/${id}`, {
+    const updated = this.getCachedMatches().filter(m => m.id !== id);
+    setCache(CACHE_KEYS.MATCHES, updated);
+    return this.request<{ message: string }>(`/api/matches/${id}`, {
       method: 'DELETE',
     });
-    try { localStorage.removeItem(CACHE_KEYS.MATCHES); } catch {}
-    return res;
   }
 
   // ----------------- PLAYERS -----------------
   async getPlayers(status?: 'Active' | 'Inactive'): Promise<Player[]> {
     const query = status ? `?status_filter=${status}` : '';
-    try {
-      const data = await this.request<Player[]>(`/api/players${query}`);
-      setCache(CACHE_KEYS.PLAYERS, data);
-      return data;
-    } catch (err) {
-      const cached = getCache<Player[]>(CACHE_KEYS.PLAYERS);
-      if (cached) return cached;
-      throw err;
+    const cached = this.getCachedPlayers();
+
+    const fetchPromise = this.request<Player[]>(`/api/players${query}`)
+      .then((data) => {
+        setCache(CACHE_KEYS.PLAYERS, data);
+        return data;
+      })
+      .catch((err) => {
+        if (cached.length > 0) return cached;
+        throw err;
+      });
+
+    if (cached.length > 0 && !status) {
+      fetchPromise.catch(() => {});
+      return cached;
     }
+
+    return fetchPromise;
   }
 
   async getPlayerDetail(id: number): Promise<PlayerProgressDetail> {
@@ -211,12 +274,39 @@ class ApiClient {
   }
 
   async createPlayer(data: any): Promise<Player> {
-    const res = await this.request<Player>('/api/players', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-    try { localStorage.removeItem(CACHE_KEYS.PLAYERS); } catch {}
-    return res;
+    const optimisticPlayer: Player = {
+      id: Date.now(),
+      player_name: data.player_name,
+      ign: data.ign,
+      team_role: data.team_role,
+      status: 'Active',
+      avatar_url: data.avatar_url,
+      joined_at: data.joined_at,
+      matches_count: 0,
+      total_kills: 0,
+      total_damage: data.total_damage || 0,
+      total_assists: data.total_assists || 0,
+      total_deaths: data.total_deaths || 0,
+      kd: 0,
+      avg_damage: 0,
+      survival_rate: 65,
+      trend: 'stable',
+      role_history: [],
+    };
+    const current = this.getCachedPlayers();
+    setCache(CACHE_KEYS.PLAYERS, [...current, optimisticPlayer]);
+
+    try {
+      const res = await this.request<Player>('/api/players', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      const updated = this.getCachedPlayers().map(p => p.id === optimisticPlayer.id ? res : p);
+      setCache(CACHE_KEYS.PLAYERS, updated);
+      return res;
+    } catch {
+      return optimisticPlayer;
+    }
   }
 
   async updatePlayerRole(playerId: number, newRole: string, reason?: string): Promise<any> {
@@ -230,22 +320,55 @@ class ApiClient {
 
   // ----------------- TOURNAMENTS & PRACTICE -----------------
   async getTournaments(): Promise<Tournament[]> {
-    try {
-      const data = await this.request<Tournament[]>('/api/tournaments');
-      setCache(CACHE_KEYS.TOURNAMENTS, data);
-      return data;
-    } catch (err) {
-      const cached = getCache<Tournament[]>(CACHE_KEYS.TOURNAMENTS);
-      if (cached) return cached;
-      throw err;
+    const cached = this.getCachedTournaments();
+    const fetchPromise = this.request<Tournament[]>('/api/tournaments')
+      .then((data) => {
+        setCache(CACHE_KEYS.TOURNAMENTS, data);
+        return data;
+      })
+      .catch((err) => {
+        if (cached.length > 0) return cached;
+        throw err;
+      });
+
+    if (cached.length > 0) {
+      fetchPromise.catch(() => {});
+      return cached;
     }
+
+    return fetchPromise;
   }
 
   async createTournament(data: any): Promise<Tournament> {
-    return this.request<Tournament>('/api/tournaments', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    const optimisticTourn: Tournament = {
+      id: Date.now(),
+      name: data.name,
+      date: data.date,
+      status: data.status || 'Upcoming',
+      notes: data.notes || '',
+      matches_count: 0,
+      avg_placement: 0,
+      total_kills: 0,
+      avg_kills: 0,
+      total_damage: 0,
+      avg_damage: 0,
+      booyah_count: 0,
+      matches: [],
+    };
+    const current = this.getCachedTournaments();
+    setCache(CACHE_KEYS.TOURNAMENTS, [optimisticTourn, ...current]);
+
+    try {
+      const res = await this.request<Tournament>('/api/tournaments', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      const updated = this.getCachedTournaments().map(t => t.id === optimisticTourn.id ? res : t);
+      setCache(CACHE_KEYS.TOURNAMENTS, updated);
+      return res;
+    } catch {
+      return optimisticTourn;
+    }
   }
 
   async getPracticeSessions(): Promise<PracticeSession[]> {
@@ -274,18 +397,27 @@ class ApiClient {
   // ----------------- DASHBOARD & ANALYTICS -----------------
   async getDashboardSummary(period: string = 'Today', dateFilter?: string): Promise<DashboardSummary> {
     const q = dateFilter && dateFilter !== 'All' ? `&date_filter=${encodeURIComponent(dateFilter)}` : '';
-    try {
-      const data = await this.request<DashboardSummary>(`/api/analytics/dashboard?period=${period}${q}`);
-      setCache(CACHE_KEYS.DASHBOARD, data);
-      return data;
-    } catch (err) {
-      const cached = getCache<DashboardSummary>(CACHE_KEYS.DASHBOARD);
-      if (cached) return cached;
-      throw err;
+    const cached = this.getCachedDashboard();
+
+    const fetchPromise = this.request<DashboardSummary>(`/api/analytics/dashboard?period=${period}${q}`)
+      .then((data) => {
+        setCache(CACHE_KEYS.DASHBOARD, data);
+        return data;
+      })
+      .catch((err) => {
+        if (cached) return cached;
+        throw err;
+      });
+
+    if (cached && !dateFilter) {
+      fetchPromise.catch(() => {});
+      return cached;
     }
+
+    return fetchPromise;
   }
 
-  async getDailyEvaluation(date: string = '26 Sept 2026'): Promise<DailyEvaluation> {
+  async getDailyEvaluation(date: string = getTodayDateString()): Promise<DailyEvaluation> {
     return this.request<DailyEvaluation>(`/api/analytics/daily?date=${encodeURIComponent(date)}`);
   }
 

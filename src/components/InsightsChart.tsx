@@ -10,7 +10,7 @@ interface Props {
   title: string;
   subtitle: string;
   data: ChartDataPoint[];
-  colorTheme?: 'blue' | 'red' | 'green' | 'amber';
+  colorTheme?: 'blue' | 'red' | 'green' | 'amber' | 'purple';
   yAxisLabel?: string;
   defaultChartType?: 'line' | 'bar';
   invertRank?: boolean; // For position where #1 is highest
@@ -39,13 +39,13 @@ export const InsightsChart: React.FC<Props> = ({
       badge: 'text-red-400',
     },
     blue: {
-      line: '#EF4444',
-      dot: '#F87171',
-      gradientFrom: '#EF4444',
-      gradientTo: '#991B1B',
-      bar: 'fill-red-500',
-      activePill: 'bg-red-600 text-white',
-      badge: 'text-red-400',
+      line: '#3B82F6',
+      dot: '#60A5FA',
+      gradientFrom: '#3B82F6',
+      gradientTo: '#1E3A8A',
+      bar: 'fill-blue-500',
+      activePill: 'bg-blue-600 text-white',
+      badge: 'text-blue-400',
     },
     green: {
       line: '#10B981',
@@ -64,6 +64,15 @@ export const InsightsChart: React.FC<Props> = ({
       bar: 'fill-amber-500',
       activePill: 'bg-amber-600 text-white',
       badge: 'text-amber-400',
+    },
+    purple: {
+      line: '#8B5CF6',
+      dot: '#A78BFA',
+      gradientFrom: '#8B5CF6',
+      gradientTo: '#4C1D95',
+      bar: 'fill-purple-500',
+      activePill: 'bg-purple-600 text-white',
+      badge: 'text-purple-400',
     },
   };
 

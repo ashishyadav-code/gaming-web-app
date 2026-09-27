@@ -53,7 +53,7 @@ export const MoreScreen: React.FC<Props> = ({
       {/* Top Header */}
       <header className="px-5 pt-4 pb-2 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center p-0.5 bg-[#14141a] border border-white/10">
+          <div className="w-11 h-11 rounded-2xl overflow-hidden flex items-center justify-center p-1 bg-white/[0.05] backdrop-blur-xl border border-white/15 shadow-md shadow-red-950/30">
             <img
               src={ASSETS.logo}
               alt="Team Sarkar Logo"
