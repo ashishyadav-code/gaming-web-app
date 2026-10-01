@@ -213,7 +213,9 @@ export const HomeScreen: React.FC<Props> = ({
   return (
     <div className="min-h-full pb-28 text-left animate-fade-in-smooth bg-[#0c0c10]">
       {/* Top Header with official logo */}
-      <Header onUserClick={onOpenAccount} />
+      <div className="md:hidden">
+        <Header onUserClick={onOpenAccount} />
+      </div>
 
       {/* Hero Banner with official logo crest & dynamic date capsule */}
       <HeroBanner
@@ -289,7 +291,7 @@ export const HomeScreen: React.FC<Props> = ({
       </div>
 
       {/* 4 Compact Minimalist Glassy Stat Summary Cards (With Real Daily Improvements) */}
-      <div className="px-5 grid grid-cols-4 gap-2 mb-4">
+      <div className="px-5 grid grid-cols-2 sm:grid-cols-4 gap-2.5 md:gap-4 mb-4">
         {/* Card 1: Matches */}
         <div className="p-2.5 rounded-2xl glass-card border border-white/10 shadow-sm flex flex-col justify-between min-h-[82px] hover:border-red-500/30 transition-all">
           <div className="w-7 h-7 rounded-lg bg-red-500/15 text-red-400 flex items-center justify-center border border-red-500/20">
@@ -437,7 +439,7 @@ export const HomeScreen: React.FC<Props> = ({
       )}
 
       {/* Latest 5 Scrims Cards (Top performing in Green, Worst performing in Red) */}
-      <div className="px-5 mb-4 space-y-2">
+      <div className="px-5 mb-4 grid grid-cols-1 md:grid-cols-2 gap-3 space-y-0">
         {latestScrims.map((s, idx) => {
           let cardStyle = 'border-white/10 glass-card hover:border-white/20';
           if (s.isTop) {
@@ -544,7 +546,7 @@ export const HomeScreen: React.FC<Props> = ({
       </div>
 
       {/* Compact Recent Matches List with Points */}
-      <div className="px-5 mb-4 space-y-2">
+      <div className="px-5 mb-4 grid grid-cols-1 md:grid-cols-2 gap-3 space-y-0">
         {(allMatches && allMatches.length > 0 ? allMatches.slice(0, 4) : []).map((m) => {
           const matchPts = calculateMatchPoints(m.placement, m.team_kills);
           return (

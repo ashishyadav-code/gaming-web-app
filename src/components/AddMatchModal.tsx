@@ -23,6 +23,7 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
   // Form states (Tournament only, no practice)
   const [selectedMap, setSelectedMap] = useState<'BERMUDA' | 'NEXTERRA' | 'KALAHARI' | 'ALPINE' | 'PURGATORY'>('BERMUDA');
   const [placement, setPlacement] = useState<number>(1);
+  const [placementInput, setPlacementInput] = useState<string>("1");
   const [tournamentId, setTournamentId] = useState<number | ''>('');
   const [date, setDate] = useState<string>(() => getTodayDateString());
   const [time, setTime] = useState<string>('08:40 PM');
@@ -35,6 +36,8 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
       setShouldRender(true);
       setIsClosing(false);
       setDate(getTodayDateString());
+      setPlacement(1);
+      setPlacementInput("1");
     } else if (shouldRender) {
       setIsClosing(true);
       const timer = setTimeout(() => {
@@ -215,45 +218,103 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
           </div>
 
           {/* Placement, Date, Time Row */}
-          <div className="grid grid-cols-3 gap-2">
-            <div>
-              <label className="text-xs font-bold text-zinc-300 block mb-1">Placement #</label>
-              <div className="relative">
+          <div className="space-y-2">
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <label className="text-xs font-bold text-zinc-300 block mb-1">Placement #</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    required
+                    value={placementInput}
+                    onChange={(e) => {
+                      const val = e.target.value.trim();
+                      if (val === '') {
+                        setPlacementInput('');
+                        return;
+                      }
+                      if (/^\d+$/.test(val)) {
+                        const num = parseInt(val, 10);
+                        if (num <= 12) {
+                          setPlacementInput(val);
+                          if (num >= 1) {
+                            setPlacement(num);
+                          }
+                        }
+                      }
+                    }}
+                    onBlur={() => {
+                      const num = parseInt(placementInput, 10);
+                      if (isNaN(num) || num < 1) {
+                        setPlacement(1);
+                        setPlacementInput('1');
+                      } else if (num > 12) {
+                        setPlacement(12);
+                        setPlacementInput('12');
+                      } else {
+                        setPlacement(num);
+                        setPlacementInput(String(num));
+                      }
+                    }}
+                    placeholder="1-12"
+                    className="w-full py-2 px-3 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-sm font-extrabold text-white text-center focus:border-red-500 focus:outline-none"
+                  />
+                  {placement === 1 && (
+                    <Crown className="w-3.5 h-3.5 text-amber-400 absolute -top-1.5 right-1" />
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-zinc-300 block mb-1">Date</label>
                 <input
-                  type="number"
-                  min="1"
-                  max="12"
+                  type="text"
                   required
-                  value={placement}
-                  onChange={(e) => setPlacement(Math.max(1, Math.min(12, parseInt(e.target.value) || 1)))}
-                  className="w-full py-2 px-3 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-sm font-extrabold text-white text-center focus:border-red-500 focus:outline-none"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full py-2 px-2.5 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-xs font-semibold text-white text-center focus:border-red-500 focus:outline-none"
                 />
-                {placement === 1 && (
-                  <Crown className="w-3.5 h-3.5 text-amber-400 absolute -top-1.5 right-1" />
-                )}
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-zinc-300 block mb-1">Time</label>
+                <input
+                  type="text"
+                  required
+                  value={time}
+                  onChange={(e) => setTime(e.target.value)}
+                  className="w-full py-2 px-2.5 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-xs font-semibold text-white text-center focus:border-red-500 focus:outline-none"
+                />
               </div>
             </div>
 
+            {/* Quick 1-12 Placement Rank Chips */}
             <div>
-              <label className="text-xs font-bold text-zinc-300 block mb-1">Date</label>
-              <input
-                type="text"
-                required
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full py-2 px-2.5 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-xs font-semibold text-white text-center focus:border-red-500 focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-bold text-zinc-300 block mb-1">Time</label>
-              <input
-                type="text"
-                required
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                className="w-full py-2 px-2.5 rounded-xl border border-[#2b2b38] bg-[#1c1c24] text-xs font-semibold text-white text-center focus:border-red-500 focus:outline-none"
-              />
+              <div className="flex items-center justify-between text-[10px] text-zinc-400 font-bold mb-1 px-0.5">
+                <span>Select Rank (Tap 1-12):</span>
+                <span className="text-amber-400 font-black">Rank #{placement} ({points.placementPts} PP)</span>
+              </div>
+              <div className="grid grid-cols-6 sm:grid-cols-12 gap-1">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => {
+                      setPlacement(r);
+                      setPlacementInput(String(r));
+                    }}
+                    className={`py-1 text-xs font-black rounded-lg transition-all flex items-center justify-center gap-0.5 ${
+                      placement === r
+                        ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-md shadow-red-600/30 ring-1 ring-red-400 scale-105'
+                        : 'bg-[#1c1c24] text-zinc-400 hover:text-white hover:bg-[#252532] border border-[#2a2a38]'
+                    }`}
+                  >
+                    {r === 1 && <Crown className="w-2.5 h-2.5 text-amber-400" />}
+                    <span>#{r}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -293,15 +354,34 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
                     {p.player_name}
                   </span>
 
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] text-zinc-400 font-bold uppercase">Kills</span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] text-zinc-400 font-bold uppercase mr-1">Kills</span>
+                    <button
+                      type="button"
+                      onClick={() => handleKillsChange(idx, Math.max(0, p.kills - 1))}
+                      className="w-7 h-7 rounded-lg bg-[#1c1c24] hover:bg-[#282836] border border-[#2b2b38] text-zinc-300 font-black text-sm flex items-center justify-center active:scale-95 transition-all"
+                    >
+                      -
+                    </button>
                     <input
-                      type="number"
-                      min="0"
+                      type="text"
+                      inputMode="numeric"
                       value={p.kills}
-                      onChange={(e) => handleKillsChange(idx, parseInt(e.target.value) || 0)}
-                      className="w-16 py-1 text-center rounded-lg bg-[#1c1c24] text-xs font-black text-red-400 border border-[#2b2b38] focus:border-red-500 focus:outline-none"
+                      onChange={(e) => {
+                        const val = e.target.value.trim();
+                        if (val === '' || /^\d+$/.test(val)) {
+                          handleKillsChange(idx, val === '' ? 0 : parseInt(val, 10) || 0);
+                        }
+                      }}
+                      className="w-11 py-1 text-center rounded-lg bg-[#1c1c24] text-xs font-black text-red-400 border border-[#2b2b38] focus:border-red-500 focus:outline-none"
                     />
+                    <button
+                      type="button"
+                      onClick={() => handleKillsChange(idx, p.kills + 1)}
+                      className="w-7 h-7 rounded-lg bg-[#1c1c24] hover:bg-[#282836] border border-[#2b2b38] text-zinc-300 font-black text-sm flex items-center justify-center active:scale-95 transition-all"
+                    >
+                      +
+                    </button>
                   </div>
                 </div>
               ))}

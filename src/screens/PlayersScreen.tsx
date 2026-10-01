@@ -123,7 +123,7 @@ export const PlayersScreen: React.FC<Props> = ({ onSelectPlayer, onOpenAddPlayer
       </div>
 
       {/* Player List */}
-      <div className="px-5 space-y-3">
+      <div className="px-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 space-y-0">
         {players.length === 0 ? (
           <div className="p-8 text-center bg-[#141419] rounded-2xl border border-[#22222b]">
             <User className="w-8 h-8 text-zinc-600 mx-auto mb-2" />

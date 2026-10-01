@@ -18,6 +18,9 @@ import { MatchesScreen } from './screens/MatchesScreen';
 import { PlayersScreen } from './screens/PlayersScreen';
 import { InsightsScreen } from './screens/InsightsScreen';
 import { AccountModal } from './components/AccountModal';
+import { DesktopSidebar } from './components/DesktopSidebar';
+import { DesktopHeader } from './components/DesktopHeader';
+
 import { Player, Match } from './types';
 import { api } from './api/client';
 
@@ -89,49 +92,71 @@ const MainAppContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#070709] flex justify-center text-slate-100 antialiased font-sans selection:bg-red-600 selection:text-white">
-      {/* Real Edge-to-Edge Mobile-First Container (No fake phone bezel) */}
-      <div className="w-full max-w-md min-h-screen bg-[#0c0c10] shadow-2xl flex flex-col relative overflow-x-hidden border-x border-[#1a1a24]">
-        {/* Main Screen Content */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden relative" key={refreshKey}>
-          {activeTab === 'home' && (
-            <HomeScreen
-              onNavigateTab={setActiveTab}
-              onOpenAddMatch={() => setIsAddMatchOpen(true)}
-              onOpenAddTournament={() => setIsAddTournamentOpen(true)}
-              onSelectPlayer={(p) => setSelectedPlayer(p)}
-              onSelectMatch={(m) => setSelectedMatch(m)}
-              onOpenAccount={() => setIsAccountOpen(true)}
-            />
-          )}
+    <div className="min-h-screen bg-[#070709] flex text-slate-100 antialiased font-sans selection:bg-red-600 selection:text-white">
+      {/* Desktop Esports Sidebar (visible on md+, hidden on mobile) */}
+      <DesktopSidebar
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onOpenAddMatch={() => setIsAddMatchOpen(true)}
+        onOpenAddTournament={() => setIsAddTournamentOpen(true)}
+        onOpenAddPlayer={() => setIsAddPlayerOpen(true)}
+        onOpenAccount={() => setIsAccountOpen(true)}
+      />
 
-          {activeTab === 'matches' && (
-            <MatchesScreen
-              onSelectMatch={(m) => setSelectedMatch(m)}
-              onOpenAddMatch={() => setIsAddMatchOpen(true)}
-            />
-          )}
-
-          {activeTab === 'players' && (
-            <PlayersScreen
-              onSelectPlayer={(p) => setSelectedPlayer(p)}
-              onOpenAddPlayer={() => setIsAddPlayerOpen(true)}
-            />
-          )}
-
-          {activeTab === 'insights' && (
-            <InsightsScreen
-              onBack={() => setActiveTab('home')}
-            />
-          )}
-        </main>
-
-        {/* Floating Bottom Navigation Bar */}
-        <BottomNav
+      {/* Main Workspace / View Area */}
+      <div className="flex-1 flex flex-col min-h-screen bg-[#08080c] relative overflow-x-hidden">
+        {/* Desktop Sticky Header (visible on md+, hidden on mobile) */}
+        <DesktopHeader
           activeTab={activeTab}
-          onTabChange={setActiveTab}
-          onPlusClick={() => setIsActionSheetOpen(true)}
+          onSearchClick={() => {}}
+          onNotificationsClick={() => {}}
+          onOpenAccount={() => setIsAccountOpen(true)}
         />
+
+        {/* Responsive Content Container */}
+        <div className="flex-1 w-full max-w-md md:max-w-6xl lg:max-w-7xl mx-auto bg-[#0c0c10] md:bg-transparent shadow-2xl md:shadow-none flex flex-col relative overflow-x-hidden border-x border-[#1a1a24] md:border-none">
+          <main className="flex-1 overflow-y-auto overflow-x-hidden relative pb-24 md:pb-10 md:pt-4" key={refreshKey}>
+            {activeTab === 'home' && (
+              <HomeScreen
+                onNavigateTab={setActiveTab}
+                onOpenAddMatch={() => setIsAddMatchOpen(true)}
+                onOpenAddTournament={() => setIsAddTournamentOpen(true)}
+                onSelectPlayer={(p) => setSelectedPlayer(p)}
+                onSelectMatch={(m) => setSelectedMatch(m)}
+                onOpenAccount={() => setIsAccountOpen(true)}
+              />
+            )}
+
+            {activeTab === 'matches' && (
+              <MatchesScreen
+                onSelectMatch={(m) => setSelectedMatch(m)}
+                onOpenAddMatch={() => setIsAddMatchOpen(true)}
+              />
+            )}
+
+            {activeTab === 'players' && (
+              <PlayersScreen
+                onSelectPlayer={(p) => setSelectedPlayer(p)}
+                onOpenAddPlayer={() => setIsAddPlayerOpen(true)}
+              />
+            )}
+
+            {activeTab === 'insights' && (
+              <InsightsScreen
+                onBack={() => setActiveTab('home')}
+              />
+            )}
+          </main>
+
+          {/* Floating Bottom Navigation Bar (mobile only) */}
+          <div className="md:hidden">
+            <BottomNav
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              onPlusClick={() => setIsActionSheetOpen(true)}
+            />
+          </div>
+        </div>
       </div>
 
       {/* ================= MODALS & ACTION SHEETS ================= */}
