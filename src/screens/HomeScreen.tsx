@@ -34,7 +34,24 @@ export const HomeScreen: React.FC<Props> = ({
   const todayDateStr = getTodayDateString();
   const yesterdayDateStr = getYesterdayDateString();
 
-  const [period, setPeriod] = useState<'Today' | '7D' | '14D' | '30D'>('Today');
+  const PERIOD_TABS = ['Today', '7D', '14D', '30D'] as const;
+  type PeriodTab = (typeof PERIOD_TABS)[number];
+
+  const [period, setPeriod] = useState<PeriodTab>('Today');
+  const [jellyDir, setJellyDir] = useState<'right' | 'left' | null>(null);
+  const [jellyKey, setJellyKey] = useState(0);
+
+  const handlePeriodChange = (newPeriod: PeriodTab) => {
+    if (newPeriod === period) return;
+    const oldIdx = PERIOD_TABS.indexOf(period);
+    const newIdx = PERIOD_TABS.indexOf(newPeriod);
+    setJellyDir(newIdx > oldIdx ? 'right' : 'left');
+    setJellyKey((k) => k + 1);
+    setPeriod(newPeriod);
+    if (newPeriod === 'Today') setSelectedDate(todayDateStr);
+    else setSelectedDate('All');
+  };
+
   const [selectedDate, setSelectedDate] = useState<string>(todayDateStr);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   
@@ -267,26 +284,50 @@ export const HomeScreen: React.FC<Props> = ({
         </div>
       )}
 
-      {/* Period Selector Tabs */}
-      <div className="px-5 mb-3">
-        <div className="p-1 rounded-2xl flex items-center justify-between glass-pill border border-white/10 shadow-sm max-w-sm mx-auto">
-          {(['Today', '7D', '14D', '30D'] as const).map((p) => (
-            <button
-              key={p}
-              onClick={() => {
-                setPeriod(p);
-                if (p === 'Today') setSelectedDate(todayDateStr);
-                else setSelectedDate('All');
-              }}
-              className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                period === p
-                  ? 'bg-red-600 text-white shadow-sm scale-100'
-                  : 'text-zinc-400 hover:text-white'
+      {/* Period Selector Tabs with iOS Jelly Spring Stretch Animation */}
+      <div className="px-5 mb-3.5">
+        <div className="relative p-1 rounded-2xl flex items-center glass-pill border border-white/15 shadow-xl max-w-sm md:max-w-md mx-auto backdrop-blur-2xl">
+          {/* Active Sliding & Stretching Jelly Indicator Pill */}
+          <div
+            className="absolute top-1 bottom-1 pointer-events-none"
+            style={{
+              left: `calc(${PERIOD_TABS.indexOf(period) * 25}% + 4px)`,
+              width: 'calc(25% - 8px)',
+              transition: 'left 0.42s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            }}
+          >
+            <div
+              key={jellyKey}
+              className={`w-full h-full rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-red-600 shadow-[0_0_22px_rgba(239,68,68,0.6)] border border-red-400/40 relative overflow-hidden ${
+                jellyDir === 'right' ? 'animate-jelly-right' : jellyDir === 'left' ? 'animate-jelly-left' : ''
               }`}
             >
-              {p}
-            </button>
-          ))}
+              {/* Specular gloss highlight on top of pill */}
+              <div className="absolute inset-x-0 top-0 h-[48%] bg-gradient-to-b from-white/35 to-transparent rounded-t-xl" />
+              {/* Ambient glowing radial flare */}
+              <div className="absolute -right-1 -top-1 w-6 h-6 bg-red-300/40 rounded-full blur-sm" />
+            </div>
+          </div>
+
+          {PERIOD_TABS.map((p) => {
+            const isActive = period === p;
+            return (
+              <button
+                key={p}
+                onClick={() => handlePeriodChange(p)}
+                className={`relative z-10 flex-1 py-1.5 md:py-2 rounded-xl text-xs md:text-sm font-black transition-colors duration-200 select-none flex items-center justify-center gap-1 active:scale-95 ${
+                  isActive
+                    ? 'text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]'
+                    : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+              >
+                <span>{p}</span>
+                {isActive && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse hidden sm:inline-block shadow-[0_0_6px_#fff]" />
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
