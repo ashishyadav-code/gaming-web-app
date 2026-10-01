@@ -289,16 +289,16 @@ export const HomeScreen: React.FC<Props> = ({
         <div className="relative p-1 rounded-2xl flex items-center glass-pill border border-white/15 shadow-xl max-w-sm md:max-w-md mx-auto backdrop-blur-2xl">
           {/* Active Sliding & Stretching Jelly Indicator Pill */}
           <div
-            className="absolute top-1 bottom-1 pointer-events-none"
+            className="absolute top-1 bottom-1 pointer-events-none transform-gpu will-change-[left]"
             style={{
               left: `calc(${PERIOD_TABS.indexOf(period) * 25}% + 4px)`,
               width: 'calc(25% - 8px)',
-              transition: 'left 0.42s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              transition: 'left 0.62s cubic-bezier(0.22, 1, 0.36, 1)',
             }}
           >
             <div
               key={jellyKey}
-              className={`w-full h-full rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-red-600 shadow-[0_0_22px_rgba(239,68,68,0.6)] border border-red-400/40 relative overflow-hidden ${
+              className={`w-full h-full rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-red-600 shadow-[0_0_24px_rgba(239,68,68,0.65)] border border-red-400/40 relative overflow-hidden transform-gpu ${
                 jellyDir === 'right' ? 'animate-jelly-right' : jellyDir === 'left' ? 'animate-jelly-left' : ''
               }`}
             >
