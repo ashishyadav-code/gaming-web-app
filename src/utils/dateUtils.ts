@@ -47,13 +47,66 @@ export function normalizeDate(dateStr: string = ''): string {
 }
 
 /**
+ * Parses match date strings (e.g. "3 Oct 2026", "26 Sept 2026", "2026-10-03") into Date object
+ */
+export function parseMatchDate(dateStr: string = ''): Date | null {
+  if (!dateStr) return null;
+  const clean = dateStr.trim().replace(/september/i, 'Sep').replace(/sept/i, 'Sep');
+  const d = new Date(clean);
+  if (!isNaN(d.getTime())) {
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+
+  // Fallback for custom formats: e.g. "3 Oct 2026" or "03-10-2026"
+  const parts = clean.split(/[\s-]+/);
+  if (parts.length === 3) {
+    const day = parseInt(parts[0], 10);
+    const monthStr = parts[1].slice(0, 3).toLowerCase();
+    const year = parseInt(parts[2], 10);
+    const months: Record<string, number> = {
+      jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+      jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
+    };
+    if (!isNaN(day) && months[monthStr] !== undefined && !isNaN(year)) {
+      return new Date(year, months[monthStr], day);
+    }
+  }
+  return null;
+}
+
+/**
  * Checks if two date strings represent the same day
  */
 export function isSameDay(date1: string = '', date2: string = ''): boolean {
   if (!date1 || !date2) return false;
   const n1 = normalizeDate(date1);
   const n2 = normalizeDate(date2);
-  return n1 === n2 || n1.includes(n2) || n2.includes(n1);
+  if (n1 === n2) return true;
+
+  const d1 = parseMatchDate(date1);
+  const d2 = parseMatchDate(date2);
+  if (d1 && d2) {
+    return (
+      d1.getFullYear() === d2.getFullYear() &&
+      d1.getMonth() === d2.getMonth() &&
+      d1.getDate() === d2.getDate()
+    );
+  }
+  return false;
+}
+
+/**
+ * Checks if a match date falls within the last N days from today
+ */
+export function isWithinLastNDays(dateStr: string = '', nDays: number = 7): boolean {
+  const d = parseMatchDate(dateStr);
+  if (!d) return false;
+
+  const now = new Date();
+  const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+  const startThreshold = new Date(now.getFullYear(), now.getMonth(), now.getDate() - nDays, 0, 0, 0, 0);
+
+  return d.getTime() >= startThreshold.getTime() && d.getTime() <= endOfToday.getTime();
 }
 
 /**
@@ -64,5 +117,11 @@ export function getUniqueMatchDates(matches: { date: string }[]): string[] {
   for (const m of matches) {
     if (m.date) datesSet.add(m.date.trim());
   }
-  return Array.from(datesSet);
+
+  // Sort newest first
+  return Array.from(datesSet).sort((a, b) => {
+    const da = parseMatchDate(a)?.getTime() || 0;
+    const db = parseMatchDate(b)?.getTime() || 0;
+    return db - da;
+  });
 }

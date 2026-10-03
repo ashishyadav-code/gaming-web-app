@@ -34,9 +34,18 @@ export const HeroBanner: React.FC<Props> = ({
           <div className="flex items-center gap-3 min-w-0 pr-2">
             <div className="w-10 h-10 rounded-xl overflow-hidden p-1 bg-black/40 backdrop-blur-md border border-white/10 flex-shrink-0 flex items-center justify-center">
               <img
-                src={ASSETS.logo}
-                alt="Logo Crest"
+                src={ASSETS.teamSarkarLogo || ASSETS.logo}
+                alt="Team Sarkar"
                 className="w-full h-full object-contain filter drop-shadow"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  if (target.src !== ASSETS.legacyLogo && ASSETS.legacyLogo) {
+                    target.src = ASSETS.legacyLogo;
+                  } else {
+                    target.style.display = 'none';
+                    target.parentElement!.innerHTML = '<span class="text-xs font-black text-red-500 tracking-wider">SRK</span>';
+                  }
+                }}
               />
             </div>
             <div className="min-w-0">

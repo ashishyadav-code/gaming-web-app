@@ -11,7 +11,10 @@ import { Player, Match, Tournament, DashboardSummary, DailyEvaluation } from '..
 import { api } from '../api/client';
 import { ASSETS } from '../utils/assets';
 import { calculateMatchPoints } from '../utils/points';
-import { getTodayDateString, getYesterdayDateString, isSameDay } from '../utils/dateUtils';
+import {
+  getTodayDateString, getYesterdayDateString, isSameDay,
+  parseMatchDate, isWithinLastNDays, getUniqueMatchDates
+} from '../utils/dateUtils';
 import { buildScrimsPointsList } from '../utils/scrimPoints';
 
 interface Props {
@@ -34,7 +37,7 @@ export const HomeScreen: React.FC<Props> = ({
   const todayDateStr = getTodayDateString();
   const yesterdayDateStr = getYesterdayDateString();
 
-  const PERIOD_TABS = ['Today', '7D', '14D', '30D'] as const;
+  const PERIOD_TABS = ['Today', '7D', '15D', '20D'] as const;
   type PeriodTab = (typeof PERIOD_TABS)[number];
 
   const [period, setPeriod] = useState<PeriodTab>('Today');
@@ -111,121 +114,162 @@ export const HomeScreen: React.FC<Props> = ({
     PURGATORY: ASSETS.maps.PURGATORY,
   };
 
-  // Filter matches for the selected date
-  const selectedDateMatches = useMemo(() => {
-    if (selectedDate === 'All') return allMatches;
-    return allMatches.filter((m) => isSameDay(m.date, selectedDate));
-  }, [allMatches, selectedDate]);
+  // Filter matches for the active view / period
+  const activeMatches = useMemo(() => {
+    if (period === 'Today') {
+      if (selectedDate && selectedDate !== 'All') {
+        return allMatches.filter((m) => isSameDay(m.date, selectedDate));
+      }
+      return allMatches.filter((m) => isSameDay(m.date, todayDateStr));
+    }
+    if (period === '7D') {
+      return allMatches.filter((m) => isWithinLastNDays(m.date, 7));
+    }
+    if (period === '15D') {
+      return allMatches.filter((m) => isWithinLastNDays(m.date, 15));
+    }
+    if (period === '20D') {
+      return allMatches.filter((m) => isWithinLastNDays(m.date, 20));
+    }
+    return allMatches;
+  }, [allMatches, period, selectedDate, todayDateStr]);
 
-  // Yesterday / previous session matches for comparison
-  const previousSessionMatches = useMemo(() => {
-    if (allMatches.length === 0) return [];
-    
-    if (selectedDate === 'All') {
-      const mid = Math.floor(allMatches.length / 2);
-      return allMatches.slice(mid);
+  // Keep selectedDateMatches synced so any downstream lists use active period data
+  const selectedDateMatches = activeMatches;
+
+  // Find the actual most recent match day strictly before the selected date (for Today comparison)
+  const previousMatchDayInfo = useMemo(() => {
+    if (allMatches.length === 0) return { dateStr: null, matches: [] };
+    const curTargetDate = (period === 'Today' && selectedDate !== 'All') ? selectedDate : todayDateStr;
+    const curParsed = parseMatchDate(curTargetDate);
+
+    // Get unique dates in match history, sorted newest first
+    const uniqueDates = getUniqueMatchDates(allMatches);
+    const candidateDates = uniqueDates
+      .map((d) => ({ str: d, date: parseMatchDate(d) }))
+      .filter((d) => d.date !== null && !isSameDay(d.str, curTargetDate));
+
+    // Pick the latest date strictly earlier than curTargetDate
+    let prevEntry = curParsed
+      ? candidateDates.find((d) => d.date!.getTime() < curParsed.getTime())
+      : null;
+
+    if (!prevEntry && candidateDates.length > 0) {
+      prevEntry = candidateDates[0];
     }
 
-    if (isSameDay(selectedDate, todayDateStr)) {
-      // Compare Today vs Yesterday
-      const yMatches = allMatches.filter((m) => isSameDay(m.date, yesterdayDateStr));
-      if (yMatches.length > 0) return yMatches;
-      // Fallback: previous matches not in today
-      return allMatches.filter((m) => !isSameDay(m.date, todayDateStr));
-    }
+    if (!prevEntry) return { dateStr: null, matches: [] };
 
-    // If viewing yesterday (26 Sept), compare against first half of matches or earlier day
-    const otherMatches = allMatches.filter((m) => !isSameDay(m.date, selectedDate));
-    if (otherMatches.length > 0) return otherMatches;
+    const matchesOnPrevDay = allMatches.filter((m) => isSameDay(m.date, prevEntry.str));
+    return {
+      dateStr: prevEntry.str,
+      matches: matchesOnPrevDay,
+    };
+  }, [allMatches, period, selectedDate, todayDateStr]);
 
-    // Intra-day split comparison if only single day exists (e.g. Matches 1-3 vs 4-6)
-    if (selectedDateMatches.length >= 4) {
-      const mid = Math.floor(selectedDateMatches.length / 2);
-      return selectedDateMatches.slice(mid); // earlier half
-    }
-
-    return [];
-  }, [allMatches, selectedDate, todayDateStr, yesterdayDateStr, selectedDateMatches]);
-
-  // Compute stats and real daily improvements/trends
+  // Compute stats and real daily improvements / period averages
   const metrics = useMemo(() => {
-    // Current set
-    let curMatches = selectedDateMatches;
-    // If today is selected but has 0 matches yet, check if summary has data or if yesterday had data
-    const hasCurrentMatches = curMatches.length > 0;
-    
-    if (!hasCurrentMatches && summary && summary.matches > 0 && isSameDay(selectedDate, yesterdayDateStr)) {
-      curMatches = allMatches;
-    }
-
-    const curCount = hasCurrentMatches ? curMatches.length : (summary?.matches || 0);
-    const curKillsSum = hasCurrentMatches
-      ? curMatches.reduce((acc, m) => acc + (m.team_kills || 0), 0)
-      : (summary?.avg_kills ? summary.avg_kills * curCount : 0);
-    const curAvgK = curCount > 0 ? Number((curKillsSum / curCount).toFixed(1)) : (summary?.avg_kills || 0.0);
-
-    const curPlacements = hasCurrentMatches ? curMatches.map((m) => m.placement || 12) : [];
+    const curMatches = activeMatches;
+    const curCount = curMatches.length;
+    const curKillsSum = curMatches.reduce((acc, m) => acc + (m.team_kills || 0), 0);
+    const curAvgK = curCount > 0 ? Number((curKillsSum / curCount).toFixed(1)) : 0.0;
+    const curPlacements = curMatches.map((m) => m.placement || 12);
     const curAvgRank = curPlacements.length > 0
       ? Math.round(curPlacements.reduce((a, b) => a + b, 0) / curPlacements.length)
-      : (dailyEval?.avg_placement ? Math.round(dailyEval.avg_placement) : 7);
+      : (period === 'Today' ? 0 : 7);
+    const curBooyah = curMatches.filter((m) => m.placement === 1).length;
 
-    const curBooyah = hasCurrentMatches
-      ? curMatches.filter((m) => m.placement === 1).length
-      : (summary?.booyah || 0);
+    if (period === 'Today') {
+      const prevMatches = previousMatchDayInfo.matches;
+      const prevCount = prevMatches.length;
+      const prevDateLabel = previousMatchDayInfo.dateStr || 'last match day';
 
-    // Previous set comparison
-    const prevMatches = previousSessionMatches;
-    const prevCount = prevMatches.length;
-    let prevAvgK = 0.0;
-    let prevAvgRank = 0;
-    let prevBooyah = 0;
+      let prevAvgK = 0.0;
+      let prevAvgRank = 0;
+      let prevBooyah = 0;
 
-    if (prevCount > 0) {
-      const prevKillsSum = prevMatches.reduce((acc, m) => acc + (m.team_kills || 0), 0);
-      prevAvgK = Number((prevKillsSum / prevCount).toFixed(1));
-      const prevPlacements = prevMatches.map((m) => m.placement || 12);
-      prevAvgRank = Math.round(prevPlacements.reduce((a, b) => a + b, 0) / prevPlacements.length);
-      prevBooyah = prevMatches.filter((m) => m.placement === 1).length;
-    } else if (hasCurrentMatches && curMatches.length >= 4) {
-      // Intra-day comparison: compare second half of matches to first half
-      const half = Math.floor(curMatches.length / 2);
-      const earlyMatches = [...curMatches].reverse().slice(0, half);
-      const _lateMatches = [...curMatches].reverse().slice(half);
-      const earlyAvgK = earlyMatches.reduce((acc, m) => acc + (m.team_kills || 0), 0) / earlyMatches.length;
-      prevAvgK = Number(earlyAvgK.toFixed(1));
-      const earlyAvgR = Math.round(earlyMatches.reduce((acc, m) => acc + (m.placement || 12), 0) / earlyMatches.length);
-      prevAvgRank = earlyAvgR;
+      if (prevCount > 0) {
+        const prevKillsSum = prevMatches.reduce((acc, m) => acc + (m.team_kills || 0), 0);
+        prevAvgK = Number((prevKillsSum / prevCount).toFixed(1));
+        const prevPlacements = prevMatches.map((m) => m.placement || 12);
+        prevAvgRank = Math.round(prevPlacements.reduce((a, b) => a + b, 0) / prevPlacements.length);
+        prevBooyah = prevMatches.filter((m) => m.placement === 1).length;
+      }
+
+      // Matches Trend
+      const matchesTrend = prevCount > 0 ? (curCount - prevCount) : 0;
+
+      // Kills Trend
+      let killsTrendPct = 0;
+      if (prevAvgK > 0) {
+        killsTrendPct = Math.round(((curAvgK - prevAvgK) / prevAvgK) * 100);
+      } else if (curAvgK > 0) {
+        killsTrendPct = 100;
+      }
+
+      // Rank improvement: lower placement rank is better (#1 > #7)
+      let rankImprovement = 0;
+      if (prevAvgRank > 0 && curAvgRank > 0) {
+        rankImprovement = prevAvgRank - curAvgRank;
+      }
+
+      const booyahTrend = curBooyah - prevBooyah;
+
+      return {
+        matches: curCount,
+        matchesLabel: prevCount > 0
+          ? (matchesTrend > 0 ? `▲ +${matchesTrend} vs ${prevDateLabel}` : matchesTrend < 0 ? `▼ ${matchesTrend} vs ${prevDateLabel}` : `Same as ${prevDateLabel}`)
+          : (curCount > 0 ? `Logged today` : `No matches today`),
+        matchesTrend,
+
+        avgKills: curAvgK,
+        avgKillsLabel: prevAvgK > 0
+          ? (killsTrendPct > 0 ? `▲ +${killsTrendPct}% vs ${prevDateLabel}` : killsTrendPct < 0 ? `▼ ${Math.abs(killsTrendPct)}% vs ${prevDateLabel}` : `Same as ${prevDateLabel} (${prevAvgK})`)
+          : (curAvgK > 0 ? `▲ +100% vs ${prevDateLabel}` : `0% vs ${prevDateLabel}`),
+        avgKillsTrendPct: killsTrendPct,
+
+        avgPosition: curAvgRank,
+        avgPositionLabel: prevAvgRank > 0 && curAvgRank > 0
+          ? (rankImprovement > 0 ? `▲ +${rankImprovement} Ranks vs #${prevAvgRank}` : rankImprovement < 0 ? `▼ ${Math.abs(rankImprovement)} Ranks vs #${prevAvgRank}` : `Same rank (#${prevAvgRank})`)
+          : (curAvgRank > 0 ? `#${curAvgRank} Today` : `No ranks logged`),
+        rankImprovement,
+
+        booyah: curBooyah,
+        booyahLabel: prevCount > 0
+          ? (booyahTrend > 0 ? `▲ +${booyahTrend} vs ${prevDateLabel}` : booyahTrend < 0 ? `▼ ${Math.abs(booyahTrend)} vs ${prevDateLabel}` : (curBooyah === 0 ? `0 in both days` : `Same as ${prevDateLabel}`))
+          : `${curBooyah} Booyahs`,
+        booyahTrend,
+
+        periodSubtitle: prevCount > 0 ? `Compared to last match day (${prevDateLabel})` : `Today telemetry`,
+        hasCurrentMatches: curCount > 0,
+        isMultiDay: false,
+      };
     }
 
-    // Trend calculations
-    let killsTrendPct = 0;
-    if (prevAvgK > 0) {
-      killsTrendPct = Math.round(((curAvgK - prevAvgK) / prevAvgK) * 100);
-    } else if (curAvgK > 0) {
-      killsTrendPct = 40; // positive progression baseline
-    }
-
-    // Placement trend: lower rank number is better (#1 > #7)
-    let rankImprovement = 0;
-    if (prevAvgRank > 0 && curAvgRank > 0) {
-      rankImprovement = prevAvgRank - curAvgRank;
-    }
-
-    const matchesDelta = prevCount > 0 ? (curCount - prevCount) : 0;
-    const booyahDelta = curBooyah - prevBooyah;
-
+    // Multi-day periods: 7D, 15D, 20D
+    const daysNum = period === '7D' ? 7 : period === '15D' ? 15 : 20;
     return {
       matches: curCount,
-      matchesTrend: matchesDelta,
+      matchesLabel: `${curCount} in last ${daysNum} days`,
+      matchesTrend: 0,
+
       avgKills: curAvgK,
-      avgKillsTrendPct: killsTrendPct,
+      avgKillsLabel: `Overall avg (${daysNum}D)`,
+      avgKillsTrendPct: 0,
+
       avgPosition: curAvgRank,
-      rankImprovement,
+      avgPositionLabel: `Overall avg rank (${daysNum}D)`,
+      rankImprovement: 0,
+
       booyah: curBooyah,
-      booyahTrend: booyahDelta,
-      hasCurrentMatches,
+      booyahLabel: `${curBooyah} Booyahs (${daysNum}D)`,
+      booyahTrend: 0,
+
+      periodSubtitle: `Last ${daysNum} Days Overall Squad Averages`,
+      hasCurrentMatches: curCount > 0,
+      isMultiDay: true,
     };
-  }, [selectedDateMatches, previousSessionMatches, allMatches, summary, dailyEval, selectedDate, yesterdayDateStr]);
+  }, [activeMatches, period, previousMatchDayInfo]);
 
   return (
     <div className="min-h-full pb-28 text-left animate-fade-in-smooth bg-[#0c0c10]">
@@ -243,18 +287,22 @@ export const HomeScreen: React.FC<Props> = ({
       {/* Date Filter Status Indicator */}
       <div className="px-5 mb-2 flex items-center justify-between">
         <span className="text-[11px] font-bold text-zinc-400 flex items-center gap-1.5">
-          <span className={`w-2 h-2 rounded-full ${isSameDay(selectedDate, todayDateStr) ? 'bg-red-500 animate-pulse' : 'bg-zinc-500'}`} />
+          <span className={`w-2 h-2 rounded-full ${period === 'Today' && isSameDay(selectedDate, todayDateStr) ? 'bg-red-500 animate-pulse' : 'bg-emerald-500'}`} />
           <span>
-            {isSameDay(selectedDate, todayDateStr)
-              ? `Today • ${todayDateStr}`
-              : isSameDay(selectedDate, yesterdayDateStr)
-              ? `Yesterday • ${yesterdayDateStr}`
-              : selectedDate === 'All'
-              ? 'All Recorded Dates'
-              : selectedDate}
+            {period === 'Today'
+              ? (isSameDay(selectedDate, todayDateStr) ? `Today • ${todayDateStr}` : `Date • ${selectedDate}`)
+              : `${period} • Last ${period.replace('D', '')} Days Overall Performance`}
           </span>
         </span>
-        {selectedDate !== todayDateStr && (
+        {period !== 'Today' && (
+          <button
+            onClick={() => handlePeriodChange('Today')}
+            className="text-[10px] font-bold text-red-400 hover:text-red-300 hover:underline flex items-center gap-1"
+          >
+            <span>Switch to Today</span>
+          </button>
+        )}
+        {period === 'Today' && selectedDate !== todayDateStr && (
           <button
             onClick={() => setSelectedDate(todayDateStr)}
             className="text-[10px] font-bold text-red-400 hover:text-red-300 hover:underline flex items-center gap-1"
@@ -331,100 +379,128 @@ export const HomeScreen: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* 4 Compact Minimalist Glassy Stat Summary Cards (With Real Daily Improvements) */}
+      {/* 4 Compact Minimalist Glassy Stat Summary Cards (With Real Daily Improvements & Period Averages) */}
       <div className="px-5 grid grid-cols-2 sm:grid-cols-4 gap-2.5 md:gap-4 mb-4">
         {/* Card 1: Matches */}
-        <div className="p-2.5 rounded-2xl glass-card border border-white/10 shadow-sm flex flex-col justify-between min-h-[82px] hover:border-red-500/30 transition-all">
+        <div className="p-2.5 rounded-2xl glass-card border border-white/10 shadow-sm flex flex-col justify-between min-h-[86px] hover:border-red-500/30 transition-all">
           <div className="w-7 h-7 rounded-lg bg-red-500/15 text-red-400 flex items-center justify-center border border-red-500/20">
             <Swords className="w-3.5 h-3.5" />
           </div>
-          <div>
+          <div className="mt-2 min-w-0">
             <div className="text-base font-black text-white leading-tight">
               {metrics.matches}
             </div>
             <div className="text-[10px] font-bold text-zinc-400 leading-tight">
               Matches
             </div>
-            <div className="text-[9px] font-extrabold flex items-center gap-0.5 mt-0.5">
-              {metrics.matchesTrend > 0 ? (
-                <span className="text-emerald-400">▲ +{metrics.matchesTrend}</span>
-              ) : metrics.matchesTrend < 0 ? (
-                <span className="text-red-400">▼ {metrics.matchesTrend}</span>
-              ) : (
-                <span className="text-zinc-500">▲ 0</span>
-              )}
+            <div className="text-[9px] font-extrabold flex items-center gap-0.5 mt-1 min-w-0">
+              <span
+                className={`truncate ${
+                  metrics.isMultiDay
+                    ? 'text-zinc-400 font-semibold'
+                    : metrics.matchesTrend > 0
+                    ? 'text-emerald-400'
+                    : metrics.matchesTrend < 0
+                    ? 'text-red-400'
+                    : 'text-zinc-400 font-medium'
+                }`}
+                title={metrics.matchesLabel}
+              >
+                {metrics.matchesLabel}
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Card 2: Avg Kills (Real Improvement vs Yesterday) */}
-        <div className="p-2.5 rounded-2xl glass-card border border-white/10 shadow-sm flex flex-col justify-between min-h-[82px] hover:border-rose-500/30 transition-all">
+        {/* Card 2: Avg Kills (Real Improvement vs Yesterday / Period Avg) */}
+        <div className="p-2.5 rounded-2xl glass-card border border-white/10 shadow-sm flex flex-col justify-between min-h-[86px] hover:border-rose-500/30 transition-all">
           <div className="w-7 h-7 rounded-lg bg-rose-500/15 text-rose-400 flex items-center justify-center border border-rose-500/20">
             <Crosshair className="w-3.5 h-3.5" />
           </div>
-          <div>
+          <div className="mt-2 min-w-0">
             <div className="text-base font-black text-white leading-tight">
               {metrics.avgKills}
             </div>
             <div className="text-[10px] font-bold text-zinc-400 leading-tight">
               Avg Kills
             </div>
-            <div className="text-[9px] font-extrabold flex items-center gap-0.5 mt-0.5">
-              {metrics.avgKillsTrendPct > 0 ? (
-                <span className="text-emerald-400">▲ +{metrics.avgKillsTrendPct}%</span>
-              ) : metrics.avgKillsTrendPct < 0 ? (
-                <span className="text-red-400">▼ {metrics.avgKillsTrendPct}%</span>
-              ) : (
-                <span className="text-zinc-500">▲ 0%</span>
-              )}
+            <div className="text-[9px] font-extrabold flex items-center gap-0.5 mt-1 min-w-0">
+              <span
+                className={`truncate ${
+                  metrics.isMultiDay
+                    ? 'text-zinc-400 font-semibold'
+                    : metrics.avgKillsTrendPct > 0
+                    ? 'text-emerald-400'
+                    : metrics.avgKillsTrendPct < 0
+                    ? 'text-red-400'
+                    : 'text-zinc-400 font-medium'
+                }`}
+                title={metrics.avgKillsLabel}
+              >
+                {metrics.avgKillsLabel}
+              </span>
             </div>
           </div>
         </div>
 
         {/* Card 3: Avg Position */}
-        <div className="p-2.5 rounded-2xl glass-card border border-white/10 shadow-sm flex flex-col justify-between min-h-[82px] hover:border-amber-500/30 transition-all">
+        <div className="p-2.5 rounded-2xl glass-card border border-white/10 shadow-sm flex flex-col justify-between min-h-[86px] hover:border-amber-500/30 transition-all">
           <div className="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center border border-amber-500/20">
             <Award className="w-3.5 h-3.5" />
           </div>
-          <div>
+          <div className="mt-2 min-w-0">
             <div className="text-base font-black text-white leading-tight">
               {metrics.avgPosition > 0 ? `#${metrics.avgPosition}` : '-'}
             </div>
             <div className="text-[10px] font-bold text-zinc-400 leading-tight truncate">
               Avg Position
             </div>
-            <div className="text-[9px] font-extrabold flex items-center gap-0.5 mt-0.5">
-              {metrics.rankImprovement > 0 ? (
-                <span className="text-emerald-400">▲ +{metrics.rankImprovement} Ranks</span>
-              ) : metrics.rankImprovement < 0 ? (
-                <span className="text-red-400">▼ {Math.abs(metrics.rankImprovement)} Ranks</span>
-              ) : (
-                <span className="text-zinc-500">- 0 Ranks</span>
-              )}
+            <div className="text-[9px] font-extrabold flex items-center gap-0.5 mt-1 min-w-0">
+              <span
+                className={`truncate ${
+                  metrics.isMultiDay
+                    ? 'text-zinc-400 font-semibold'
+                    : metrics.rankImprovement > 0
+                    ? 'text-emerald-400'
+                    : metrics.rankImprovement < 0
+                    ? 'text-red-400'
+                    : 'text-zinc-400 font-medium'
+                }`}
+                title={metrics.avgPositionLabel}
+              >
+                {metrics.avgPositionLabel}
+              </span>
             </div>
           </div>
         </div>
 
         {/* Card 4: Booyah */}
-        <div className="p-2.5 rounded-2xl glass-card border border-white/10 shadow-sm flex flex-col justify-between min-h-[82px] hover:border-amber-500/30 transition-all">
+        <div className="p-2.5 rounded-2xl glass-card border border-white/10 shadow-sm flex flex-col justify-between min-h-[86px] hover:border-amber-500/30 transition-all">
           <div className="w-7 h-7 rounded-lg bg-red-500/15 text-red-400 flex items-center justify-center border border-red-500/20">
             <Trophy className="w-3.5 h-3.5" />
           </div>
-          <div>
+          <div className="mt-2 min-w-0">
             <div className="text-base font-black text-white leading-tight">
               {metrics.booyah}
             </div>
             <div className="text-[10px] font-bold text-zinc-400 leading-tight">
               Booyah
             </div>
-            <div className="text-[9px] font-extrabold flex items-center gap-0.5 mt-0.5">
-              {metrics.booyahTrend > 0 ? (
-                <span className="text-emerald-400">▲ +{metrics.booyahTrend}</span>
-              ) : metrics.booyahTrend < 0 ? (
-                <span className="text-red-400">▼ {metrics.booyahTrend}</span>
-              ) : (
-                <span className="text-zinc-500">0</span>
-              )}
+            <div className="text-[9px] font-extrabold flex items-center gap-0.5 mt-1 min-w-0">
+              <span
+                className={`truncate ${
+                  metrics.isMultiDay
+                    ? 'text-zinc-400 font-semibold'
+                    : metrics.booyahTrend > 0
+                    ? 'text-emerald-400'
+                    : metrics.booyahTrend < 0
+                    ? 'text-red-400'
+                    : 'text-zinc-400 font-medium'
+                }`}
+                title={metrics.booyahLabel}
+              >
+                {metrics.booyahLabel}
+              </span>
             </div>
           </div>
         </div>
