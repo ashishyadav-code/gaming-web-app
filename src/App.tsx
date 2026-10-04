@@ -93,17 +93,9 @@ const MainAppContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#060608] flex text-slate-100 antialiased font-sans selection:bg-red-600 selection:text-white relative">
-      {/* Windows Fluent Reveal Highlight & Ambient Cursor Engine */}
+    <div className="min-h-screen bg-[#07070a] flex text-slate-100 antialiased font-sans selection:bg-red-600 selection:text-white relative">
+      {/* Windows Fluent Reveal Highlight Engine (Minimal, Tight Proximity) */}
       <SpotlightCursor />
-
-      {/* iOS Liquid Glass Ambient Refraction Mesh (Vibrant colored lights behind frosted glass) */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-red-600/[0.14] blur-[120px] animate-pulse" />
-        <div className="absolute top-1/3 -right-24 w-96 h-96 rounded-full bg-rose-600/[0.12] blur-[130px]" />
-        <div className="absolute -bottom-24 left-1/3 w-[30rem] h-[30rem] rounded-full bg-red-950/[0.30] blur-[140px]" />
-        <div className="absolute top-2/3 left-12 w-80 h-80 rounded-full bg-amber-600/[0.08] blur-[120px]" />
-      </div>
 
       {/* Desktop Esports Sidebar (visible on md+, hidden on mobile) */}
       <DesktopSidebar

@@ -19,14 +19,14 @@ export const HeroBanner: React.FC<Props> = ({
         <img
           src={ASSETS.heroBanner}
           alt="Team Sarkar Hero Banner"
-          className="absolute inset-0 w-full h-full object-cover object-center opacity-60 group-hover:scale-105 transition-transform duration-700 pointer-events-none"
+          className="absolute inset-0 w-full h-full object-cover object-right opacity-35 group-hover:scale-105 transition-transform duration-700 pointer-events-none"
           onError={(e) => {
             (e.target as HTMLImageElement).src = ASSETS.heroHeader;
           }}
         />
 
-        {/* Gradient Overlay for high readability & glassy sheen */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0c0c12]/98 via-[#0e0e16]/95 to-red-950/60 pointer-events-none" />
+        {/* Gradient Overlay: hides duplicate baked text on left, keeps artwork on right */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0c0c12] via-[#0c0c12]/90 to-transparent pointer-events-none" />
 
         {/* Content */}
         <div className="relative p-3.5 z-10 flex items-center justify-between gap-2">
