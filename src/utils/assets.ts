@@ -1,8 +1,9 @@
 import logoImg from '../assets/team_sarkar.png';
 import teamSarkarLogo from '../assets/team_sarkar.png';
 import legacyLogoImg from '../assets/logo.png';
-import heroBannerImg from '../assets/hero_banner.png';
-import heroHeaderImg from '../assets/hero_header.png';
+import headerLogoImg from '../assets/header_logo.png';
+import heroBannerImg from '../assets/header_logo.png';
+import heroHeaderImg from '../assets/header_logo.png';
 import mapBermuda from '../assets/map_bermuda.png';
 import mapKalahari from '../assets/map_kalahari.png';
 import mapNexterra from '../assets/map_nexterra.png';
@@ -20,9 +21,10 @@ import avatarPandit from '../assets/pandit.jpeg';
 export const ASSETS = {
   logo: logoImg,
   teamSarkarLogo: teamSarkarLogo,
+  headerLogo: headerLogoImg,
   legacyLogo: legacyLogoImg,
-  heroBanner: heroBannerImg,
-  heroHeader: heroHeaderImg,
+  heroBanner: headerLogoImg,
+  heroHeader: headerLogoImg,
   maps: {
     BERMUDA: mapBermuda,
     KALAHARI: mapKalahari,

@@ -13,65 +13,33 @@ export const HeroBanner: React.FC<Props> = ({
   onDateClick
 }) => {
   return (
-    <div className="px-5 my-2">
-      <div className="relative w-full rounded-2xl overflow-hidden glass-card border border-white/10 group shadow-lg shadow-black/40">
-        {/* Artwork Background */}
+    <div className="px-5 my-2.5">
+      <div className="relative w-full rounded-2xl overflow-hidden glass-card border border-white/15 group shadow-xl shadow-black/60 aspect-[3/1] sm:aspect-[3.6/1] min-h-[110px] sm:min-h-[140px] flex items-center">
+        {/* Crisp Esports Header Poster */}
         <img
-          src={ASSETS.heroBanner}
+          src={ASSETS.headerLogo || ASSETS.heroBanner}
           alt="Team Sarkar Hero Banner"
-          className="absolute inset-0 w-full h-full object-cover object-right opacity-35 group-hover:scale-105 transition-transform duration-700 pointer-events-none"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = ASSETS.heroHeader;
-          }}
+          className="w-full h-full object-cover object-center group-hover:scale-[1.02] transition-transform duration-700 pointer-events-none select-none"
         />
 
-        {/* Gradient Overlay: hides duplicate baked text on left, keeps artwork on right */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0c0c12] via-[#0c0c12]/90 to-transparent pointer-events-none" />
+        {/* Subtle Edge Vignette for depth */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/20 pointer-events-none" />
 
-        {/* Content */}
-        <div className="relative p-3.5 z-10 flex items-center justify-between gap-2">
-          {/* Logo Crest & Quote */}
-          <div className="flex items-center gap-3 min-w-0 pr-2">
-            <div className="w-10 h-10 rounded-xl overflow-hidden p-1 glass-card border border-white/20 flex-shrink-0 flex items-center justify-center shadow-md">
-              <img
-                src={ASSETS.teamSarkarLogo || ASSETS.logo}
-                alt="Team Sarkar"
-                className="w-full h-full object-contain filter drop-shadow"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  if (target.src !== ASSETS.legacyLogo && ASSETS.legacyLogo) {
-                    target.src = ASSETS.legacyLogo;
-                  } else {
-                    target.style.display = 'none';
-                    target.parentElement!.innerHTML = '<span class="text-xs font-black text-red-500 tracking-wider">SRK</span>';
-                  }
-                }}
-              />
-            </div>
-            <div className="min-w-0">
-              <h2 className="text-white font-extrabold text-[15px] leading-snug tracking-tight drop-shadow-sm truncate">
-                Discipline Today
-              </h2>
-              <p className="text-zinc-400 font-medium text-[12px] leading-tight truncate">
-                Domination Tomorrow.
-              </p>
-              <div className="w-8 h-0.5 bg-red-500 rounded-full mt-1.5" />
-            </div>
-          </div>
-
-          {/* Date Capsule Button */}
-          <div className="flex-shrink-0">
+        {/* Floating Date Filter Capsule Button */}
+        {onDateClick && (
+          <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-10">
             <button
               onClick={onDateClick}
               type="button"
-              className="px-3.5 py-1.5 rounded-full glass-btn border border-white/20 shadow-md flex items-center gap-1.5 text-white text-xs font-bold hover:border-red-500/50 active:scale-95 transition-all"
+              className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-black/70 hover:bg-black/90 backdrop-blur-md border border-white/20 hover:border-red-500/60 shadow-lg flex items-center gap-1.5 text-white text-[10.5px] sm:text-xs font-bold active:scale-95 transition-all"
+              title="Filter by date"
             >
-              <Calendar className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
+              <Calendar className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-red-400 flex-shrink-0" />
               <span className="whitespace-nowrap tracking-tight">{selectedDate}</span>
-              <ChevronRight className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0" />
+              <ChevronRight className="w-3 h-3 text-zinc-400 flex-shrink-0" />
             </button>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
