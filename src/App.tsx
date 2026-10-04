@@ -20,6 +20,7 @@ import { InsightsScreen } from './screens/InsightsScreen';
 import { AccountModal } from './components/AccountModal';
 import { DesktopSidebar } from './components/DesktopSidebar';
 import { DesktopHeader } from './components/DesktopHeader';
+import { SpotlightCursor } from './components/SpotlightCursor';
 
 import { Player, Match } from './types';
 import { api } from './api/client';
@@ -93,6 +94,9 @@ const MainAppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#060608] flex text-slate-100 antialiased font-sans selection:bg-red-600 selection:text-white relative">
+      {/* Windows Fluent Reveal Highlight & Ambient Cursor Engine */}
+      <SpotlightCursor />
+
       {/* iOS Liquid Glass Ambient Refraction Mesh (Vibrant colored lights behind frosted glass) */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-red-600/[0.14] blur-[120px] animate-pulse" />

@@ -10,20 +10,56 @@
   }
 }
 
-/* Apple iOS / visionOS Ultra Liquid Glass & Specular Edge Refraction */
-/* Apple iOS / visionOS Specular Liquid Glass System (Refraction, Specular Glints & Inset Lighting) */
+/* Windows Fluent Reveal Highlight & iOS Liquid Glass Specular System */
+:root {
+  --cursor-x: -999px;
+  --cursor-y: -999px;
+  --cursor-opacity: 0;
+}
+
+.glass-panel,
+.glass-card,
+.glass-btn,
+.glass-button,
+.glass-pill,
+.glass-sheet,
+.glass-nav {
+  --mouse-x: -999px;
+  --mouse-y: -999px;
+  --proximity: 0;
+  --is-hovered: 0;
+}
+
+/* Glass Panel (Sidebar, Header, Main Panels) */
 .glass-panel {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 45%, rgba(14, 14, 20, 0.80) 100%);
+  border: 1px solid transparent !important;
+  background-origin: padding-box, padding-box, border-box;
+  background-clip: padding-box, padding-box, border-box;
+  background-image: 
+    /* Layer 1: Interior Surface Spotlight */
+    radial-gradient(
+      320px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      rgba(255, 255, 255, calc(0.08 * var(--proximity, 0))),
+      rgba(239, 68, 68, calc(0.05 * var(--proximity, 0))) 45%,
+      transparent 80%
+    ),
+    /* Layer 2: Deep Obsidian Glass Base */
+    linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 45%, rgba(14, 14, 20, 0.85) 100%),
+    /* Layer 3: Dynamic Border Reveal Highlight */
+    radial-gradient(
+      220px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      rgba(255, 255, 255, calc(0.92 * var(--proximity, 0))),
+      rgba(239, 68, 68, calc(0.65 * var(--proximity, 0))) 40%,
+      rgba(255, 255, 255, 0.18) 100%
+    );
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.35),
     inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 0 0px 0px rgba(255, 255, 255, 0);
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .glass-panel::before {
@@ -60,20 +96,85 @@
   z-index: 2;
 }
 
+/* Glass Card with Reveal Highlight (Glows as mouse approaches from outside, lights up inside) */
 .glass-card {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.03) 45%, rgba(16, 16, 24, 0.85) 100%);
+  border-radius: 20px;
+  border: 1px solid transparent !important;
+  background-origin: padding-box, padding-box, border-box;
+  background-clip: padding-box, padding-box, border-box;
+  background-image: 
+    /* Layer 1: Surface Spotlight under cursor */
+    radial-gradient(
+      280px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      rgba(255, 255, 255, calc(0.12 * var(--proximity, 0) + 0.08 * var(--is-hovered, 0))),
+      rgba(239, 68, 68, calc(0.08 * var(--proximity, 0))) 45%,
+      transparent 80%
+    ),
+    /* Layer 2: Frosted Obsidian Glass Body */
+    linear-gradient(145deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.03) 45%, rgba(16, 16, 24, 0.88) 100%),
+    /* Layer 3: Dynamic Border Reveal Highlight (lights up border where cursor approaches) */
+    radial-gradient(
+      180px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      rgba(255, 255, 255, calc(0.95 * var(--proximity, 0))),
+      rgba(239, 68, 68, calc(0.70 * var(--proximity, 0))) 40%,
+      rgba(255, 255, 255, 0.20) 100%
+    );
   backdrop-filter: blur(12px) saturate(190%);
   -webkit-backdrop-filter: blur(12px) saturate(190%);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.35),
+    0 0 calc(24px * var(--proximity, 0)) rgba(239, 68, 68, calc(0.25 * var(--proximity, 0))),
     inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 0 0px 0px rgba(255, 255, 255, 0);
-  transition: all 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  transition: box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Emerald Themed Card Reveal (Top Scrim) */
+.glass-card[class*="border-emerald"] {
+  background-image: 
+    radial-gradient(
+      280px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      rgba(255, 255, 255, calc(0.12 * var(--proximity, 0) + 0.08 * var(--is-hovered, 0))),
+      rgba(16, 185, 129, calc(0.10 * var(--proximity, 0))) 45%,
+      transparent 80%
+    ),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(6, 78, 59, 0.25) 45%, rgba(10, 25, 18, 0.90) 100%),
+    radial-gradient(
+      180px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      rgba(255, 255, 255, calc(0.95 * var(--proximity, 0))),
+      rgba(52, 211, 153, calc(0.85 * var(--proximity, 0))) 40%,
+      rgba(16, 185, 129, 0.45) 100%
+    );
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.35),
+    0 0 calc(24px * var(--proximity, 0)) rgba(16, 185, 129, calc(0.30 * var(--proximity, 0))),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Red Themed Card Reveal (Lowest Scrim) */
+.glass-card[class*="border-red"] {
+  background-image: 
+    radial-gradient(
+      280px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      rgba(255, 255, 255, calc(0.12 * var(--proximity, 0) + 0.08 * var(--is-hovered, 0))),
+      rgba(239, 68, 68, calc(0.10 * var(--proximity, 0))) 45%,
+      transparent 80%
+    ),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(127, 29, 29, 0.25) 45%, rgba(24, 10, 12, 0.90) 100%),
+    radial-gradient(
+      180px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      rgba(255, 255, 255, calc(0.95 * var(--proximity, 0))),
+      rgba(239, 68, 68, calc(0.85 * var(--proximity, 0))) 40%,
+      rgba(239, 68, 68, 0.45) 100%
+    );
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.35),
+    0 0 calc(24px * var(--proximity, 0)) rgba(239, 68, 68, calc(0.30 * var(--proximity, 0))),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .glass-card::before {
@@ -111,27 +212,37 @@
 }
 
 .glass-card:hover {
-  border-color: rgba(255, 255, 255, 0.45);
-  box-shadow: 
-    0 16px 44px rgba(0, 0, 0, 0.55),
-    0 0 20px rgba(255, 255, 255, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.2);
   transform: translateY(-1.5px);
 }
 
-/* Glass Buttons & Interactive Elements */
+/* Glass Buttons & Interactive Elements with Reveal Highlight */
 .glass-btn,
 .glass-button {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border-radius: 16px;
+  border: 1px solid transparent !important;
+  background-origin: padding-box, padding-box, border-box;
+  background-clip: padding-box, padding-box, border-box;
+  background-image: 
+    radial-gradient(
+      180px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      rgba(255, 255, 255, calc(0.18 * var(--proximity, 0) + 0.12 * var(--is-hovered, 0))),
+      rgba(239, 68, 68, calc(0.12 * var(--proximity, 0))) 45%,
+      transparent 80%
+    ),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 100%),
+    radial-gradient(
+      140px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      rgba(255, 255, 255, calc(0.98 * var(--proximity, 0))),
+      rgba(239, 68, 68, calc(0.75 * var(--proximity, 0))) 45%,
+      rgba(255, 255, 255, 0.22) 100%
+    );
   backdrop-filter: blur(8px) saturate(180%);
   -webkit-backdrop-filter: blur(8px) saturate(180%);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.2),
+    0 0 calc(18px * var(--proximity, 0)) rgba(239, 68, 68, calc(0.30 * var(--proximity, 0))),
     inset 0 1px 0 rgba(255, 255, 255, 0.5),
     inset 0 -1px 0 rgba(255, 255, 255, 0.1);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -178,12 +289,6 @@
 
 .glass-btn:hover,
 .glass-button:hover {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.10) 100%);
-  border-color: rgba(255, 255, 255, 0.45);
-  box-shadow: 
-    0 12px 36px rgba(0, 0, 0, 0.3),
-    0 0 16px rgba(255, 255, 255, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
   transform: translateY(-1px);
 }
 
@@ -192,17 +297,34 @@
   transform: scale(0.97);
 }
 
+/* Glass Pill (Pill Tabs, Badges) */
 .glass-pill {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(20, 20, 28, 0.80) 100%);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 9999px;
+  border: 1px solid transparent !important;
+  background-origin: padding-box, padding-box, border-box;
+  background-clip: padding-box, padding-box, border-box;
+  background-image: 
+    radial-gradient(
+      200px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      rgba(255, 255, 255, calc(0.14 * var(--proximity, 0))),
+      rgba(239, 68, 68, calc(0.08 * var(--proximity, 0))) 45%,
+      transparent 80%
+    ),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(20, 20, 28, 0.82) 100%),
+    radial-gradient(
+      150px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      rgba(255, 255, 255, calc(0.95 * var(--proximity, 0))),
+      rgba(239, 68, 68, calc(0.70 * var(--proximity, 0))) 45%,
+      rgba(255, 255, 255, 0.20) 100%
+    );
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
   box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+    0 8px 32px rgba(0, 0, 0, 0.25),
+    0 0 calc(20px * var(--proximity, 0)) rgba(239, 68, 68, calc(0.20 * var(--proximity, 0))),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .glass-pill::before {
@@ -242,10 +364,25 @@
 .glass-nav {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(26, 26, 36, 0.85) 0%, rgba(12, 12, 18, 0.95) 100%);
+  border: 1px solid transparent !important;
+  background-origin: padding-box, padding-box, border-box;
+  background-clip: padding-box, padding-box, border-box;
+  background-image: 
+    radial-gradient(
+      240px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      rgba(255, 255, 255, calc(0.12 * var(--proximity, 0))),
+      rgba(239, 68, 68, calc(0.06 * var(--proximity, 0))) 45%,
+      transparent 80%
+    ),
+    linear-gradient(180deg, rgba(26, 26, 36, 0.85) 0%, rgba(12, 12, 18, 0.95) 100%),
+    radial-gradient(
+      180px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      rgba(255, 255, 255, calc(0.92 * var(--proximity, 0))),
+      rgba(239, 68, 68, calc(0.65 * var(--proximity, 0))) 40%,
+      rgba(255, 255, 255, 0.22) 100%
+    );
   backdrop-filter: blur(24px) saturate(200%);
   -webkit-backdrop-filter: blur(24px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.25);
   box-shadow: 
     0 16px 48px rgba(0, 0, 0, 0.8),
     inset 0 1px 0 rgba(255, 255, 255, 0.5),
@@ -272,12 +409,28 @@
 .glass-sheet {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(28, 28, 40, 0.92) 0%, rgba(10, 10, 15, 0.98) 100%);
+  border: 1px solid transparent !important;
+  background-origin: padding-box, padding-box, border-box;
+  background-clip: padding-box, padding-box, border-box;
+  background-image: 
+    radial-gradient(
+      360px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      rgba(255, 255, 255, calc(0.12 * var(--proximity, 0))),
+      rgba(239, 68, 68, calc(0.07 * var(--proximity, 0))) 45%,
+      transparent 80%
+    ),
+    linear-gradient(180deg, rgba(28, 28, 40, 0.92) 0%, rgba(10, 10, 15, 0.98) 100%),
+    radial-gradient(
+      240px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      rgba(255, 255, 255, calc(0.92 * var(--proximity, 0))),
+      rgba(239, 68, 68, calc(0.65 * var(--proximity, 0))) 45%,
+      rgba(255, 255, 255, 0.22) 100%
+    );
   backdrop-filter: blur(28px) saturate(200%);
   -webkit-backdrop-filter: blur(28px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.25);
   box-shadow: 
     0 -16px 48px rgba(0, 0, 0, 0.85),
+    0 0 calc(30px * var(--proximity, 0)) rgba(239, 68, 68, calc(0.20 * var(--proximity, 0))),
     inset 0 1px 0 rgba(255, 255, 255, 0.55),
     inset 0 -1px 0 rgba(255, 255, 255, 0.1);
 }
