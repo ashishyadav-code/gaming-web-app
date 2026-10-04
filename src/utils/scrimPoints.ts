@@ -145,11 +145,15 @@ export function buildScrimsPointsList(
         ? Number((breakdowns.reduce((sum, b) => sum + b.placement, 0) / count).toFixed(1))
         : t.avg_placement || 0;
 
+      const effectiveStatus = (t.status && t.status !== 'Upcoming')
+        ? t.status
+        : (count > 0 ? 'Completed' : 'Upcoming');
+
       result.push({
         id: t.id,
         name: t.name,
         date: t.date,
-        status: t.status || (count > 0 ? 'Completed' : 'Upcoming'),
+        status: effectiveStatus,
         notes: t.notes,
         matchesCount: count,
         kp: totalKp,
@@ -172,30 +176,28 @@ export function buildScrimsPointsList(
   });
 
   // 4. Tag Top and Lowest within the first up to 5 items (latest 5)
-  // Only evaluate played scrims with matches and positive points so upcoming/empty scrims aren't tagged as LOWEST
+  // Evaluate all scrims in latest 5 that have matches played (matchesCount > 0)
   const topSlice = result.slice(0, 5);
-  const playedScrims = topSlice.filter((s) => s.matchesCount > 0 && s.tp > 0 && s.status !== 'Upcoming');
+  const playedScrims = topSlice.filter((s) => s.matchesCount > 0);
 
   if (playedScrims.length >= 2) {
-    const tps = playedScrims.map((s) => s.tp);
-    const maxTp = Math.max(...tps);
-    const minTp = Math.min(...tps);
+    // Sort played scrims by TP descending, then KP descending for tie-break
+    const sortedByPoints = [...playedScrims].sort((a, b) => {
+      if (b.tp !== a.tp) return b.tp - a.tp;
+      return b.kp - a.kp;
+    });
 
-    if (maxTp !== minTp) {
-      let topTagged = false;
-      let lowestTagged = false;
-      // Tag highest TP in GREEN and lowest TP in RED
+    const bestScrim = sortedByPoints[0];
+    const worstScrim = sortedByPoints[sortedByPoints.length - 1];
+
+    // Only tag if there's a real difference between the best and worst score
+    if (bestScrim.tp > worstScrim.tp) {
       topSlice.forEach((s) => {
-        if (!topTagged && s.matchesCount > 0 && s.tp === maxTp) {
-          s.isTop = true;
-          topTagged = true;
-        } else if (!lowestTagged && s.matchesCount > 0 && s.tp === minTp) {
-          s.isLowest = true;
-          lowestTagged = true;
-        }
+        s.isTop = (s.id === bestScrim.id);
+        s.isLowest = (s.id === worstScrim.id);
       });
     }
-  } else if (playedScrims.length === 1) {
+  } else if (playedScrims.length === 1 && playedScrims[0].tp > 0) {
     playedScrims[0].isTop = true;
   }
 

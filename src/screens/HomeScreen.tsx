@@ -96,6 +96,17 @@ export const HomeScreen: React.FC<Props> = ({
 
   const latestScrims = useMemo(() => scrims.slice(0, 5), [scrims]);
 
+  // Points rank map for latest 5 scrims (Rank #1 = highest points)
+  const pointsRankMap = useMemo(() => {
+    const sorted = [...latestScrims].sort((a, b) => {
+      if (b.tp !== a.tp) return b.tp - a.tp;
+      return b.kp - a.kp;
+    });
+    const map = new Map<number, number>();
+    sorted.forEach((s, i) => map.set(s.id, i + 1));
+    return map;
+  }, [latestScrims]);
+
   const handleOpenScrimDetail = (scrimId: number) => {
     setSelectedScrimId(scrimId);
     setIsPointsTableOpen(true);
@@ -582,7 +593,7 @@ export const HomeScreen: React.FC<Props> = ({
                       : 'bg-[#1c1c24] text-zinc-400 border border-white/5'
                   }`}
                 >
-                  #{idx + 1}
+                  #{pointsRankMap.get(s.id) || idx + 1}
                 </div>
 
                 <div className="min-w-0 flex-1">
