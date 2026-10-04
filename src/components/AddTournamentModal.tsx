@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Trophy, Check, ShieldAlert } from 'lucide-react';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
@@ -74,9 +75,9 @@ export const AddTournamentModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
     }
   };
 
-  return (
+  return createPortal(
     <div className={`fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/80 backdrop-blur-md ${isClosing ? 'animate-backdrop-out' : 'animate-backdrop-in'}`}>
-      <div className={`glass-sheet rounded-3xl p-5 max-w-sm w-full shadow-2xl border border-white/10 text-left relative transition-all ${isClosing ? 'animate-fade-out-smooth' : 'animate-slide-up-smooth'}`}>
+      <div className={`glass-sheet rounded-3xl p-5 max-w-sm w-full shadow-2xl border border-white/10 text-left relative transition-all ${isClosing ? 'animate-modal-pop-out' : 'animate-modal-pop-in'}`}>
         <div className="flex items-center justify-between pb-3 border-b border-white/10">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30">
@@ -180,6 +181,7 @@ export const AddTournamentModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
           </button>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

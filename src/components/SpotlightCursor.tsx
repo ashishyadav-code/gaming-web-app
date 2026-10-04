@@ -19,8 +19,8 @@ export const SpotlightCursor: React.FC = () => {
     let lastY = -999;
     let isInsideWindow = false;
 
-    // Minimal, tight proximity zone (85px)
-    const PROXIMITY_RADIUS = 85;
+    // Minimal, tight proximity zone (95px - slightly enhanced by 5-10%)
+    const PROXIMITY_RADIUS = 95;
     const activeElements = new Set<HTMLElement>();
 
     const updateSpotlights = (cursorX: number, cursorY: number) => {

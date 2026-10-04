@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Calendar, Check, Clock } from 'lucide-react';
 import { getTodayDateString, getYesterdayDateString } from '../utils/dateUtils';
 
@@ -64,7 +65,7 @@ export const DatePickerModal: React.FC<Props> = ({
     triggerClose(() => onSelectDate(val));
   };
 
-  return (
+  return createPortal(
     <div
       className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md ${
         isClosing ? 'animate-backdrop-out' : 'animate-backdrop-in'
@@ -74,7 +75,7 @@ export const DatePickerModal: React.FC<Props> = ({
 
       <div
         className={`glass-sheet rounded-3xl p-5 max-w-sm w-full shadow-2xl border border-white/10 text-left relative overflow-hidden transition-all ${
-          isClosing ? 'animate-fade-out-smooth' : 'animate-slide-up-smooth'
+          isClosing ? 'animate-modal-pop-out' : 'animate-modal-pop-in'
         }`}
       >
         {/* Glow backdrop */}
@@ -161,6 +162,7 @@ export const DatePickerModal: React.FC<Props> = ({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

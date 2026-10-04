@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   X, Trophy, Crown, Swords, Crosshair, Award, ChevronDown, ChevronUp,
   Search, Flame, ShieldAlert, Sparkles, Calendar, Layers, ArrowLeft
@@ -95,7 +96,7 @@ export const PointsTableModal: React.FC<Props> = ({
     PURGATORY: ASSETS.maps.PURGATORY,
   };
 
-  return (
+  return createPortal(
     <div
       className={`fixed inset-0 z-50 flex items-start sm:items-center justify-center p-0 sm:p-3 bg-black/90 backdrop-blur-md overflow-y-auto ${
         isClosing ? 'animate-backdrop-out' : 'animate-backdrop-in'
@@ -103,7 +104,7 @@ export const PointsTableModal: React.FC<Props> = ({
     >
       <div
         className={`glass-sheet rounded-none sm:rounded-3xl p-4 sm:p-5 max-w-lg w-full min-h-screen sm:min-h-0 shadow-2xl border-0 sm:border border-white/10 relative my-0 sm:my-6 text-left max-h-none sm:max-h-[92vh] overflow-y-auto transition-all ${
-          isClosing ? 'animate-fade-out-smooth' : 'animate-slide-up-smooth'
+          isClosing ? 'animate-modal-pop-out' : 'animate-modal-pop-in'
         }`}
       >
         {/* Top Header with Back Navigation (Mobile-first page experience) */}
@@ -606,6 +607,7 @@ export const PointsTableModal: React.FC<Props> = ({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

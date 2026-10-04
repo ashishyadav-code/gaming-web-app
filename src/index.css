@@ -29,7 +29,7 @@
   --is-hovered: 0;
 }
 
-/* Glass Card: Solid dark matte base (#13131a), minimal 65px border highlight when cursor approaches */
+/* Glass Card: Solid dark matte base (#13131a), minimal 75px border highlight when cursor approaches */
 .glass-card {
   position: relative;
   overflow: hidden;
@@ -38,18 +38,19 @@
   background-origin: padding-box, padding-box, border-box;
   background-clip: padding-box, padding-box, border-box;
   background-image: 
-    /* Layer 1: Very subtle inner highlight only when mouse is inside (80px radius, 4% max) */
+    /* Layer 1: Subtle inner highlight only when mouse is inside (95px radius, 5% max) */
     radial-gradient(
-      80px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
-      rgba(255, 255, 255, calc(0.04 * var(--is-hovered, 0))),
+      95px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      rgba(255, 255, 255, calc(0.05 * var(--is-hovered, 0))),
       transparent 80%
     ),
     /* Layer 2: Clean Matte Dark Esports Base */
     linear-gradient(160deg, #14141b 0%, #0d0d12 100%),
-    /* Layer 3: Tight 65px Border Reveal Highlight */
+    /* Layer 3: Tight 75px Border Reveal Highlight (enhanced by ~5%) */
     radial-gradient(
-      65px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
-      rgba(255, 255, 255, calc(0.70 * var(--proximity, 0))),
+      75px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      rgba(255, 255, 255, calc(0.76 * var(--proximity, 0))),
+      rgba(239, 68, 68, calc(0.35 * var(--proximity, 0))) 35%,
       rgba(255, 255, 255, 0.08) 100%
     );
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
@@ -60,7 +61,7 @@
   transform: translateY(-1.5px);
 }
 
-/* Glass Buttons: Dark matte base (#14141c), 55px tight border reveal */
+/* Glass Buttons: Dark matte base (#14141c), 65px tight border reveal */
 .glass-btn,
 .glass-button {
   position: relative;
@@ -72,16 +73,17 @@
   background-image: 
     /* Layer 1: Minimal inner highlight when mouse is inside */
     radial-gradient(
-      60px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
-      rgba(255, 255, 255, calc(0.05 * var(--is-hovered, 0))),
+      75px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      rgba(255, 255, 255, calc(0.06 * var(--is-hovered, 0))),
       transparent 80%
     ),
     /* Layer 2: Clean Dark Button Base */
     linear-gradient(140deg, #171720 0%, #111116 100%),
-    /* Layer 3: Tight 55px Border Reveal Glint */
+    /* Layer 3: Tight 65px Border Reveal Glint (enhanced by ~5%) */
     radial-gradient(
-      55px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
-      rgba(255, 255, 255, calc(0.75 * var(--proximity, 0))),
+      65px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      rgba(255, 255, 255, calc(0.80 * var(--proximity, 0))),
+      rgba(239, 68, 68, calc(0.40 * var(--proximity, 0))) 35%,
       rgba(255, 255, 255, 0.09) 100%
     );
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
@@ -111,14 +113,14 @@
   background-clip: padding-box, padding-box, border-box;
   background-image: 
     radial-gradient(
-      70px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
-      rgba(255, 255, 255, calc(0.04 * var(--is-hovered, 0))),
+      80px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      rgba(255, 255, 255, calc(0.05 * var(--is-hovered, 0))),
       transparent 80%
     ),
     linear-gradient(140deg, #16161f 0%, #0e0e13 100%),
     radial-gradient(
-      60px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
-      rgba(255, 255, 255, calc(0.75 * var(--proximity, 0))),
+      70px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      rgba(255, 255, 255, calc(0.80 * var(--proximity, 0))),
       rgba(255, 255, 255, 0.09) 100%
     );
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
@@ -294,12 +296,40 @@
 @keyframes fadeInSmooth {
   0% {
     opacity: 0;
-    transform: scale(0.97);
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes modalPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
   }
   100% {
     opacity: 1;
     transform: scale(1);
   }
+}
+
+@keyframes modalPopOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+.animate-modal-pop-in {
+  animation: modalPopIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-modal-pop-out {
+  animation: modalPopOut 0.18s ease-in forwards;
 }
 
 @keyframes fadeOutSmooth {
@@ -332,7 +362,7 @@
 }
 
 .animate-fade-in-smooth {
-  animation: fadeInSmooth 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeInSmooth 0.22s ease-out forwards;
 }
 
 .animate-fade-out-smooth {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Trophy, Check, ShieldAlert, Swords, Crown, Award } from 'lucide-react';
 import { Player, Tournament } from '../types';
 import { api } from '../api/client';
@@ -146,9 +147,9 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
     { name: 'PURGATORY', img: ASSETS.maps.PURGATORY },
   ];
 
-  return (
+  return createPortal(
     <div className={`fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/80 backdrop-blur-md overflow-y-auto ${isClosing ? 'animate-backdrop-out' : 'animate-backdrop-in'}`}>
-      <div className={`glass-sheet rounded-3xl p-5 max-w-md w-full shadow-2xl border border-white/10 relative my-6 text-left max-h-[92vh] overflow-y-auto transition-all ${isClosing ? 'animate-fade-out-smooth' : 'animate-slide-up-smooth'}`}>
+      <div className={`glass-sheet rounded-3xl p-5 max-w-md w-full shadow-2xl border border-white/10 relative my-6 text-left max-h-[92vh] overflow-y-auto transition-all ${isClosing ? 'animate-modal-pop-out' : 'animate-modal-pop-in'}`}>
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-white/10">
           <div>
@@ -413,6 +414,7 @@ export const AddMatchModal: React.FC<Props> = ({ isOpen, onClose, onSuccess, pla
           </button>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
