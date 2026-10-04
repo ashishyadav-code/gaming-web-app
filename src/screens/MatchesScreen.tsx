@@ -99,7 +99,7 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
       {/* Top Header */}
       <header className="px-5 pt-4 pb-2 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-11 h-11 rounded-2xl overflow-hidden flex items-center justify-center p-1 bg-white/[0.05] backdrop-blur-xl border border-white/15 shadow-md shadow-red-950/30">
+          <div className="w-11 h-11 rounded-2xl overflow-hidden flex items-center justify-center p-1.5 glass-card border border-white/20 shadow-lg shadow-black/60">
             <img
               src={ASSETS.logo}
               alt="Team Sarkar Logo"
@@ -120,7 +120,7 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="w-9 h-9 rounded-full glass-card border border-white/10 shadow-sm flex items-center justify-center text-zinc-300 hover:bg-white/10 active:scale-95 transition-transform">
+          <button className="w-9 h-9 rounded-xl glass-btn border border-white/15 shadow-md flex items-center justify-center text-zinc-300 hover:text-white active:scale-95 transition-all">
             <Search className="w-4 h-4" />
           </button>
           <button
@@ -131,7 +131,7 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
               }
               onOpenAddMatch();
             }}
-            className="w-9 h-9 rounded-full bg-red-600 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)] flex items-center justify-center hover:bg-red-700 active:scale-95 transition-all"
+            className="w-9 h-9 rounded-xl bg-red-600 text-white shadow-[0_0_15px_rgba(239,68,68,0.5)] border border-red-400/40 flex items-center justify-center hover:bg-red-700 active:scale-95 transition-all"
             title="Add Match"
           >
             <Plus className="w-5 h-5 stroke-[2.5]" />
@@ -152,7 +152,7 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
 
         <button
           onClick={() => setIsDatePickerOpen(true)}
-          className="px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-bold text-zinc-300 shadow-sm glass-card border border-white/10 hover:border-red-500/30 active:scale-95 transition-all"
+          className="px-3.5 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-bold text-zinc-300 shadow-md glass-btn border border-white/15 hover:border-red-500/40 active:scale-95 transition-all"
         >
           <Calendar className="w-3.5 h-3.5 text-red-400" />
           <span className="text-[11px]">{selectedDate === 'All' ? 'All Dates' : selectedDate}</span>
@@ -163,7 +163,7 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
       {/* Match List Grouped By Date */}
       <div className="px-5 space-y-4">
         {matches.length === 0 ? (
-          <div className="p-8 text-center glass-card rounded-2xl border border-white/10">
+          <div className="p-8 text-center glass-card rounded-2xl border border-white/15">
             <Swords className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
             <div className="text-xs font-bold text-zinc-300">No tournament matches found for this filter.</div>
             <p className="text-[11px] text-zinc-500 mt-1">Tap the (+) button above to record a new tournament match.</p>
@@ -182,7 +182,7 @@ export const MatchesScreen: React.FC<Props> = ({ onSelectMatch, onOpenAddMatch }
                     <div
                       key={m.id}
                       onClick={() => onSelectMatch(m)}
-                      className="p-3 rounded-2xl glass-card border border-white/10 shadow-sm hover:border-red-500/35 transition-all active:scale-[0.99] cursor-pointer"
+                      className="p-3 rounded-2xl glass-card border border-white/15 shadow-md hover:border-white/35 transition-all active:scale-[0.99] cursor-pointer"
                     >
                       {/* Top Row: Map icon, Name, Time, Placement, Points & Team Kills */}
                       <div className="flex items-center justify-between gap-3">

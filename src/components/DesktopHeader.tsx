@@ -29,7 +29,7 @@ export const DesktopHeader: React.FC<Props> = ({
   const current = titles[activeTab] || titles.home;
 
   return (
-    <header className="hidden md:flex items-center justify-between px-8 py-3.5 border-b border-[#181822] bg-[#0c0c11]/80 backdrop-blur-xl sticky top-0 z-20">
+    <header className="hidden md:flex items-center justify-between px-8 py-3.5 border-b border-white/10 glass-panel sticky top-0 z-20 shadow-xl">
       {/* Title & Subtitle */}
       <div>
         <h1 className="text-base font-black text-white tracking-wider uppercase leading-tight">
@@ -43,7 +43,7 @@ export const DesktopHeader: React.FC<Props> = ({
       {/* Right Controls */}
       <div className="flex items-center gap-3">
         {/* Date Badge */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#141419] border border-[#22222b] text-xs font-bold text-zinc-300">
+        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl glass-card border border-white/15 text-xs font-bold text-zinc-300 shadow-md">
           <Calendar className="w-3.5 h-3.5 text-red-500" />
           <span>{getTodayDateString()}</span>
         </div>
@@ -51,30 +51,30 @@ export const DesktopHeader: React.FC<Props> = ({
         {/* Search */}
         <button
           onClick={onSearchClick}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#141419] border border-[#22222b] text-xs font-medium text-zinc-400 hover:text-white hover:border-zinc-500 transition-all"
+          className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl glass-btn border border-white/15 text-xs font-medium text-zinc-300 hover:text-white hover:border-white/35 transition-all shadow-md active:scale-95"
         >
-          <Search className="w-3.5 h-3.5" />
+          <Search className="w-3.5 h-3.5 text-zinc-400" />
           <span>Search...</span>
         </button>
 
         {/* Notifications */}
         <button
           onClick={onNotificationsClick}
-          className="w-9 h-9 rounded-xl bg-[#141419] border border-[#22222b] flex items-center justify-center text-zinc-400 hover:text-white hover:border-red-500/40 relative transition-all"
+          className="w-9 h-9 rounded-xl glass-btn border border-white/15 flex items-center justify-center text-zinc-300 hover:text-white hover:border-red-500/50 relative transition-all shadow-md active:scale-95"
         >
           <Bell className="w-4 h-4" />
-          <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500 ring-2 ring-[#141419] animate-pulse" />
+          <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500 ring-2 ring-black/60 animate-pulse" />
         </button>
 
         {/* User Badge */}
         <button
           onClick={onOpenAccount || openLoginModal}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all glass-btn shadow-md active:scale-95 ${
             isMaster
-              ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25'
+              ? 'border-amber-500/40 text-amber-300 hover:border-amber-400'
               : isIGL
-              ? 'bg-red-500/15 text-red-400 border border-red-500/30 hover:bg-red-500/25'
-              : 'bg-[#181822] text-zinc-300 border border-[#2b2b3a] hover:bg-[#222230]'
+              ? 'border-red-500/40 text-red-300 hover:border-red-400'
+              : 'border-white/15 text-zinc-300 hover:border-white/30'
           }`}
         >
           {isMaster ? (

@@ -569,11 +569,11 @@ export const HomeScreen: React.FC<Props> = ({
       {/* Latest 5 Scrims Cards (Top performing in Green, Worst performing in Red) */}
       <div className="px-5 mb-4 grid grid-cols-1 md:grid-cols-2 gap-3 space-y-0">
         {latestScrims.map((s, idx) => {
-          let cardStyle = 'border-white/10 glass-card hover:border-white/20';
+          let cardStyle = 'border-white/15 glass-card hover:border-white/30';
           if (s.isTop) {
-            cardStyle = 'border-emerald-500/60 bg-gradient-to-r from-emerald-950/30 via-[#0e1f16] to-[#0c0c10] shadow-[0_0_18px_rgba(16,185,129,0.18)] hover:border-emerald-400/80';
+            cardStyle = 'glass-card border-emerald-500/60 bg-gradient-to-r from-emerald-950/30 via-[#0e1f16] to-[#0c0c10] shadow-[0_0_18px_rgba(16,185,129,0.22)] hover:border-emerald-400/80';
           } else if (s.isLowest) {
-            cardStyle = 'border-red-500/60 bg-gradient-to-r from-red-950/30 via-[#220d10] to-[#0c0c10] shadow-[0_0_18px_rgba(239,68,68,0.18)] hover:border-red-400/80';
+            cardStyle = 'glass-card border-red-500/60 bg-gradient-to-r from-red-950/30 via-[#220d10] to-[#0c0c10] shadow-[0_0_18px_rgba(239,68,68,0.22)] hover:border-red-400/80';
           }
 
           return (

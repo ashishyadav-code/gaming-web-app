@@ -49,7 +49,7 @@ export const PlayersScreen: React.FC<Props> = ({ onSelectPlayer, onOpenAddPlayer
       {/* Top Header */}
       <header className="px-5 pt-4 pb-2 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-11 h-11 rounded-2xl overflow-hidden flex items-center justify-center p-1 bg-white/[0.05] backdrop-blur-xl border border-white/15 shadow-md shadow-red-950/30">
+          <div className="w-11 h-11 rounded-2xl overflow-hidden flex items-center justify-center p-1.5 glass-card border border-white/20 shadow-lg shadow-black/60">
             <img
               src={ASSETS.logo}
               alt="Team Sarkar Logo"
@@ -69,7 +69,7 @@ export const PlayersScreen: React.FC<Props> = ({ onSelectPlayer, onOpenAddPlayer
           </div>
         </div>
 
-        <button className="w-9 h-9 rounded-full bg-[#15151c] border border-white/10 shadow-sm flex items-center justify-center text-zinc-300 hover:bg-[#202029] active:scale-95 transition-transform">
+        <button className="w-9 h-9 rounded-xl glass-btn border border-white/15 shadow-md flex items-center justify-center text-zinc-300 hover:text-white active:scale-95 transition-all">
           <Search className="w-4 h-4" />
         </button>
       </header>
@@ -86,13 +86,13 @@ export const PlayersScreen: React.FC<Props> = ({ onSelectPlayer, onOpenAddPlayer
 
       {/* Segmented Control Tabs */}
       <div className="px-5 mb-4">
-        <div className="p-1 rounded-2xl flex items-center justify-between bg-[#141419] border border-[#22222b] shadow-sm">
+        <div className="p-1 rounded-2xl flex items-center justify-between glass-pill border border-white/15 shadow-md">
           <button
             onClick={() => setTab('Active')}
             className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold transition-all ${
               tab === 'Active'
-                ? 'bg-red-600 text-white shadow-sm'
-                : 'text-zinc-400 hover:text-white'
+                ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-[0_0_16px_rgba(239,68,68,0.5)] border border-red-400/40'
+                : 'text-zinc-400 hover:text-white glass-btn border border-transparent hover:border-white/15'
             }`}
           >
             Active ({activeCount})
@@ -102,8 +102,8 @@ export const PlayersScreen: React.FC<Props> = ({ onSelectPlayer, onOpenAddPlayer
             onClick={() => setTab('Inactive')}
             className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold transition-all ${
               tab === 'Inactive'
-                ? 'bg-red-600 text-white shadow-sm'
-                : 'text-zinc-400 hover:text-white'
+                ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-[0_0_16px_rgba(239,68,68,0.5)] border border-red-400/40'
+                : 'text-zinc-400 hover:text-white glass-btn border border-transparent hover:border-white/15'
             }`}
           >
             Inactive ({inactiveCount})
@@ -113,8 +113,8 @@ export const PlayersScreen: React.FC<Props> = ({ onSelectPlayer, onOpenAddPlayer
             onClick={() => setTab('History')}
             className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold transition-all ${
               tab === 'History'
-                ? 'bg-red-600 text-white shadow-sm'
-                : 'text-zinc-400 hover:text-white'
+                ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-[0_0_16px_rgba(239,68,68,0.5)] border border-red-400/40'
+                : 'text-zinc-400 hover:text-white glass-btn border border-transparent hover:border-white/15'
             }`}
           >
             History
@@ -125,7 +125,7 @@ export const PlayersScreen: React.FC<Props> = ({ onSelectPlayer, onOpenAddPlayer
       {/* Player List */}
       <div className="px-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 space-y-0">
         {players.length === 0 ? (
-          <div className="p-8 text-center bg-[#141419] rounded-2xl border border-[#22222b]">
+          <div className="p-8 text-center glass-card rounded-2xl border border-white/15">
             <User className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
             <div className="text-xs font-bold text-zinc-300">No players found in this category.</div>
           </div>
@@ -134,13 +134,13 @@ export const PlayersScreen: React.FC<Props> = ({ onSelectPlayer, onOpenAddPlayer
             <div
               key={p.id}
               onClick={() => onSelectPlayer(p)}
-              className="p-3.5 rounded-2xl bg-[#141419] border border-[#22222b] shadow-sm cursor-pointer hover:border-red-500/35 transition-all active:scale-[0.99]"
+              className="p-3.5 rounded-2xl glass-card border border-white/15 shadow-xl cursor-pointer hover:border-red-500/40 transition-all active:scale-[0.99]"
             >
               {/* Top Row: Avatar, Name, Role badge, Join date, Chevron */}
               <div className="flex items-center justify-between gap-3 mb-2.5">
                 <div className="flex items-center gap-3">
                   <div className="relative">
-                    <div className="w-12 h-12 rounded-full overflow-hidden border border-white/20 shadow-sm bg-[#1c1c24] p-0.5">
+                    <div className="w-12 h-12 rounded-full overflow-hidden border border-white/25 shadow-md bg-[#1c1c24] p-0.5">
                       <img
                         src={getPlayerAvatar(p.player_name || p.team_role || p.avatar_url)}
                         alt={p.player_name}
@@ -148,7 +148,7 @@ export const PlayersScreen: React.FC<Props> = ({ onSelectPlayer, onOpenAddPlayer
                       />
                     </div>
                     {p.status === 'Active' && (
-                      <span className="absolute top-0 right-0 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-[#141419]" />
+                      <span className="absolute top-0 right-0 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-black/70 animate-pulse" />
                     )}
                   </div>
 
@@ -157,32 +157,32 @@ export const PlayersScreen: React.FC<Props> = ({ onSelectPlayer, onOpenAddPlayer
                       <h3 className="text-xs font-black text-white tracking-tight leading-tight">
                         {p.player_name}
                       </h3>
-                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold border uppercase tracking-wider ${roleColors[p.team_role] || 'bg-[#1c1c24] text-zinc-400 border-[#2a2a38]'}`}>
+                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold border uppercase tracking-wider ${roleColors[p.team_role] || 'bg-white/5 text-zinc-400 border-white/15'}`}>
                         {p.team_role}
                       </span>
                     </div>
-                    <div className="text-[10px] font-medium text-zinc-500 mt-0.5">
+                    <div className="text-[10px] font-medium text-zinc-400 mt-0.5">
                       Joined {p.joined_at}
                     </div>
                   </div>
                 </div>
 
-                <ChevronRight className="w-4 h-4 text-zinc-600" />
+                <ChevronRight className="w-4 h-4 text-zinc-500" />
               </div>
 
               {/* 3-Metric Clean Row (Damage and Survival removed) */}
-              <div className="pt-2 border-t border-[#22222b] grid grid-cols-3 gap-2 text-center">
-                <div>
+              <div className="pt-2 border-t border-white/10 grid grid-cols-3 gap-2 text-center">
+                <div className="p-1 rounded-xl glass-card border border-white/5">
                   <div className="text-xs font-black text-red-500">{p.total_kills || 0}</div>
-                  <div className="text-[9px] font-bold text-zinc-500 uppercase">Kills</div>
+                  <div className="text-[9px] font-bold text-zinc-400 uppercase">Kills</div>
                 </div>
-                <div>
+                <div className="p-1 rounded-xl glass-card border border-white/5">
                   <div className="text-xs font-black text-zinc-200">{p.matches_count || 0}</div>
-                  <div className="text-[9px] font-bold text-zinc-500 uppercase">Matches</div>
+                  <div className="text-[9px] font-bold text-zinc-400 uppercase">Matches</div>
                 </div>
-                <div>
+                <div className="p-1 rounded-xl glass-card border border-white/5">
                   <div className="text-xs font-black text-amber-400">{p.kd !== undefined && p.kd !== null ? p.kd : '0.0'}</div>
-                  <div className="text-[9px] font-bold text-zinc-500 uppercase">K/D</div>
+                  <div className="text-[9px] font-bold text-zinc-400 uppercase">K/D</div>
                 </div>
               </div>
             </div>
@@ -198,15 +198,15 @@ export const PlayersScreen: React.FC<Props> = ({ onSelectPlayer, onOpenAddPlayer
             }
             onOpenAddPlayer();
           }}
-          className={`p-3.5 rounded-2xl border-2 border-dashed flex items-center justify-between cursor-pointer transition-all active:scale-98 ${
+          className={`p-3.5 rounded-2xl border-2 border-dashed glass-btn flex items-center justify-between cursor-pointer transition-all active:scale-98 shadow-md ${
             isIGL
-              ? 'border-red-500/30 bg-red-500/5 hover:bg-red-500/10 text-red-400'
-              : 'border-[#22222b] bg-[#141419]/50 hover:bg-[#141419] text-zinc-500'
+              ? 'border-red-500/40 text-red-300 hover:border-red-400'
+              : 'border-white/15 text-zinc-400 hover:border-white/25'
           }`}
         >
           <div className="flex items-center gap-3">
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold ${
-              isIGL ? 'bg-red-500/20 text-red-400' : 'bg-[#1c1c24] text-zinc-500'
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold glass-card border ${
+              isIGL ? 'border-red-500/40 text-red-400' : 'border-white/10 text-zinc-400'
             }`}>
               {isIGL ? <Plus className="w-4 h-4 stroke-[2.5]" /> : <Lock className="w-4 h-4" />}
             </div>
@@ -214,12 +214,12 @@ export const PlayersScreen: React.FC<Props> = ({ onSelectPlayer, onOpenAddPlayer
               <div className="text-xs font-extrabold text-white">
                 Add Player
               </div>
-              <div className="text-[10px] font-semibold text-zinc-500">
+              <div className="text-[10px] font-semibold text-zinc-400">
                 Add new player to the team (IGL Only)
               </div>
             </div>
           </div>
-          <ChevronRight className="w-4 h-4 text-zinc-600" />
+          <ChevronRight className="w-4 h-4 text-zinc-500" />
         </div>
       </div>
     </div>

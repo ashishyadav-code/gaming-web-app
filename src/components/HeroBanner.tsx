@@ -26,13 +26,13 @@ export const HeroBanner: React.FC<Props> = ({
         />
 
         {/* Gradient Overlay for high readability & glassy sheen */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#09090c]/90 via-[#0e0e14]/70 to-red-950/20 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0c0c12]/98 via-[#0e0e16]/95 to-red-950/60 pointer-events-none" />
 
         {/* Content */}
         <div className="relative p-3.5 z-10 flex items-center justify-between gap-2">
           {/* Logo Crest & Quote */}
           <div className="flex items-center gap-3 min-w-0 pr-2">
-            <div className="w-10 h-10 rounded-xl overflow-hidden p-1 bg-black/40 backdrop-blur-md border border-white/10 flex-shrink-0 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl overflow-hidden p-1 glass-card border border-white/20 flex-shrink-0 flex items-center justify-center shadow-md">
               <img
                 src={ASSETS.teamSarkarLogo || ASSETS.logo}
                 alt="Team Sarkar"
@@ -64,7 +64,7 @@ export const HeroBanner: React.FC<Props> = ({
             <button
               onClick={onDateClick}
               type="button"
-              className="px-3 py-1.5 rounded-full bg-black/55 backdrop-blur-md border border-white/15 shadow-sm flex items-center gap-1.5 text-white text-xs font-bold hover:bg-black/75 hover:border-red-500/40 active:scale-95 transition-all"
+              className="px-3.5 py-1.5 rounded-full glass-btn border border-white/20 shadow-md flex items-center gap-1.5 text-white text-xs font-bold hover:border-red-500/50 active:scale-95 transition-all"
             >
               <Calendar className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
               <span className="whitespace-nowrap tracking-tight">{selectedDate}</span>

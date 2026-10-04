@@ -31,14 +31,14 @@ export const DesktopSidebar: React.FC<Props> = ({
   ];
 
   return (
-    <aside className="hidden md:flex flex-col w-64 lg:w-72 bg-[#0c0c11]/95 backdrop-blur-2xl border-r border-[#1a1a24] h-screen sticky top-0 z-30 select-none justify-between p-5">
+    <aside className="hidden md:flex flex-col w-64 lg:w-72 glass-panel border-r border-white/10 h-screen sticky top-0 z-30 select-none justify-between p-5 shadow-2xl">
       {/* Top Branding & Nav */}
       <div className="space-y-6">
         {/* Brand Header */}
         <div className="flex items-center gap-3 px-1">
-          <div className="w-12 h-12 rounded-2xl overflow-hidden flex items-center justify-center p-1 bg-white/[0.05] border border-white/15 shadow-lg shadow-red-950/40">
+          <div className="w-12 h-12 rounded-2xl overflow-hidden flex items-center justify-center p-1.5 glass-card border border-white/25 shadow-lg shadow-black/60">
             <img
-              src={ASSETS.logo}
+              src={ASSETS.teamSarkarLogo || ASSETS.logo}
               alt="Team Sarkar Logo"
               className="w-full h-full object-contain filter drop-shadow hover:scale-105 transition-transform"
             />
@@ -57,12 +57,12 @@ export const DesktopSidebar: React.FC<Props> = ({
         </div>
 
         {/* Live DB Pill */}
-        <div className="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between text-[11px] font-bold">
+        <div className="px-3.5 py-2 rounded-xl glass-card border border-emerald-500/30 flex items-center justify-between text-[11px] font-bold shadow-md">
           <div className="flex items-center gap-2 text-emerald-400">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span>MongoDB Atlas</span>
           </div>
-          <span className="text-[10px] font-extrabold text-emerald-300 uppercase">ONLINE</span>
+          <span className="text-[10px] font-extrabold text-emerald-300 uppercase tracking-wider">ONLINE</span>
         </div>
 
         {/* Main Navigation */}
@@ -79,8 +79,8 @@ export const DesktopSidebar: React.FC<Props> = ({
                 onClick={() => onTabChange(item.id)}
                 className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-black transition-all ${
                   isActive
-                    ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-lg shadow-red-600/30 scale-[1.02]'
-                    : 'text-zinc-400 hover:text-white hover:bg-white/[0.05]'
+                    ? 'relative overflow-hidden bg-gradient-to-r from-red-600 via-rose-600 to-red-600 text-white shadow-[0_0_24px_rgba(239,68,68,0.55)] border border-red-400/50 scale-[1.02]'
+                    : 'text-zinc-400 hover:text-white glass-btn hover:border-white/30'
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -98,27 +98,27 @@ export const DesktopSidebar: React.FC<Props> = ({
         </nav>
 
         {/* Quick Actions (Command Center) */}
-        <div className="space-y-2 pt-2 border-t border-[#1a1a24]">
+        <div className="space-y-2 pt-2 border-t border-white/10">
           <div className="text-[10px] font-black text-zinc-500 uppercase tracking-widest px-3 mb-1">
             Quick Actions
           </div>
           <button
             onClick={onOpenAddMatch}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl bg-red-600/15 hover:bg-red-600/25 border border-red-500/30 text-red-400 hover:text-white text-xs font-bold transition-all active:scale-98"
+            className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl glass-btn border border-red-500/35 text-red-300 hover:text-white text-xs font-bold transition-all active:scale-95 shadow-md hover:border-red-400/60"
           >
             <Plus className="w-4 h-4 text-red-400" />
             <span>Record Match</span>
           </button>
           <button
             onClick={onOpenAddTournament}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/25 text-amber-400 hover:text-amber-300 text-xs font-bold transition-all active:scale-98"
+            className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl glass-btn border border-amber-500/35 text-amber-300 hover:text-amber-200 text-xs font-bold transition-all active:scale-95 shadow-md hover:border-amber-400/60"
           >
             <Trophy className="w-4 h-4 text-amber-400" />
             <span>New Scrim / Cup</span>
           </button>
           <button
             onClick={onOpenAddPlayer}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-zinc-300 hover:text-white text-xs font-bold transition-all active:scale-98"
+            className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl glass-btn border border-white/20 text-zinc-300 hover:text-white text-xs font-bold transition-all active:scale-95 shadow-md hover:border-white/35"
           >
             <UserPlus className="w-4 h-4 text-zinc-400" />
             <span>Add Player</span>
@@ -127,13 +127,13 @@ export const DesktopSidebar: React.FC<Props> = ({
       </div>
 
       {/* Bottom Profile Section */}
-      <div className="pt-4 border-t border-[#1a1a24]">
+      <div className="pt-4 border-t border-white/10">
         <div
           onClick={onOpenAccount}
-          className="p-2.5 rounded-2xl bg-[#141419] border border-white/10 hover:border-red-500/40 cursor-pointer transition-all flex items-center justify-between group"
+          className="p-3 rounded-2xl glass-card border border-white/15 hover:border-red-500/50 cursor-pointer transition-all flex items-center justify-between group shadow-lg"
         >
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20 flex-shrink-0 bg-[#1c1c24]">
+            <div className="w-10 h-10 rounded-full overflow-hidden border border-white/25 flex-shrink-0 bg-[#1c1c24] shadow-md">
               <img
                 src={getPlayerAvatar(user?.ign || 'HASHIRAMA 777')}
                 alt="Avatar"
@@ -156,7 +156,7 @@ export const DesktopSidebar: React.FC<Props> = ({
               logoutUser();
             }}
             title="Sign Out"
-            className="w-7 h-7 rounded-lg bg-white/5 hover:bg-red-500/20 hover:text-red-400 text-zinc-400 flex items-center justify-center transition-colors"
+            className="w-7 h-7 rounded-lg glass-btn border border-white/10 hover:border-red-500/40 text-zinc-400 hover:text-red-400 flex items-center justify-center transition-colors shadow-sm"
           >
             <LogOut className="w-3.5 h-3.5" />
           </button>

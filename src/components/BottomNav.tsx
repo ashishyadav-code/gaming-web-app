@@ -12,7 +12,7 @@ interface Props {
 export const BottomNav: React.FC<Props> = ({ activeTab, onTabChange, onPlusClick }) => {
   return (
     <div className="fixed bottom-4 left-0 right-0 max-w-md mx-auto px-4 z-40 pointer-events-none">
-      <nav className="pointer-events-auto bg-[#131318]/92 backdrop-blur-2xl rounded-full px-5 py-2 shadow-2xl flex items-center justify-between border border-white/10">
+      <nav className="pointer-events-auto glass-pill rounded-full px-5 py-2 shadow-2xl flex items-center justify-between border border-white/20">
         {/* Home */}
         <button
           onClick={() => onTabChange('home')}
