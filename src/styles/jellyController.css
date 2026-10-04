@@ -1,0 +1,165 @@
+/* ==========================================================================
+   🎮 JELLY ANIMATION CONTROLLER (Aap yahan se aasaani se customize kar sakte ho)
+   ==========================================================================
+   
+   Bhai, yahan se aap Jelly Effect ke start, stretch, slide aur END FINISH 
+   ki speed aur smoothness ko customize kar sakte ho:
+
+   1. --jelly-duration          -> Total animation time (Poora effect kitni der chalega)
+   2. --jelly-slide-speed       -> Tab sliding speed (Indicator kitni der me slide hoga)
+   3. --jelly-slide-ease        -> Sliding curve (Apple iOS spring deceleration)
+   
+   4. --jelly-stretch-max       -> Maximum stretch lambai (1.20 = Kam, 1.32 = Perfect, 1.45 = Zyada)
+   5. --jelly-squash-min        -> Stretch ke waqt kitna patla hoga (0.88 = Mota, 0.82 = Sleek)
+   6. --jelly-skew-angle        -> Motion tilt angle (0deg = Seedha, 3deg = Natural tilt)
+   
+   🔥 END ANIMATION CONTROLLER (Aakhiri Finish & Settle Speed):
+   7. --jelly-end-ease          -> End finish hone ka curve (Soft landing, no harsh snap)
+   8. --jelly-end-bounce        -> End wobble ka bounce (1.02 = Bilkul smooth soft rest, 1.08 = Springy)
+   ========================================================================== */
+
+:root {
+  /* ------------------------------------------------------------------------
+     1. SPEED & SLIDING SETTINGS (Slide hone ki speed aur motion)
+     ------------------------------------------------------------------------ */
+  --jelly-slide-speed: 0.4s;
+  --jelly-slide-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ------------------------------------------------------------------------
+     2. STRETCH & SQUASH (Khinchav aur patlapan)
+     ------------------------------------------------------------------------ */
+  --jelly-stretch-max: 1.13;       /* Peak stretch lambai */
+  --jelly-squash-min: 0.8;        /* Peak squash patlapan */
+  --jelly-skew-angle: 1deg;      /* Dynamic tilt */
+
+  /* ------------------------------------------------------------------------
+     3. 🔥 END SETTLING CONTROLLER (End me kis speed & smoothness se finish ho)
+     ------------------------------------------------------------------------ */
+  --jelly-duration: .65s;         /* Total duration */
+  --jelly-end-ease: cubic-bezier(0.25, 1, 0.45, 1.1); /* Buttery smooth tail deceleration */
+  --jelly-end-bounce: 1;       /* Ultra gentle damped recoil (Zero jerky stop) */
+
+  /* ------------------------------------------------------------------------
+     4. GLOW & STYLING
+     ------------------------------------------------------------------------ */
+  --jelly-glow-blur: 20px;
+  --jelly-glow-opacity: 0.65;
+}
+
+/* Horizontal Jelly Spring (Moving Right) with Smooth Deceleration Finish */
+@keyframes jellySpringRight {
+  0% {
+    transform: scale(1, 1) skewX(0deg);
+  }
+  24% {
+    /* Peak stretch & dynamic tilt */
+    transform: scale(var(--jelly-stretch-max), var(--jelly-squash-min)) skewX(calc(-1 * var(--jelly-skew-angle)));
+  }
+  50% {
+    /* Smooth recovery passing midpoint */
+    transform: scale(calc(1 + (var(--jelly-stretch-max) - 1) * 0.32), calc(1 - (1 - var(--jelly-squash-min)) * 0.32)) skewX(calc(-0.4 * var(--jelly-skew-angle)));
+  }
+  74% {
+    /* Soft damped rebound */
+    transform: scale(var(--jelly-end-bounce), calc(2 - var(--jelly-end-bounce))) skewX(calc(0.2 * var(--jelly-skew-angle)));
+  }
+  90% {
+    /* Micro-settle feathering for zero-jerk landing */
+    transform: scale(calc(1 + (var(--jelly-end-bounce) - 1) * 0.15), calc(1 - (var(--jelly-end-bounce) - 1) * 0.15)) skewX(0deg);
+  }
+  100% {
+    /* Seamless, natural rest */
+    transform: scale(1, 1) skewX(0deg);
+  }
+}
+
+/* Horizontal Jelly Spring (Moving Left) with Smooth Deceleration Finish */
+@keyframes jellySpringLeft {
+  0% {
+    transform: scale(1, 1) skewX(0deg);
+  }
+  24% {
+    /* Peak stretch & dynamic tilt */
+    transform: scale(var(--jelly-stretch-max), var(--jelly-squash-min)) skewX(var(--jelly-skew-angle));
+  }
+  50% {
+    /* Smooth recovery passing midpoint */
+    transform: scale(calc(1 + (var(--jelly-stretch-max) - 1) * 0.32), calc(1 - (1 - var(--jelly-squash-min)) * 0.32)) skewX(calc(0.4 * var(--jelly-skew-angle)));
+  }
+  74% {
+    /* Soft damped rebound */
+    transform: scale(var(--jelly-end-bounce), calc(2 - var(--jelly-end-bounce))) skewX(calc(-0.2 * var(--jelly-skew-angle)));
+  }
+  90% {
+    /* Micro-settle feathering for zero-jerk landing */
+    transform: scale(calc(1 + (var(--jelly-end-bounce) - 1) * 0.15), calc(1 - (var(--jelly-end-bounce) - 1) * 0.15)) skewX(0deg);
+  }
+  100% {
+    /* Seamless, natural rest */
+    transform: scale(1, 1) skewX(0deg);
+  }
+}
+
+/* Vertical Jelly Spring (Moving Down) */
+@keyframes jellySpringDown {
+  0% {
+    transform: scale(1, 1);
+  }
+  24% {
+    transform: scale(var(--jelly-squash-min), var(--jelly-stretch-max));
+  }
+  50% {
+    transform: scale(calc(1 - (1 - var(--jelly-squash-min)) * 0.32), calc(1 + (var(--jelly-stretch-max) - 1) * 0.32));
+  }
+  74% {
+    transform: scale(calc(2 - var(--jelly-end-bounce)), var(--jelly-end-bounce));
+  }
+  90% {
+    transform: scale(calc(1 - (var(--jelly-end-bounce) - 1) * 0.15), calc(1 + (var(--jelly-end-bounce) - 1) * 0.15));
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}
+
+/* Vertical Jelly Spring (Moving Up) */
+@keyframes jellySpringUp {
+  0% {
+    transform: scale(1, 1);
+  }
+  24% {
+    transform: scale(var(--jelly-squash-min), var(--jelly-stretch-max));
+  }
+  50% {
+    transform: scale(calc(1 - (1 - var(--jelly-squash-min)) * 0.32), calc(1 + (var(--jelly-stretch-max) - 1) * 0.32));
+  }
+  74% {
+    transform: scale(calc(2 - var(--jelly-end-bounce)), var(--jelly-end-bounce));
+  }
+  90% {
+    transform: scale(calc(1 - (var(--jelly-end-bounce) - 1) * 0.15), calc(1 + (var(--jelly-end-bounce) - 1) * 0.15));
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}
+
+.animate-jelly-right {
+  animation: jellySpringRight var(--jelly-duration) var(--jelly-end-ease) forwards;
+  transform-origin: left center;
+}
+
+.animate-jelly-left {
+  animation: jellySpringLeft var(--jelly-duration) var(--jelly-end-ease) forwards;
+  transform-origin: right center;
+}
+
+.animate-jelly-down {
+  animation: jellySpringDown var(--jelly-duration) var(--jelly-end-ease) forwards;
+  transform-origin: center top;
+}
+
+.animate-jelly-up {
+  animation: jellySpringUp var(--jelly-duration) var(--jelly-end-ease) forwards;
+  transform-origin: center bottom;
+}

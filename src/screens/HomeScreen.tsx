@@ -289,14 +289,16 @@ export const HomeScreen: React.FC<Props> = ({
         <Header onUserClick={onOpenAccount} />
       </div>
 
-      {/* Hero Banner with official logo crest & dynamic date capsule */}
+      {/* Hero Banner with slim design & attached bottom JellyTabs panel matching Image 3 */}
       <HeroBanner
         selectedDate={selectedDate}
         onDateClick={() => setIsDatePickerOpen(true)}
+        period={period}
+        onPeriodChange={handlePeriodChange}
       />
 
       {/* Date Filter Status Indicator */}
-      <div className="px-5 mb-2 flex items-center justify-between">
+      <div className="px-5 mt-2 mb-3 flex items-center justify-between">
         <span className="text-[11px] font-bold text-zinc-400 flex items-center gap-1.5">
           <span className={`w-2 h-2 rounded-full ${period === 'Today' && isSameDay(selectedDate, todayDateStr) ? 'bg-red-500 animate-pulse' : 'bg-emerald-500'}`} />
           <span>
@@ -343,55 +345,8 @@ export const HomeScreen: React.FC<Props> = ({
         </div>
       )}
 
-      {/* Period Selector Tabs with iOS Jelly Spring Stretch Animation */}
-      <div className="px-5 mb-3.5">
-        <div className="relative p-1 rounded-2xl flex items-center glass-pill border border-white/15 shadow-xl max-w-sm md:max-w-md mx-auto backdrop-blur-2xl">
-          {/* Active Sliding & Stretching Jelly Indicator Pill */}
-          <div
-            className="absolute top-1 bottom-1 pointer-events-none transform-gpu will-change-[left]"
-            style={{
-              left: `calc(${PERIOD_TABS.indexOf(period) * 25}% + 4px)`,
-              width: 'calc(25% - 8px)',
-              transition: 'left 0.62s cubic-bezier(0.22, 1, 0.36, 1)',
-            }}
-          >
-            <div
-              key={jellyKey}
-              className={`w-full h-full rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-red-600 shadow-[0_0_24px_rgba(239,68,68,0.65)] border border-red-400/40 relative overflow-hidden transform-gpu ${
-                jellyDir === 'right' ? 'animate-jelly-right' : jellyDir === 'left' ? 'animate-jelly-left' : ''
-              }`}
-            >
-              {/* Specular gloss highlight on top of pill */}
-              <div className="absolute inset-x-0 top-0 h-[48%] bg-gradient-to-b from-white/35 to-transparent rounded-t-xl" />
-              {/* Ambient glowing radial flare */}
-              <div className="absolute -right-1 -top-1 w-6 h-6 bg-red-300/40 rounded-full blur-sm" />
-            </div>
-          </div>
-
-          {PERIOD_TABS.map((p) => {
-            const isActive = period === p;
-            return (
-              <button
-                key={p}
-                onClick={() => handlePeriodChange(p)}
-                className={`relative z-10 flex-1 py-1.5 md:py-2 rounded-xl text-xs md:text-sm font-black transition-colors duration-200 select-none flex items-center justify-center gap-1 active:scale-95 ${
-                  isActive
-                    ? 'text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]'
-                    : 'text-zinc-400 hover:text-zinc-200'
-                }`}
-              >
-                <span>{p}</span>
-                {isActive && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse hidden sm:inline-block shadow-[0_0_6px_#fff]" />
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
       {/* 4 Compact Minimalist Glassy Stat Summary Cards (With Real Daily Improvements & Period Averages) */}
-      <div className="px-5 grid grid-cols-2 sm:grid-cols-4 gap-2.5 md:gap-4 mb-4">
+      <div className="px-5 grid grid-cols-2 sm:grid-cols-4 gap-2.5 md:gap-4 mb-4 mt-1">
         {/* Card 1: Matches */}
         <div className="p-2.5 rounded-2xl glass-card border border-white/10 shadow-sm flex flex-col justify-between min-h-[86px] hover:border-red-500/30 transition-all">
           <div className="w-7 h-7 rounded-lg bg-red-500/15 text-red-400 flex items-center justify-center border border-red-500/20">

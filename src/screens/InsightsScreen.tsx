@@ -13,6 +13,7 @@ import { fetchDeterministicInsights, InsightResult } from '../services/groqServi
 import { getPlacementPoints } from '../utils/points';
 import { getTodayDateString, getYesterdayDateString, isSameDay } from '../utils/dateUtils';
 import { getPlayerAvatar } from '../utils/assets';
+import { JellyTabs } from '../components/JellyTabs';
 
 type ViewMode = 'Me' | 'Team';
 type CategoryFilter = 'Today' | 'Overall';
@@ -273,88 +274,60 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
         </button>
       </div>
 
-      {/* Main View Toggle: [ Me | Team ] */}
+      {/* Main View Toggle: [ Me | Team ] with Jelly Effect */}
       <div className="px-5 mb-3">
-        <div className="p-1 glass-pill border border-white/10 rounded-full flex items-center shadow-xs">
-          <button
-            type="button"
-            onClick={() => setViewMode('Me')}
-            className={`flex-1 py-1.5 text-xs font-black rounded-full transition-all text-center ${
-              viewMode === 'Me'
-                ? 'bg-red-600 text-white shadow-sm'
-                : 'text-zinc-400 hover:text-white'
-            }`}
-          >
-            Me ({activePlayer})
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('Team')}
-            className={`flex-1 py-1.5 text-xs font-black rounded-full transition-all text-center ${
-              viewMode === 'Team'
-                ? 'bg-red-600 text-white shadow-sm'
-                : 'text-zinc-400 hover:text-white'
-            }`}
-          >
-            Team
-          </button>
-        </div>
+        <JellyTabs
+          tabs={[
+            { id: 'Me', label: `Me (${activePlayer})` },
+            { id: 'Team', label: 'Team' },
+          ]}
+          activeTab={viewMode}
+          onChange={(v) => setViewMode(v as ViewMode)}
+          tabClassName="py-1.5 text-xs font-black"
+        />
       </div>
 
-      {/* Player Identity Selector for "Me" view mode */}
+      {/* Player Identity Selector for "Me" view mode with Jelly Effect */}
       {viewMode === 'Me' && (
         <div className="px-5 mb-3">
           <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5 flex items-center justify-between">
             <span>Viewing Player Profile:</span>
             <span className="text-red-400 font-extrabold">{activePlayer}</span>
           </div>
-          <div className="grid grid-cols-4 gap-1.5 p-1 rounded-2xl glass-card border border-white/10">
-            {SQUAD_PLAYERS.map((sp) => {
-              const isSelected = activePlayer === sp.name;
-              return (
-                <button
-                  key={sp.name}
-                  onClick={() => setActivePlayer(sp.name)}
-                  className={`p-1.5 rounded-xl flex flex-col items-center text-center transition-all ${
-                    isSelected
-                      ? 'bg-red-600 text-white shadow-sm scale-100 ring-1 ring-red-400'
-                      : 'hover:bg-white/5 text-zinc-400 hover:text-zinc-200'
-                  }`}
-                >
-                  <div className="w-7 h-7 rounded-full overflow-hidden border border-white/20 mb-1 bg-[#1a1a24]">
+          <JellyTabs
+            tabs={SQUAD_PLAYERS.map((sp) => ({
+              id: sp.name,
+              label: (
+                <div className="flex flex-col items-center py-0.5 w-full">
+                  <div className="w-7 h-7 rounded-full overflow-hidden border border-white/20 mb-1 bg-[#1a1a24] flex-shrink-0">
                     <img
                       src={getPlayerAvatar(sp.name)}
                       alt={sp.name}
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <span className="text-[9.5px] font-black tracking-tight leading-tight truncate w-full">
+                  <span className="text-[9.5px] font-black tracking-tight leading-tight truncate w-full text-center">
                     {sp.name}
                   </span>
-                </button>
-              );
-            })}
-          </div>
+                </div>
+              ),
+            }))}
+            activeTab={activePlayer}
+            onChange={(name) => setActivePlayer(name)}
+            tabClassName="py-1"
+          />
         </div>
       )}
 
-      {/* Sub-Filters: Today vs Overall */}
+      {/* Sub-Filters: Today vs Overall with Jelly Effect */}
       <div className="px-5 mb-3 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => setCategory(cat)}
-              className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold whitespace-nowrap transition-all shadow-xs ${
-                category === cat
-                  ? 'bg-red-600 text-white shadow-sm'
-                  : 'glass-card text-zinc-400 border border-white/10 hover:text-white hover:border-red-500/20'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+        <div className="w-[190px]">
+          <JellyTabs
+            tabs={['Today', 'Overall'] as const}
+            activeTab={category}
+            onChange={(cat) => setCategory(cat as CategoryFilter)}
+            tabClassName="py-1 text-[11px] font-extrabold"
+          />
         </div>
 
         {/* Dynamic today status badge */}

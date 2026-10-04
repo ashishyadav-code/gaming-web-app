@@ -4,6 +4,7 @@ import { Player } from '../types';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { ASSETS, getPlayerAvatar } from '../utils/assets';
+import { JellyTabs } from '../components/JellyTabs';
 
 interface Props {
   onSelectPlayer: (player: Player) => void;
@@ -84,42 +85,18 @@ export const PlayersScreen: React.FC<Props> = ({ onSelectPlayer, onOpenAddPlayer
         </p>
       </div>
 
-      {/* Segmented Control Tabs */}
-      <div className="px-5 mb-4">
-        <div className="p-1 rounded-2xl flex items-center justify-between glass-pill border border-white/15 shadow-md">
-          <button
-            onClick={() => setTab('Active')}
-            className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold transition-all ${
-              tab === 'Active'
-                ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-[0_0_16px_rgba(239,68,68,0.5)] border border-red-400/40'
-                : 'text-zinc-400 hover:text-white glass-btn border border-transparent hover:border-white/15'
-            }`}
-          >
-            Active ({activeCount})
-          </button>
-
-          <button
-            onClick={() => setTab('Inactive')}
-            className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold transition-all ${
-              tab === 'Inactive'
-                ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-[0_0_16px_rgba(239,68,68,0.5)] border border-red-400/40'
-                : 'text-zinc-400 hover:text-white glass-btn border border-transparent hover:border-white/15'
-            }`}
-          >
-            Inactive ({inactiveCount})
-          </button>
-
-          <button
-            onClick={() => setTab('History')}
-            className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold transition-all ${
-              tab === 'History'
-                ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-[0_0_16px_rgba(239,68,68,0.5)] border border-red-400/40'
-                : 'text-zinc-400 hover:text-white glass-btn border border-transparent hover:border-white/15'
-            }`}
-          >
-            History
-          </button>
-        </div>
+      {/* Segmented Control Tabs with Jelly Effect */}
+      <div className="px-5 mb-4 max-w-md">
+        <JellyTabs
+          tabs={[
+            { id: 'Active', label: `Active (${activeCount})` },
+            { id: 'Inactive', label: `Inactive (${inactiveCount})` },
+            { id: 'History', label: 'History' },
+          ]}
+          activeTab={tab}
+          onChange={(t) => setTab(t as any)}
+          tabClassName="py-1.5 text-xs font-bold"
+        />
       </div>
 
       {/* Player List */}

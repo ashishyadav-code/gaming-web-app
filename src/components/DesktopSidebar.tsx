@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Home, Swords, Users, BarChart3, Plus, Trophy, UserPlus, Shield, LogOut } from 'lucide-react';
 import { NavTab } from './BottomNav';
 import { useAuth } from '../context/AuthContext';
@@ -29,6 +29,18 @@ export const DesktopSidebar: React.FC<Props> = ({
     { id: 'players', label: 'Roster & Team', icon: Users },
     { id: 'insights', label: 'Performance', icon: BarChart3 },
   ];
+
+  const [jellyDir, setJellyDir] = useState<'down' | 'up' | null>(null);
+  const [jellyKey, setJellyKey] = useState<number>(0);
+
+  const handleNavClick = (tabId: NavTab) => {
+    if (tabId === activeTab) return;
+    const oldIdx = navItems.findIndex((n) => n.id === activeTab);
+    const newIdx = navItems.findIndex((n) => n.id === tabId);
+    setJellyDir(newIdx > oldIdx ? 'down' : 'up');
+    setJellyKey((k: number) => k + 1);
+    onTabChange(tabId);
+  };
 
   return (
     <aside className="hidden md:flex flex-col w-64 lg:w-72 bg-[#09090d] border-r border-[#1a1a24] h-screen sticky top-0 z-30 select-none justify-between p-5">
@@ -65,7 +77,7 @@ export const DesktopSidebar: React.FC<Props> = ({
           <span className="text-[10px] font-extrabold text-emerald-300 uppercase tracking-wider">ONLINE</span>
         </div>
 
-        {/* Main Navigation */}
+        {/* Main Navigation with Jelly Spring Transition */}
         <nav className="space-y-1.5">
           <div className="text-[10px] font-black text-zinc-500 uppercase tracking-widest px-3 mb-2">
             Navigation
@@ -76,19 +88,29 @@ export const DesktopSidebar: React.FC<Props> = ({
             return (
               <button
                 key={item.id}
-                onClick={() => onTabChange(item.id)}
+                onClick={() => handleNavClick(item.id)}
                 className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-black transition-all ${
                   isActive
                     ? 'relative overflow-hidden bg-gradient-to-r from-red-600 via-rose-600 to-red-600 text-white shadow-[0_0_24px_rgba(239,68,68,0.55)] border border-red-400/50 scale-[1.02]'
                     : 'text-zinc-400 hover:text-white bg-[#121217] hover:bg-[#1a1a22] border border-white/[0.06] hover:border-white/20'
                 }`}
               >
-                <div className="flex items-center gap-3">
+                {isActive && (
+                  <div
+                    key={jellyKey}
+                    className={`absolute inset-0 pointer-events-none ${
+                      jellyDir === 'down' ? 'animate-jelly-down' : jellyDir === 'up' ? 'animate-jelly-up' : ''
+                    }`}
+                  >
+                    <div className="absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
+                  </div>
+                )}
+                <div className="flex items-center gap-3 relative z-10">
                   <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-zinc-400'}`} />
                   <span>{item.label}</span>
                 </div>
                 {item.badge && (
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-white/20 text-white font-extrabold uppercase">
+                  <span className="relative z-10 text-[9px] px-1.5 py-0.5 rounded-md bg-white/20 text-white font-extrabold uppercase">
                     {item.badge}
                   </span>
                 )}
