@@ -113,12 +113,19 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
       return pClean.includes('PANDIT') || pClean.includes('ANSH');
     }
 
-    return pClean.includes(actClean) || actClean.includes(pClean);
+    return false;
   };
 
-  // Calculate stats for "Me"
+  // Only matches where this active player actually played in the squad
+  const playerPlayedMatches = useMemo(() => {
+    return chronologicalMatches.filter((m) =>
+      m.player_stats?.some((p) => matchesActivePlayer(p.player_name))
+    );
+  }, [chronologicalMatches, activePlayer]);
+
+  // Calculate stats for "Me" strictly from matches played
   const playerStatsList = useMemo(() => {
-    return chronologicalMatches.map((m, idx) => {
+    return playerPlayedMatches.map((m, idx) => {
       const pStat = m.player_stats?.find((p) => matchesActivePlayer(p.player_name));
       const kills = pStat ? pStat.kills : 0;
       return {
@@ -129,7 +136,7 @@ export const InsightsScreen: React.FC<Props> = ({ onBack }) => {
         date: m.date,
       };
     });
-  }, [chronologicalMatches, activePlayer]);
+  }, [playerPlayedMatches, activePlayer]);
 
   const meTotalKills = playerStatsList.reduce((acc, curr) => acc + curr.kills, 0);
   const meMatchesCount = playerStatsList.length;
